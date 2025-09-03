@@ -8,30 +8,31 @@ const API_BASE = 'https://mini-app-service.onrender.com';
 
 tg.ready(); // Notify Telegram we are ready
 
-let initData = tg.initData; // Send this to server to verify user
+let initData = tg.initData; // Signed payload from Telegram
 let verified = false;
 
-// Verify phone number
+// Verify user via initData (no phone number)
 verifyBtn.onclick = async () => {
   try {
-    const contact = await tg.requestContact(); // show native phone popup:contentReference[oaicite:3]{index=3}.
-    // Send to server for validation
-    const resp = await fetch(`${API_BASE}/api/verify-phone`, {
+    const resp = await fetch(`${API_BASE}/api/verify-user`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ initData, contact })
+      body: JSON.stringify({ initData })
     });
+
     const data = await resp.json();
+
     if (data.ok) {
       verified = true;
-      statusEl.textContent = 'Verified!';
+      statusEl.textContent = `Verified as ${data.username || 'user'}!`;
       verifyBtn.style.display = 'none';
       updateBtn.style.display = '';
     } else {
       statusEl.textContent = 'Verification failed.';
     }
   } catch (err) {
-    statusEl.textContent = 'Verification cancelled.';
+    console.error(err);
+    statusEl.textContent = 'Verification error.';
   }
 };
 
@@ -44,6 +45,7 @@ updateBtn.onclick = async () => {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ initData })
   });
+
   const data = await resp.json();
   if (data.ok) {
     scoreEl.textContent = `Current score: ${data.score}`;
