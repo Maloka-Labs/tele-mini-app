@@ -3,17 +3,41 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>My Mini App</title>
+    <title>Thumb Rebellion</title>
+
     <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <!-- Fonts & Styles -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <h1>Your Score</h1>
-    <p id="status">Click “Verify” to continue.</p>
-    <button id="verifyBtn">Verify Phone</button>
-    <button id="updateBtn" style="display:none">Update Score</button>
-    <p id="score" style="font-size:24px"></p>
+    <div class="container">
+      <h1>🏆 Thumb Timer Score Tracker</h1>
+
+      <!-- User Info -->
+      <div class="user-info" id="userInfo">
+        <img id="userAvatar" class="avatar" src="" alt="Avatar" />
+        <p id="userName"></p>
+      </div>
+
+      <!-- Status Message -->
+      <p id="status" class="status">Click “Verify” to continue.</p>
+
+      <!-- Buttons -->
+      <div class="button-group">
+        <button id="verifyBtn">✅ Verify Telegram</button>
+        <button id="updateBtn" style="display:none">🔄 Update Score</button>
+      </div>
+
+      <!-- Score -->
+      <p id="score" class="score"></p>
+
+      <!-- Loader -->
+      <div id="loader" class="loader" style="display: none;"></div>
+
+    </div>
 
     <script type="module" src="./app.js"></script>
   </body>
