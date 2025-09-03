@@ -2,8 +2,10 @@ const statusEl = document.getElementById('status');
 const verifyBtn = document.getElementById('verifyBtn');
 const updateBtn = document.getElementById('updateBtn');
 const scoreEl  = document.getElementById('score');
-
 const tg = window.Telegram.WebApp;
+
+const API_BASE = 'https://mini-app-service.onrender.com';
+
 tg.ready(); // Notify Telegram we are ready
 
 let initData = tg.initData; // Send this to server to verify user
@@ -14,7 +16,7 @@ verifyBtn.onclick = async () => {
   try {
     const contact = await tg.requestContact(); // show native phone popup:contentReference[oaicite:3]{index=3}.
     // Send to server for validation
-    const resp = await fetch('/api/verify-phone', {
+    const resp = await fetch(`${API_BASE}/api/verify-phone`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ initData, contact })
@@ -37,7 +39,7 @@ verifyBtn.onclick = async () => {
 updateBtn.onclick = async () => {
   if (!verified) return;
   statusEl.textContent = 'Updating...';
-  const resp = await fetch('/api/get-score', {
+  const resp = await fetch(`${API_BASE}/api/get-score`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ initData })
