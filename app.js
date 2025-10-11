@@ -49,6 +49,19 @@ verifyBtn.onclick = async () => {
       verifyBtn.style.display = 'none';
       updateBtn.style.display = '';
       statusEl.style.color = 'var(--status-ok)';
+
+      // NEW: fetch score immediately
+      updateBtn.onclick();
+
+      // NEW: auto-refresh every 30s while the page is visible
+      if (window.scoreTimer) clearInterval(window.scoreTimer);
+      const refresh = () => verified && !document.hidden && updateBtn.onclick();
+      window.scoreTimer = setInterval(refresh, 30_000);
+
+      // (Optional) also refresh when the tab becomes visible again
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) refresh();
+      }, { once: false });
     } else {
       statusEl.textContent = 'Verification failed.';
       statusEl.style.color = 'var(--status-error)';
