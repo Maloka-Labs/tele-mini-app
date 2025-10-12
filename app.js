@@ -6,11 +6,33 @@ const loader = document.getElementById('loader');
 const userAvatar = document.getElementById('userAvatar');
 const userName = document.getElementById('userName');
 
+const userIdEl = document.getElementById('userId');
+const copyIdBtn = document.getElementById('copyIdBtn');
+
 const tg = window.Telegram.WebApp;
 
 const API_BASE = 'https://mini-app-service.onrender.com';
 
 tg.ready(); // Notify Telegram that we are ready
+
+const tgUser = tg.initDataUnsafe?.user;
+const tgUserId = tgUser?.id; // ← THIS is your userId
+
+if (tgUserId) {
+  userIdEl.textContent = `User ID: ${tgUserId}`;
+  copyIdBtn.onclick = async () => {
+    try {
+      await navigator.clipboard.writeText(String(tgUserId));
+      statusEl.textContent = '✅ User ID copied. Use this in ThumbTimer.';
+      statusEl.style.color = 'var(--status-ok)';
+    } catch {
+      statusEl.textContent = 'Could not copy ID.';
+      statusEl.style.color = 'var(--status-error)';
+    }
+  };
+} else {
+  userIdEl.textContent = 'Open this Mini App inside Telegram to see your ID.';
+}
 
 let initData = tg.initData;
 let verified = false;
