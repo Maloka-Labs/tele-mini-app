@@ -2,46 +2,274 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Thumb Rebellion</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content="Good Vibes — AI-Powered Wellness Guidance by Maloka" />
+    <title>Good Vibes — AI Wellness Gurus</title>
 
     <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-    <!-- Fonts & Styles -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css" />
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <div class="container">
-      <h1>🏆 Thumb Timer Score Tracker</h1>
 
-      <p id="userId" class="muted" style="font-size:12px;"></p>
-      <button id="copyIdBtn" class="tiny">Copy User ID</button>
+    <!-- ═══ HEADER ═══ -->
+    <header class="app-header">
+      <div class="header-glow"></div>
+      <img src="logo.png" alt="Good Vibes Logo" class="app-logo" id="appLogo" />
+      <h1 class="app-title">Good Vibes</h1>
+      <p class="app-subtitle">AI-Powered Wellness Guidance</p>
+      <p class="app-powered">POWERED BY MALOKA × NANOCLAW</p>
 
+      <div class="stats-bar">
+        <div class="stat-item">
+          <span class="stat-value">8</span>
+          <span class="stat-label">AI GURUS</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-value">2.1M</span>
+          <span class="stat-label">FOLLOWERS</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-value">24/7</span>
+          <span class="stat-label">AVAILABLE</span>
+        </div>
+      </div>
+    </header>
 
-      <!-- User Info -->
-      <div class="user-info" id="userInfo">
-        <img id="userAvatar" class="avatar" src="" alt="Avatar" />
-        <p id="userName"></p>
+    <!-- ═══ USER WELCOME STRIP ═══ -->
+    <div class="welcome-strip hidden" id="welcomeStrip">
+      <img class="welcome-avatar" id="welcomeAvatar" src="" alt="" />
+      <div class="welcome-text">
+        <span class="welcome-hi">Welcome back,</span>
+        <span class="welcome-name" id="welcomeName">Friend</span>
+      </div>
+      <span class="welcome-badge">✦ Verified</span>
+    </div>
+
+    <!-- ═══ CHOOSE GURU ═══ -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-dot teal"></span>
+        <h2 class="section-title">Choose Your AI Guru</h2>
       </div>
 
-      <!-- Status Message -->
-      <p id="status" class="status">Click “Verify” to continue.</p>
-
-      <!-- Buttons -->
-      <div class="button-group">
-        <button id="verifyBtn">✅ Verify Telegram</button>
-        <button id="updateBtn" style="display:none">🔄 Update Score</button>
+      <!-- Filter Dropdown -->
+      <div class="filter-wrap">
+        <div class="select-wrapper">
+          <select id="guruFilter" class="guru-filter">
+            <option value="all">✦ All Gurus</option>
+            <option value="yoga">🧘 Yoga</option>
+            <option value="meditation">🌙 Meditation</option>
+            <option value="nutrition">🥗 Nutrition</option>
+            <option value="breathwork">🌬️ Breathwork</option>
+            <option value="fitness">💪 Fitness</option>
+            <option value="sleep">😴 Sleep & Recovery</option>
+            <option value="spiritual">🔮 Spiritual</option>
+            <option value="stress">🧠 Stress Management</option>
+          </select>
+          <span class="select-arrow">▾</span>
+        </div>
       </div>
 
-      <!-- Score -->
-      <p id="score" class="score"></p>
+      <!-- Guru Cards -->
+      <div id="guruList" class="guru-list"></div>
+    </section>
 
-      <!-- Loader -->
-      <div id="loader" class="loader" style="display: none;"></div>
+    <!-- ═══ ACTIVITIES ═══ -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-dot purple"></span>
+        <h2 class="section-title">Wellness Activities</h2>
+      </div>
+
+      <div class="activities-grid">
+        <button class="activity-card" id="actBreathing">
+          <span class="activity-icon">🌬️</span>
+          <span class="activity-name">Breathing</span>
+          <span class="activity-sub">Box Method</span>
+        </button>
+        <button class="activity-card" id="actMeditation">
+          <span class="activity-icon">🧘</span>
+          <span class="activity-name">Meditate</span>
+          <span class="activity-sub">5 min session</span>
+        </button>
+        <button class="activity-card" id="actAffirmation">
+          <span class="activity-icon">✨</span>
+          <span class="activity-name">Affirmation</span>
+          <span class="activity-sub">Daily boost</span>
+        </button>
+        <button class="activity-card" id="actMood">
+          <span class="activity-icon">💜</span>
+          <span class="activity-name">Mood Check</span>
+          <span class="activity-sub">How are you?</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ═══ QUOTE CARD ═══ -->
+    <div class="quote-card">
+      <div class="quote-mark">"</div>
+      <p class="quote-text" id="quoteText">The present moment is the only moment available to us, and it is the door to all moments.</p>
+      <p class="quote-author" id="quoteAuthor">— THICH NHAT HANH</p>
+    </div>
+
+    <!-- ═══ FOOTER ═══ -->
+    <footer class="app-footer">
+      <p>Built with ✨ by <span class="teal-text">Maloka</span></p>
+      <p class="footer-sub">AI Gurus respond in the style of real wellness experts</p>
+      <p id="telegramUserInfo" class="footer-user"></p>
+    </footer>
+
+    <!-- ═══════════════════════════════════ -->
+    <!-- MODALS                              -->
+    <!-- ═══════════════════════════════════ -->
+
+    <!-- Overlay -->
+    <div id="overlay" class="overlay hidden"></div>
+
+    <!-- ── Breathing Modal ── -->
+    <div id="breathingModal" class="modal hidden" role="dialog" aria-label="Breathing Exercise">
+      <div class="modal-content">
+        <button class="modal-close" id="closeBreathing">✕</button>
+        <h3 class="modal-title">Box Breathing</h3>
+        <p class="modal-subtitle">4s Inhale · 4s Hold · 4s Exhale · 4s Hold</p>
+
+        <div class="breathing-wrap">
+          <div class="breathing-ring" id="breathingRing">
+            <div class="breathing-inner">
+              <span class="breath-phase" id="breathPhase">Ready</span>
+              <span class="breath-count" id="breathCount"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="breath-cycles" id="breathCycles">Cycles completed: <strong>0</strong></div>
+        <button id="startBreathing" class="btn-primary btn-full">▶ &nbsp;Start Session</button>
+      </div>
+    </div>
+
+    <!-- ── Meditation Modal ── -->
+    <div id="meditationModal" class="modal hidden" role="dialog" aria-label="Meditation Timer">
+      <div class="modal-content">
+        <button class="modal-close" id="closeMeditation">✕</button>
+        <h3 class="modal-title">🧘 Quick Meditation</h3>
+        <p class="modal-subtitle">Find a comfortable position and close your eyes</p>
+
+        <div class="meditation-wrap">
+          <div class="meditation-orb" id="meditationOrb">
+            <div class="orb-inner"></div>
+          </div>
+          <div class="meditation-time" id="meditationTime">5:00</div>
+          <p class="meditation-instruction" id="meditationInstruction">Choose your duration</p>
+        </div>
+
+        <div class="duration-row">
+          <button class="dur-btn active" data-mins="5">5 min</button>
+          <button class="dur-btn" data-mins="10">10 min</button>
+          <button class="dur-btn" data-mins="15">15 min</button>
+        </div>
+        <button id="startMeditation" class="btn-primary btn-full">Begin Session</button>
+      </div>
+    </div>
+
+    <!-- ── Affirmation Modal ── -->
+    <div id="affirmationModal" class="modal hidden" role="dialog" aria-label="Daily Affirmation">
+      <div class="modal-content">
+        <button class="modal-close" id="closeAffirmation">✕</button>
+        <h3 class="modal-title">Daily Affirmation</h3>
+
+        <div class="affirmation-card">
+          <div class="affirmation-quote-mark">❝</div>
+          <p class="affirmation-text" id="affirmationText"></p>
+          <p class="affirmation-author" id="affirmationAuthor"></p>
+        </div>
+
+        <div class="affirmation-actions">
+          <button id="prevAffirmation" class="btn-secondary">← Prev</button>
+          <button id="nextAffirmation" class="btn-primary">Next ✨</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Mood Modal ── -->
+    <div id="moodModal" class="modal hidden" role="dialog" aria-label="Mood Check">
+      <div class="modal-content">
+        <button class="modal-close" id="closeMood">✕</button>
+        <h3 class="modal-title">How are you feeling?</h3>
+        <p class="modal-subtitle">Be honest — your guru adjusts to you</p>
+
+        <div class="mood-grid">
+          <button class="mood-btn" data-mood="amazing">🤩<span>Amazing</span></button>
+          <button class="mood-btn" data-mood="good">😊<span>Good</span></button>
+          <button class="mood-btn" data-mood="okay">😐<span>Okay</span></button>
+          <button class="mood-btn" data-mood="stressed">😤<span>Stressed</span></button>
+          <button class="mood-btn" data-mood="sad">😢<span>Sad</span></button>
+          <button class="mood-btn" data-mood="anxious">😰<span>Anxious</span></button>
+        </div>
+
+        <div class="mood-response hidden" id="moodResponse">
+          <p class="mood-response-text" id="moodResponseText"></p>
+          <p class="mood-guru-tip" id="moodGuruTip"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ CHAT SCREEN ═══ -->
+    <div id="chatScreen" class="chat-screen" aria-label="Chat with AI Guru">
+
+      <!-- Chat Header -->
+      <div class="chat-header">
+        <button class="chat-back" id="chatBack" aria-label="Back">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <div class="chat-header-info">
+          <div class="chat-header-avatar" id="chatHeaderAvatar"></div>
+          <div class="chat-header-text">
+            <span class="chat-header-name" id="chatHeaderName"></span>
+            <span class="chat-header-status" id="chatHeaderStatus">
+              <span class="chat-status-dot"></span> AI · Online
+            </span>
+          </div>
+        </div>
+        <div class="chat-header-tag" id="chatHeaderTag"></div>
+      </div>
+
+      <!-- Messages -->
+      <div class="chat-messages" id="chatMessages">
+        <!-- Populated by JS -->
+      </div>
+
+      <!-- Typing indicator (hidden by default) -->
+      <div class="chat-typing hidden" id="chatTyping">
+        <div class="typing-avatar" id="typingAvatar"></div>
+        <div class="typing-bubble">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        </div>
+      </div>
+
+      <!-- Input Bar -->
+      <div class="chat-input-bar">
+        <textarea
+          id="chatInput"
+          class="chat-input"
+          placeholder="Ask your guru anything…"
+          rows="1"
+          maxlength="500"
+          aria-label="Message input"
+        ></textarea>
+        <button class="chat-send" id="chatSend" aria-label="Send message" disabled>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
 
     </div>
+    <!-- END CHAT SCREEN -->
 
     <script type="module" src="./app.js"></script>
   </body>
