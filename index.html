@@ -52,12 +52,21 @@
       <span class="welcome-badge">✦ Verified</span>
     </div>
 
-    <!-- ═══ CHOOSE GURU ═══ -->
-    <section class="section">
-      <div class="section-header">
-        <span class="section-dot teal"></span>
-        <h2 class="section-title">Choose Your AI Guru</h2>
-      </div>
+    <!-- ═══ TAB BAR ═══ -->
+    <div class="tab-bar">
+      <button class="tab-btn active" id="tabGurus" data-tab="panelGurus">
+        <span class="tab-icon">🧘</span> AI Gurus
+      </button>
+      <button class="tab-btn" id="tabActivities" data-tab="panelActivities">
+        <span class="tab-icon">✨</span> Activities
+      </button>
+      <button class="tab-btn" id="tabProfile" data-tab="panelProfile">
+        <span class="tab-icon">🏆</span> Profile
+      </button>
+    </div>
+
+    <!-- ═══ PANEL: GURUS ═══ -->
+    <div class="tab-panel" id="panelGurus">
 
       <!-- Filter Dropdown -->
       <div class="filter-wrap">
@@ -79,38 +88,84 @@
 
       <!-- Guru Cards -->
       <div id="guruList" class="guru-list"></div>
-    </section>
+    </div>
 
-    <!-- ═══ ACTIVITIES ═══ -->
-    <section class="section">
-      <div class="section-header">
-        <span class="section-dot purple"></span>
-        <h2 class="section-title">Wellness Activities</h2>
-      </div>
-
+    <!-- ═══ PANEL: ACTIVITIES ═══ -->
+    <div class="tab-panel hidden" id="panelActivities">
       <div class="activities-grid">
         <button class="activity-card" id="actBreathing">
           <span class="activity-icon">🌬️</span>
           <span class="activity-name">Breathing</span>
           <span class="activity-sub">Box Method</span>
+          <span class="activity-reward-badge" id="badgeBreathing">+15 pts</span>
         </button>
         <button class="activity-card" id="actMeditation">
           <span class="activity-icon">🧘</span>
           <span class="activity-name">Meditate</span>
           <span class="activity-sub">5 min session</span>
+          <span class="activity-reward-badge" id="badgeMeditation">+20 pts</span>
         </button>
         <button class="activity-card" id="actAffirmation">
           <span class="activity-icon">✨</span>
           <span class="activity-name">Affirmation</span>
           <span class="activity-sub">Daily boost</span>
+          <span class="activity-reward-badge" id="badgeAffirmation">+5 pts</span>
         </button>
         <button class="activity-card" id="actMood">
           <span class="activity-icon">💜</span>
           <span class="activity-name">Mood Check</span>
           <span class="activity-sub">How are you?</span>
+          <span class="activity-reward-badge" id="badgeMood">+5 pts</span>
         </button>
       </div>
-    </section>
+    </div>
+
+    <!-- ═══ PANEL: PROFILE ═══ -->
+    <div class="tab-panel hidden" id="panelProfile">
+
+      <!-- Profile Hero Card -->
+      <div class="profile-hero" id="profileHero">
+        <div class="profile-avatar-wrap">
+          <img class="profile-avatar" id="profileAvatar" src="" alt="" />
+          <div class="profile-avatar-placeholder" id="profileAvatarPlaceholder">🧘</div>
+        </div>
+        <div class="profile-info">
+          <div class="profile-username" id="profileUsername">Loading…</div>
+          <div class="profile-handle" id="profileHandle"></div>
+        </div>
+      </div>
+
+      <!-- Points & Streak Row -->
+      <div class="profile-stats-row">
+        <div class="profile-stat-card profile-stat-points">
+          <div class="profile-stat-icon">⭐</div>
+          <div class="profile-stat-value" id="profilePoints">—</div>
+          <div class="profile-stat-label">TOTAL POINTS</div>
+        </div>
+        <div class="profile-stat-card profile-stat-streak">
+          <div class="profile-stat-icon">🔥</div>
+          <div class="profile-stat-value" id="profileStreak">—</div>
+          <div class="profile-stat-label">DAY STREAK</div>
+        </div>
+      </div>
+
+      <!-- Reward Breakdown -->
+      <div class="profile-section-title">How to Earn Points</div>
+      <div class="profile-rewards-info">
+        <div class="reward-info-row"><span>🔐 Daily Login</span><span class="reward-pts">+10 pts</span></div>
+        <div class="reward-info-row"><span>🌬️ Box Breathing (3+ cycles)</span><span class="reward-pts">+15 pts</span></div>
+        <div class="reward-info-row"><span>🧘 Meditation (full session)</span><span class="reward-pts">+20 pts</span></div>
+        <div class="reward-info-row"><span>✨ Daily Affirmation</span><span class="reward-pts">+5 pts</span></div>
+        <div class="reward-info-row"><span>💜 Mood Check</span><span class="reward-pts">+5 pts</span></div>
+      </div>
+
+      <!-- Recent Activity Feed -->
+      <div class="profile-section-title" style="margin-top:20px;">Recent Activity</div>
+      <div class="profile-feed" id="profileFeed">
+        <div class="profile-feed-loading">Loading activity…</div>
+      </div>
+
+    </div>
 
     <!-- ═══ QUOTE CARD ═══ -->
     <div class="quote-card">
@@ -132,6 +187,15 @@
 
     <!-- Overlay -->
     <div id="overlay" class="overlay hidden"></div>
+
+    <!-- ═══ REWARD TOAST ═══ -->
+    <div id="rewardToast" class="reward-toast hidden" role="alert" aria-live="polite">
+      <span class="reward-toast-icon">⭐</span>
+      <div class="reward-toast-body">
+        <span class="reward-toast-pts" id="rewardToastPts">+10 pts</span>
+        <span class="reward-toast-label" id="rewardToastLabel">Daily Login Bonus!</span>
+      </div>
+    </div>
 
     <!-- ── Breathing Modal ── -->
     <div id="breathingModal" class="modal hidden" role="dialog" aria-label="Breathing Exercise">

@@ -14,6 +14,81 @@ if (tg) {
 const tgUser    = tg?.initDataUnsafe?.user;
 const initData  = tg?.initData ?? '';  // passed to backend for auth
 
+const API_BASE = 'https://mini-app-service.onrender.com';
+
+/* ─── Reward Toast ─── */
+const rewardToast      = document.getElementById('rewardToast');
+const rewardToastPts   = document.getElementById('rewardToastPts');
+const rewardToastLabel = document.getElementById('rewardToastLabel');
+let toastTimer = null;
+
+function showRewardToast(points, label) {
+  if (toastTimer) clearTimeout(toastTimer);
+  rewardToastPts.textContent   = `+${points} pts`;
+  rewardToastLabel.textContent = label;
+  rewardToast.classList.remove('hidden', 'hide');
+  rewardToast.classList.add('show');
+
+  toastTimer = setTimeout(() => {
+    rewardToast.classList.remove('show');
+    rewardToast.classList.add('hide');
+    toastTimer = setTimeout(() => {
+      rewardToast.classList.add('hidden');
+      rewardToast.classList.remove('hide');
+    }, 350);
+  }, 3000);
+}
+
+/* ─── Daily Login Reward (called on app start) ─── */
+async function claimDailyLogin() {
+  if (!initData) return;   // not inside Telegram, skip
+  try {
+    const res  = await fetch(`${API_BASE}/api/daily-login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ initData }),
+    });
+    const data = await res.json();
+    if (data.ok && !data.already_claimed && data.points_earned > 0) {
+      showRewardToast(data.points_earned, `Daily Login Bonus! 🔥 ${data.streak}-day streak`);
+    }
+  } catch (e) {
+    console.warn('[daily-login]', e);
+  }
+}
+
+claimDailyLogin();
+
+/* ─── Activity Reward ─── */
+const ACTIVITY_LABELS = {
+  breathing:   { label: 'Box Breathing Complete!', pts: 15 },
+  meditation:  { label: 'Meditation Complete!',    pts: 20 },
+  affirmation: { label: 'Daily Affirmation!',      pts: 5  },
+  mood_check:  { label: 'Mood Check Done!',         pts: 5  },
+};
+
+async function claimActivityReward(activity) {
+  if (!initData) return;
+  try {
+    const res  = await fetch(`${API_BASE}/api/activity-reward`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ initData, activity }),
+    });
+    const data = await res.json();
+    if (data.ok && !data.already_claimed && data.points_earned > 0) {
+      const info = ACTIVITY_LABELS[activity];
+      showRewardToast(data.points_earned, info.label);
+      // Mark badge as claimed
+      const badgeMap = { breathing: 'badgeBreathing', meditation: 'badgeMeditation', affirmation: 'badgeAffirmation', mood_check: 'badgeMood' };
+      const actMap   = { breathing: 'actBreathing', meditation: 'actMeditation', affirmation: 'actAffirmation', mood_check: 'actMood' };
+      document.getElementById(badgeMap[activity])?.closest('.activity-card')?.classList.add('claimed');
+    }
+  } catch (e) {
+    console.warn('[activity-reward]', e);
+  }
+}
+
 /* ─── DOM refs ─── */
 const guruListEl   = document.getElementById('guruList');
 const guruFilter   = document.getElementById('guruFilter');
@@ -229,6 +304,27 @@ guruFilter.addEventListener('change', () => renderGurus(guruFilter.value));
 renderGurus(); // initial render
 
 /* ══════════════════════════════════════════════
+   TABS
+══════════════════════════════════════════════ */
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    // Deactivate all tabs + hide all panels
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+
+    // Activate clicked tab
+    btn.classList.add('active');
+
+    // Show corresponding panel (re-trigger animation)
+    const panel = document.getElementById(btn.dataset.tab);
+    panel.classList.remove('hidden');
+    panel.style.animation = 'none';
+    panel.offsetHeight; // reflow to restart animation
+    panel.style.animation = '';
+  });
+});
+
+/* ══════════════════════════════════════════════
    QUOTES
 ══════════════════════════════════════════════ */
 const quotes = [
@@ -269,8 +365,6 @@ overlay.addEventListener('click', () => {
 /* ══════════════════════════════════════════════
    💬 CHAT SCREEN
 ══════════════════════════════════════════════ */
-const API_BASE = 'https://mini-app-service.onrender.com';
-
 const chatScreen     = document.getElementById('chatScreen');
 const chatBack       = document.getElementById('chatBack');
 const chatMessages   = document.getElementById('chatMessages');
@@ -573,6 +667,10 @@ function tick() {
     if (phaseIdx === 0) {
       breathCycles++;
       breathCyclesEl.innerHTML = `Cycles completed: <strong>${breathCycles}</strong>`;
+      // ⭐ Award breathing reward after 3 cycles
+      if (breathCycles === 3) {
+        claimActivityReward('breathing');
+      }
     }
   }
   breathTimer = setTimeout(tick, 1000);
@@ -629,6 +727,8 @@ startMeditateBtn.addEventListener('click', () => {
     if (meditationSecs <= 0) {
       stopMeditation();
       meditationInstEl.textContent = '🎉 Session complete! Well done.';
+      // ⭐ Award meditation reward on full completion
+      claimActivityReward('meditation');
     }
   }, 1000);
 });
@@ -664,7 +764,12 @@ function showAffirmation(idx) {
   }, 150);
 }
 
-document.getElementById('actAffirmation').addEventListener('click', () => { showAffirmation(affIdx); openModal('affirmationModal'); });
+document.getElementById('actAffirmation').addEventListener('click', () => {
+  showAffirmation(affIdx);
+  openModal('affirmationModal');
+  // ⭐ Award affirmation reward on viewing
+  claimActivityReward('affirmation');
+});
 document.getElementById('closeAffirmation').addEventListener('click', () => closeModal('affirmationModal'));
 document.getElementById('nextAffirmation').addEventListener('click', () => { affIdx = (affIdx + 1) % affirmations.length; showAffirmation(affIdx); });
 document.getElementById('prevAffirmation').addEventListener('click', () => { affIdx = (affIdx - 1 + affirmations.length) % affirmations.length; showAffirmation(affIdx); });
@@ -695,5 +800,108 @@ document.querySelectorAll('.mood-btn').forEach(btn => {
     document.getElementById('moodGuruTip').textContent      = resp.tip;
     respEl.classList.remove('hidden');
     respEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    // ⭐ Award mood check reward on first selection
+    claimActivityReward('mood_check');
   });
 });
+
+/* ══════════════════════════════════════════════
+   🏆 PROFILE
+══════════════════════════════════════════════ */
+
+const EVENT_META = {
+  daily_login:  { icon: '🔐', name: 'Daily Login' },
+  breathing:    { icon: '🌬️', name: 'Box Breathing' },
+  meditation:   { icon: '🧘', name: 'Meditation' },
+  affirmation:  { icon: '✨', name: 'Daily Affirmation' },
+  mood_check:   { icon: '💜', name: 'Mood Check' },
+};
+
+function animateCounter(el, target, duration = 800) {
+  const start    = parseInt(el.textContent) || 0;
+  const diff     = target - start;
+  const startTime = performance.now();
+
+  function step(now) {
+    const elapsed  = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    // Ease-out cubic
+    const eased    = 1 - Math.pow(1 - progress, 3);
+    el.textContent = Math.round(start + diff * eased);
+    if (progress < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+async function loadProfile() {
+  const feedEl      = document.getElementById('profileFeed');
+  const pointsEl    = document.getElementById('profilePoints');
+  const streakEl    = document.getElementById('profileStreak');
+  const usernameEl  = document.getElementById('profileUsername');
+  const handleEl    = document.getElementById('profileHandle');
+  const avatarEl    = document.getElementById('profileAvatar');
+  const placeholderEl = document.getElementById('profileAvatarPlaceholder');
+
+  // Fill in local Telegram user data first (instant)
+  if (tgUser) {
+    usernameEl.textContent = tgUser.first_name + (tgUser.last_name ? ' ' + tgUser.last_name : '');
+    if (tgUser.username) handleEl.textContent = '@' + tgUser.username;
+    if (tgUser.username) {
+      avatarEl.src = `https://t.me/i/userpic/320/${tgUser.username}.jpg`;
+      avatarEl.onload  = () => { placeholderEl.style.display = 'none'; };
+      avatarEl.onerror = () => { avatarEl.style.display = 'none'; };
+    }
+  }
+
+  // Fetch profile from backend
+  if (!initData) {
+    // No Telegram context: show defaults
+    pointsEl.textContent = '0';
+    streakEl.textContent = '0';
+    feedEl.innerHTML = '<div class="feed-empty">Open in Telegram to see your activity 🚀</div>';
+    return;
+  }
+
+  feedEl.innerHTML = '<div class="profile-feed-loading">Loading activity…</div>';
+
+  try {
+    const url = `${API_BASE}/api/profile?initData=${encodeURIComponent(initData)}`;
+    const res  = await fetch(url);
+    const data = await res.json();
+
+    if (!data.ok) throw new Error(data.error);
+
+    animateCounter(pointsEl, data.total_points);
+    animateCounter(streakEl, data.streak);
+
+    if (data.events.length === 0) {
+      feedEl.innerHTML = '<div class="feed-empty">No activity yet — complete a session to earn points!</div>';
+      return;
+    }
+
+    feedEl.innerHTML = '';
+    data.events.forEach((ev, i) => {
+      const meta = EVENT_META[ev.type] || { icon: '⭐', name: ev.type };
+      const date = new Date(ev.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+      const el   = document.createElement('div');
+      el.className = 'feed-event';
+      el.style.animationDelay = `${i * 50}ms`;
+      el.innerHTML = `
+        <div class="feed-event-icon">${meta.icon}</div>
+        <div class="feed-event-body">
+          <div class="feed-event-name">${meta.name}</div>
+          <div class="feed-event-date">${date}</div>
+        </div>
+        <div class="feed-event-pts">+${ev.points}</div>
+      `;
+      feedEl.appendChild(el);
+    });
+
+  } catch (e) {
+    console.error('[profile]', e);
+    feedEl.innerHTML = '<div class="feed-empty">⚠️ Could not load activity. Try again later.</div>';
+  }
+}
+
+// Load profile when tab is clicked
+document.getElementById('tabProfile')?.addEventListener('click', loadProfile);
