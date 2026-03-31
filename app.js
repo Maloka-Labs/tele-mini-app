@@ -53,6 +53,8 @@ const gurus = [
     ctaText: 'Chat with Arjun',
     btnGradient: 'linear-gradient(135deg, #0d7377, #14a085)',
     welcomeMsg: "Namaste 🙏 I'm Arjun, your dedicated yoga guide. Whether you're stepping onto the mat for the first time or deepening an existing practice — I'm here. What brings you today?",
+    // ── Live AI backend for this guru ──
+    chatUrl: 'https://nemoclawtelegrambackend-production.up.railway.app/chat',
   },
   {
     id: 'priya',
@@ -443,48 +445,54 @@ async function sendMessage() {
   showTyping();
 
   try {
-    /*
-     * POST /api/chat
-     * Body: { initData, guruId, message, history }
-     *
-     * The backend routes the request to the correct AI model
-     * based on `guruId`, using `history` for context,
-     * and verifies the Telegram user via `initData`.
-     *
-     * Expected response: { ok: true, reply: "..." }
-     * On error:          { ok: false, error: "..." }
-     */
-    const resp = await fetch(`${API_BASE}/api/chat`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        initData,
-        guruId: guru.id,
-        message: text,
-        history: conversations[guru.id].slice(-20), // last 20 turns for context window
-      }),
-    });
+    let reply;
 
-    hideTyping();
+    if (guru.chatUrl) {
+      // ── Simple backend: POST { message } → { reply } ──
+      // Used by gurus that have their own dedicated AI endpoint (e.g. Arjun → Railway).
+      const resp = await fetch(guru.chatUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text }),
+      });
 
-    if (!resp.ok) {
-      throw new Error(`Server error ${resp.status}`);
-    }
+      hideTyping();
 
-    const data = await resp.json();
+      if (!resp.ok) throw new Error(`Server error ${resp.status}`);
 
-    if (data.ok && data.reply) {
-      appendMessage('guru', data.reply, guru);
-      conversations[guru.id].push({ role: 'assistant', content: data.reply });
+      const data = await resp.json();
+      reply = data.reply ?? data.message ?? null;
+      if (!reply) throw new Error('Empty reply from server.');
+
     } else {
-      appendErrorMessage(data.error ?? 'Something went wrong. Please try again.');
+      // ── Generic backend: POST { initData, guruId, message, history } → { ok, reply } ──
+      // Fallback for gurus not yet wired to a dedicated model.
+      const resp = await fetch(`${API_BASE}/api/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          initData,
+          guruId: guru.id,
+          message: text,
+          history: conversations[guru.id].slice(-20),
+        }),
+      });
+
+      hideTyping();
+
+      if (!resp.ok) throw new Error(`Server error ${resp.status}`);
+
+      const data = await resp.json();
+      if (!data.ok) throw new Error(data.error ?? 'Something went wrong.');
+      reply = data.reply;
     }
+
+    appendMessage('guru', reply, guru);
+    conversations[guru.id].push({ role: 'assistant', content: reply });
 
   } catch (err) {
     hideTyping();
     console.error('[Chat error]', err);
-
-    // Friendly fallback message when backend isn't reachable yet
     appendErrorMessage(
       err.message.includes('Failed to fetch') || err.message.includes('NetworkError')
         ? 'Could not reach the server. Check your connection and try again.'
