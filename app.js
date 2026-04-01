@@ -357,7 +357,7 @@ function closeModal(id) {
   document.body.style.overflow = '';
 }
 overlay.addEventListener('click', () => {
-  ['breathingModal','meditationModal','affirmationModal','moodModal'].forEach(closeModal);
+  ['breathingModal','meditationModal','affirmationModal','moodModal','onboardingModal'].forEach(closeModal);
   stopBreathing();
   stopMeditation();
 });
@@ -905,3 +905,63 @@ async function loadProfile() {
 
 // Load profile when tab is clicked
 document.getElementById('tabProfile')?.addEventListener('click', loadProfile);
+
+/* ══════════════════════════════════════════════
+   ONBOARDING
+══════════════════════════════════════════════ */
+const onboardingSteps = [
+  { icon: '✨', title: 'Welcome to Good Vibes', desc: 'Your personal, AI-powered wellness sanctuary right inside Telegram. Let\'s take a quick tour.' },
+  { icon: '🧘', title: 'AI Wellness Gurus', desc: 'Chat with specialized AI gurus for yoga, sleep, stress, and more. They respond like real wellness experts.' },
+  { icon: '🌿', title: 'Wellness Activities', desc: 'Take a break with quick activities like box breathing, meditation, or daily affirmations.' }
+];
+
+let onboardingIndex = 0;
+const obModal = document.getElementById('onboardingModal');
+const obIcon = document.getElementById('onboardingIcon');
+const obTitle = document.getElementById('onboardingTitle');
+const obDesc = document.getElementById('onboardingDesc');
+const obDotsContainer = document.getElementById('onboardingDots');
+
+function renderOnboardingStep() {
+  const step = onboardingSteps[onboardingIndex];
+  obIcon.textContent = step.icon;
+  obTitle.textContent = step.title;
+  obDesc.textContent = step.desc;
+
+  // Render dots
+  obDotsContainer.innerHTML = onboardingSteps.map((_, i) => 
+    `<span class="dot ${i === onboardingIndex ? 'active' : ''}"></span>`
+  ).join('');
+
+  if (onboardingIndex === onboardingSteps.length - 1) {
+    document.getElementById('onboardingNext').textContent = 'Get Started 🚀';
+  } else {
+    document.getElementById('onboardingNext').textContent = 'Next →';
+  }
+}
+
+function dismissOnboarding() {
+  localStorage.setItem('hv_onboarding_done', 'true');
+  closeModal('onboardingModal');
+}
+
+// Show onboarding if not done before
+window.addEventListener('DOMContentLoaded', () => {
+  if (!localStorage.getItem('hv_onboarding_done')) {
+    setTimeout(() => {
+      openModal('onboardingModal');
+      renderOnboardingStep();
+    }, 1000); // Small delay so the app loads first
+  }
+});
+
+document.getElementById('onboardingNext')?.addEventListener('click', () => {
+  if (onboardingIndex < onboardingSteps.length - 1) {
+    onboardingIndex++;
+    renderOnboardingStep();
+  } else {
+    dismissOnboarding();
+  }
+});
+
+document.getElementById('onboardingSkip')?.addEventListener('click', dismissOnboarding);

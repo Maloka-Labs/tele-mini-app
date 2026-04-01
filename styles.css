@@ -606,6 +606,20 @@ body {
 }
 .modal-close:hover { background: rgba(255,255,255,0.15); color: var(--text); }
 
+/* Onboarding Modal Dots */
+.onboarding-dots .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+.onboarding-dots .dot.active {
+  background: var(--teal);
+  box-shadow: 0 0 8px var(--teal);
+  transform: scale(1.2);
+}
+
 .modal-title {
   font-size: 20px;
   font-weight: 800;
