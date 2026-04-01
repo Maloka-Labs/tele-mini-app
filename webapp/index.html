@@ -1,0 +1,1360 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Good Vibes — AI Twins</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0a0a0f;
+      --bg-secondary: #12121a;
+      --bg-card: #1a1a2e;
+      --bg-card-hover: #22223a;
+      --accent-green: #00d68f;
+      --accent-green-glow: rgba(0, 214, 143, 0.3);
+      --accent-purple: #7c5cfc;
+      --accent-purple-glow: rgba(124, 92, 252, 0.3);
+      --accent-gold: #ffd700;
+      --accent-cyan: #00d4ff;
+      --text-primary: #f0f0f5;
+      --text-secondary: #8888a0;
+      --text-muted: #55556a;
+      --gradient-max: linear-gradient(135deg, #00d68f 0%, #00b4d8 50%, #0096c7 100%);
+      --gradient-melini: linear-gradient(135deg, #7c5cfc 0%, #c084fc 50%, #e879f9 100%);
+      --gradient-hero: linear-gradient(180deg, rgba(0, 214, 143, 0.08) 0%, rgba(124, 92, 252, 0.08) 50%, transparent 100%);
+      --border-subtle: rgba(255, 255, 255, 0.06);
+      --border-glow: rgba(255, 255, 255, 0.12);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ===== ANIMATED BACKGROUND ===== */
+    .bg-orbs {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      animation: float 8s ease-in-out infinite;
+    }
+
+    .orb-1 {
+      width: 300px;
+      height: 300px;
+      background: rgba(0, 214, 143, 0.12);
+      top: -100px;
+      right: -100px;
+      animation-delay: 0s;
+    }
+
+    .orb-2 {
+      width: 250px;
+      height: 250px;
+      background: rgba(124, 92, 252, 0.12);
+      bottom: -50px;
+      left: -80px;
+      animation-delay: -4s;
+    }
+
+    .orb-3 {
+      width: 200px;
+      height: 200px;
+      background: rgba(0, 212, 255, 0.08);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation-delay: -2s;
+    }
+
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translateY(0) scale(1);
+      }
+
+      50% {
+        transform: translateY(-30px) scale(1.05);
+      }
+    }
+
+    /* ===== MAIN CONTAINER ===== */
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 420px;
+      margin: 0 auto;
+      padding: 20px 16px 100px;
+    }
+
+    /* ===== HEADER ===== */
+    .header {
+      text-align: center;
+      padding: 24px 0 32px;
+    }
+
+    .logo-container {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 72px;
+      height: 72px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, var(--accent-green), var(--accent-purple));
+      margin-bottom: 16px;
+      position: relative;
+      animation: pulse-glow 3s ease-in-out infinite;
+    }
+
+    @keyframes pulse-glow {
+
+      0%,
+      100% {
+        box-shadow: 0 0 20px var(--accent-green-glow), 0 0 40px rgba(124, 92, 252, 0.15);
+      }
+
+      50% {
+        box-shadow: 0 0 30px var(--accent-green-glow), 0 0 60px rgba(124, 92, 252, 0.25);
+      }
+    }
+
+    .logo-icon {
+      font-size: 36px;
+    }
+
+    .brand-name {
+      font-family: 'Outfit', sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--accent-green), var(--accent-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.5px;
+    }
+
+    .brand-sub {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+      font-weight: 400;
+      letter-spacing: 0.5px;
+    }
+
+    .powered-by {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 8px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    /* ===== SECTION TITLE ===== */
+    .section-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.4;
+      }
+    }
+
+    /* ===== TWIN CARDS ===== */
+    .twin-card {
+      position: relative;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      padding: 24px;
+      margin-bottom: 16px;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      overflow: hidden;
+    }
+
+    .twin-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      border-radius: 20px 20px 0 0;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    .twin-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--border-glow);
+    }
+
+    .twin-card:hover::before {
+      opacity: 1;
+    }
+
+    .twin-card:active {
+      transform: translateY(-2px) scale(0.98);
+    }
+
+    .twin-card.max::before {
+      background: var(--gradient-max);
+    }
+
+    .twin-card.max:hover {
+      box-shadow: 0 8px 32px rgba(0, 214, 143, 0.15), 0 0 0 1px rgba(0, 214, 143, 0.1);
+    }
+
+    .twin-card.melini::before {
+      background: var(--gradient-melini);
+    }
+
+    .twin-card.melini:hover {
+      box-shadow: 0 8px 32px rgba(124, 92, 252, 0.15), 0 0 0 1px rgba(124, 92, 252, 0.1);
+    }
+
+    .twin-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .twin-avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .twin-avatar.max {
+      background: linear-gradient(135deg, rgba(0, 214, 143, 0.2), rgba(0, 180, 216, 0.2));
+      border: 1px solid rgba(0, 214, 143, 0.3);
+    }
+
+    .twin-avatar.melini {
+      background: linear-gradient(135deg, rgba(124, 92, 252, 0.2), rgba(232, 121, 249, 0.2));
+      border: 1px solid rgba(124, 92, 252, 0.3);
+    }
+
+    .twin-online {
+      position: absolute;
+      bottom: -2px;
+      right: -2px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      border: 2px solid var(--bg-card);
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+
+    .twin-info {
+      flex: 1;
+    }
+
+    .twin-name {
+      font-family: 'Outfit', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.2;
+    }
+
+    .twin-handle {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    .twin-followers {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .twin-desc {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+
+    .twin-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .tag {
+      font-size: 12px;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-weight: 500;
+      letter-spacing: 0.2px;
+    }
+
+    .tag.max {
+      background: rgba(0, 214, 143, 0.12);
+      color: #00d68f;
+      border: 1px solid rgba(0, 214, 143, 0.2);
+    }
+
+    .tag.melini {
+      background: rgba(124, 92, 252, 0.12);
+      color: #a78bfa;
+      border: 1px solid rgba(124, 92, 252, 0.2);
+    }
+
+    .twin-cta {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 14px;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      letter-spacing: 0.3px;
+    }
+
+    .twin-cta.max {
+      background: var(--gradient-max);
+      color: #fff;
+    }
+
+    .twin-cta.max:hover {
+      box-shadow: 0 4px 20px rgba(0, 214, 143, 0.4);
+    }
+
+    .twin-cta.melini {
+      background: var(--gradient-melini);
+      color: #fff;
+    }
+
+    .twin-cta.melini:hover {
+      box-shadow: 0 4px 20px rgba(124, 92, 252, 0.4);
+    }
+
+    .twin-cta:active {
+      transform: scale(0.97);
+    }
+
+    .cta-arrow {
+      font-size: 18px;
+      transition: transform 0.3s ease;
+    }
+
+    .twin-cta:hover .cta-arrow {
+      transform: translateX(4px);
+    }
+
+    /* ===== QUOTE SECTION ===== */
+    .quote-section {
+      text-align: center;
+      padding: 24px;
+      margin: 24px 0;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(0, 214, 143, 0.05), rgba(124, 92, 252, 0.05));
+      border: 1px solid var(--border-subtle);
+    }
+
+    .quote-text {
+      font-family: 'Outfit', sans-serif;
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--text-primary);
+      font-style: italic;
+      line-height: 1.6;
+    }
+
+    .quote-author {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+    }
+
+    /* ===== STATS BAR ===== */
+    .stats-bar {
+      display: flex;
+      justify-content: space-around;
+      padding: 20px;
+      margin: 16px 0;
+      background: var(--bg-secondary);
+      border-radius: 16px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-family: 'Outfit', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent-green), var(--accent-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    /* ===== FOOTER ===== */
+    .footer {
+      text-align: center;
+      padding: 24px 0 16px;
+    }
+
+    .footer-text {
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+    }
+
+    .footer-brand {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      background: linear-gradient(135deg, var(--accent-green), var(--accent-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ===== ANIMATIONS ===== */
+    .fade-in {
+      animation: fadeInUp 0.6s ease-out forwards;
+      opacity: 0;
+    }
+
+    .fade-in-1 {
+      animation-delay: 0.1s;
+    }
+
+    .fade-in-2 {
+      animation-delay: 0.2s;
+    }
+
+    .fade-in-3 {
+      animation-delay: 0.35s;
+    }
+
+    .fade-in-4 {
+      animation-delay: 0.5s;
+    }
+
+    .fade-in-5 {
+      animation-delay: 0.65s;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ===== RIPPLE EFFECT ===== */
+    .ripple {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ripple::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s ease, height 0.6s ease;
+    }
+
+    .ripple:active::after {
+      width: 300px;
+      height: 300px;
+    }
+    /* ===== VOICE CALL SECTION ===== */
+    .voice-section-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+      margin: 32px 0 16px;
+      padding: 0 4px;
+    }
+
+    .voice-section-title .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent-gold);
+      box-shadow: 0 0 8px var(--accent-gold);
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(0.8); }
+    }
+
+    .voice-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .voice-card {
+      background: var(--bg-card);
+      border-radius: 20px;
+      padding: 20px 12px;
+      text-align: center;
+      border: 1px solid var(--border-subtle);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .voice-card.max { border-color: rgba(0, 214, 143, 0.2); }
+    .voice-card.melini { border-color: rgba(124, 92, 252, 0.2); }
+
+    .voice-card:hover {
+      transform: translateY(-3px);
+    }
+    .voice-card.max:hover { box-shadow: 0 8px 30px rgba(0, 214, 143, 0.2); background: rgba(0, 214, 143, 0.05); }
+    .voice-card.melini:hover { box-shadow: 0 8px 30px rgba(124, 92, 252, 0.2); background: rgba(124, 92, 252, 0.05); }
+
+    .voice-avatar {
+      font-size: 36px;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .voice-name {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: var(--text-primary);
+    }
+
+    .voice-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+
+    .call-btn {
+      width: 100%;
+      padding: 10px 0;
+      border: none;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .call-btn.max {
+      background: linear-gradient(135deg, #00d68f, #00b4d8);
+      color: #0a0f0a;
+    }
+    .call-btn.melini {
+      background: linear-gradient(135deg, #7c5cfc, #e879f9);
+      color: #fff;
+    }
+    .call-btn:active { transform: scale(0.97); }
+
+    /* === LIVE CALL MODAL === */
+    .call-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(12px);
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+    }
+    .call-modal.active { display: flex; }
+
+    .call-modal-avatar {
+      font-size: 80px;
+      position: relative;
+    }
+    .call-modal-avatar::after {
+      content: '';
+      position: absolute;
+      inset: -16px;
+      border-radius: 50%;
+      animation: ring-pulse 1.5s ease-out infinite;
+    }
+    .call-modal.max-call .call-modal-avatar::after {
+      border: 2px solid rgba(0, 214, 143, 0.6);
+    }
+    .call-modal.melini-call .call-modal-avatar::after {
+      border: 2px solid rgba(124, 92, 252, 0.6);
+    }
+    @keyframes ring-pulse {
+      0% { transform: scale(1); opacity: 1; }
+      100% { transform: scale(1.5); opacity: 0; }
+    }
+
+    .call-modal-name {
+      font-family: 'Outfit', sans-serif;
+      font-size: 26px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .call-modal-status {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    /* Audio visualizer bars */
+    .visualizer {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      height: 40px;
+    }
+    .vis-bar {
+      width: 4px;
+      border-radius: 2px;
+      min-height: 4px;
+      transition: height 0.1s;
+    }
+    .call-modal.max-call .vis-bar { background: var(--accent-green); }
+    .call-modal.melini-call .vis-bar { background: var(--accent-purple); }
+
+    .call-timer {
+      font-family: 'Outfit', sans-serif;
+      font-size: 20px;
+      font-weight: 600;
+      color: #fff;
+      letter-spacing: 2px;
+    }
+
+    .end-call-btn {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      border: none;
+      background: #ff3b30;
+      color: #fff;
+      font-size: 28px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 20px rgba(255, 59, 48, 0.5);
+      transition: all 0.2s;
+    }
+    .end-call-btn:hover { transform: scale(1.1); }
+    .end-call-btn:active { transform: scale(0.95); }
+
+    .voice-note {
+      text-align: center;
+      font-size: 11px;
+      color: var(--text-muted);
+      background: rgba(255,215,0,0.05);
+      border: 1px solid rgba(255,215,0,0.1);
+      border-radius: 10px;
+      padding: 10px 16px;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bg-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <div class="container">
+    <!-- HEADER -->
+    <header class="header fade-in fade-in-1">
+      <div class="logo-container">
+        <span class="logo-icon">🌿</span>
+      </div>
+      <h1 class="brand-name">Good Vibes</h1>
+      <p class="brand-sub">AI-Powered Wellness Guidance</p>
+      <p class="powered-by">Powered by Maloka × NanoClaw</p>
+    </header>
+
+    <!-- STATS -->
+    <div class="stats-bar fade-in fade-in-2">
+      <div class="stat-item">
+        <div class="stat-value">2</div>
+        <div class="stat-label">AI Twins</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">618K</div>
+        <div class="stat-label">Followers</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">24/7</div>
+        <div class="stat-label">Available</div>
+      </div>
+    </div>
+
+    <!-- SECTION: CHOOSE YOUR GURU -->
+    <div class="section-title fade-in fade-in-2">
+      <span class="dot"></span>
+      Choose Your AI Guru
+    </div>
+
+    <!-- MAX CARD -->
+    <div class="twin-card max ripple fade-in fade-in-3" onclick="openTwin('max')">
+      <div class="twin-header">
+        <div class="twin-avatar max">
+          🧘‍♂️
+          <div class="twin-online"></div>
+        </div>
+        <div class="twin-info">
+          <div class="twin-name">Max Lowenstein</div>
+          <div class="twin-handle">@healingmotions</div>
+          <div class="twin-followers">📸 218K followers</div>
+        </div>
+      </div>
+      <p class="twin-desc">
+        Registered Dietitian, breathwork facilitator & yoga teacher.
+        Science-backed wellness with a warm, grounded approach.
+      </p>
+      <div class="twin-tags">
+        <span class="tag max">💨 Breathwork</span>
+        <span class="tag max">🧘 Yoga</span>
+        <span class="tag max">🥗 Nutrition</span>
+        <span class="tag max">🧠 Meditation</span>
+      </div>
+      <button class="twin-cta max">
+        Chat with Max <span class="cta-arrow">→</span>
+      </button>
+    </div>
+
+    <!-- MELINI CARD -->
+    <div class="twin-card melini ripple fade-in fade-in-4" onclick="openTwin('melini')">
+      <div class="twin-header">
+        <div class="twin-avatar melini">
+          🧘‍♀️
+          <div class="twin-online"></div>
+        </div>
+        <div class="twin-info">
+          <div class="twin-name">Melini Jesudason</div>
+          <div class="twin-handle">@meliniseri</div>
+          <div class="twin-followers">📸 400K followers</div>
+        </div>
+      </div>
+      <p class="twin-desc">
+        World-renowned yoga instructor, Reiki Master & spiritual medium.
+        Dynamic practice meets deep spiritual wisdom.
+      </p>
+      <div class="twin-tags">
+        <span class="tag melini">🤸 Inversions</span>
+        <span class="tag melini">✨ Energy Healing</span>
+        <span class="tag melini">🔥 Ashtanga</span>
+        <span class="tag melini">💫 Spirituality</span>
+      </div>
+      <button class="twin-cta melini">
+        Chat with Melini <span class="cta-arrow">→</span>
+      </button>
+    </div>
+
+    <!-- ===== VOICE SECTION ===== -->
+    <div class="voice-section-title fade-in fade-in-4">
+      <span class="dot"></span>
+      Live Voice Calls (Beta)
+    </div>
+
+    <div class="voice-cards fade-in fade-in-4">
+      <!-- CALL MAX -->
+      <div class="voice-card max">
+        <span class="voice-avatar">🧘‍♂️</span>
+        <div class="voice-name">Max</div>
+        <div class="voice-label">Breathwork & Nutrition</div>
+        <button class="call-btn max" id="callMaxBtn" onclick="startCall('max')">
+          🎙️ Call Max
+        </button>
+      </div>
+      <!-- CALL MELINI -->
+      <div class="voice-card melini">
+        <span class="voice-avatar">🧘‍♀️</span>
+        <div class="voice-name">Melini</div>
+        <div class="voice-label">Ashtanga & Energy Healing</div>
+        <button class="call-btn melini" id="callMeliniBtn" onclick="startCall('melini')">
+          🎙️ Call Melini
+        </button>
+      </div>
+    </div>
+
+    <div class="voice-note fade-in fade-in-4">
+      ⚡ Voice is in Beta — powered by WebRTC. For best results, use headphones.
+    </div>
+
+    <!-- ===== LIVE CALL MODAL ===== -->
+    <div class="call-modal" id="callModal">
+      <div class="call-modal-avatar" id="callAvatar">🧘‍♂️</div>
+      <div class="call-modal-name" id="callName">Max Lowenstein</div>
+      <div class="call-modal-status" id="callStatus">Connecting...</div>
+      <div class="visualizer" id="visualizer">
+        <!-- Bars injected by JS -->
+      </div>
+      <div class="call-timer" id="callTimer">00:00</div>
+      <button class="end-call-btn" onclick="endCall()">📵</button>
+    </div>
+
+    <!-- QUOTE -->
+    <div class="quote-section fade-in fade-in-5">
+      <p class="quote-text">"Change your breath, change your life."</p>
+      <p class="quote-author">— Max Lowenstein</p>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="footer fade-in fade-in-5">
+      <p class="footer-text">
+        Built with ✨ by <span class="footer-brand">Maloka</span>
+      </p>
+      <p class="footer-text" style="margin-top: 4px;">
+        AI Twins respond in the style of real wellness experts
+      </p>
+    </footer>
+  </div>
+
+  <script>
+    // Initialize Telegram Web App
+    const tg = window.Telegram?.WebApp;
+
+    if (tg) {
+      tg.ready();
+      tg.expand();
+
+      // Match Telegram theme
+      const params = tg.themeParams;
+      if (params) {
+        document.documentElement.style.setProperty('--bg-primary', params.bg_color || '#0a0a0f');
+        document.documentElement.style.setProperty('--bg-secondary', params.secondary_bg_color || '#12121a');
+      }
+    }
+
+    function openTwin(twin) {
+      // Haptic feedback if inside Telegram
+      if (tg?.HapticFeedback) {
+        tg.HapticFeedback.impactOccurred('medium');
+      }
+
+      // Deep link to the Telegram bot with start parameter
+      const botUsername = 'nanoclaw_maloka_bot';
+      const startParam = twin === 'max' ? 'max' : 'melini';
+      const deepLink = `https://t.me/${botUsername}?start=${startParam}`;
+
+      // If inside Telegram Mini App, use openTelegramLink
+      if (tg?.openTelegramLink) {
+        tg.openTelegramLink(deepLink);
+      } else {
+        // Open in browser — redirects to Telegram app or web
+        window.open(deepLink, '_blank');
+      }
+    }
+
+    // Rotate quotes
+    const quotes = [
+      { text: '"Change your breath, change your life."', author: '— Max Lowenstein' },
+      { text: '"Feel it to heal it."', author: '— Melini Jesudason' },
+      { text: '"Your body is your temple and your playground."', author: '— Melini Jesudason' },
+      { text: '"Your body knows the way."', author: '— Max Lowenstein' }
+    ];
+
+    let quoteIndex = 0;
+    setInterval(() => {
+      quoteIndex = (quoteIndex + 1) % quotes.length;
+      const quoteEl = document.querySelector('.quote-text');
+      const authorEl = document.querySelector('.quote-author');
+
+      quoteEl.style.opacity = 0;
+      authorEl.style.opacity = 0;
+
+      setTimeout(() => {
+        quoteEl.textContent = quotes[quoteIndex].text;
+        authorEl.textContent = quotes[quoteIndex].author;
+        quoteEl.style.opacity = 1;
+        authorEl.style.opacity = 1;
+      }, 400);
+    }, 5000);
+
+    // Add transition for quote fading
+    document.querySelector('.quote-text').style.transition = 'opacity 0.4s ease';
+    document.querySelector('.quote-author').style.transition = 'opacity 0.4s ease';
+
+    // ===== COMPLETE VOICE PIPELINE =====
+    // Backend URL — using full origin to avoid Android WebView path resolution issues
+    const VOICE_API = 'https://gaia-twins-production.up.railway.app/voice';
+
+    let mediaStream = null;
+    let audioContext = null;
+    let analyser = null;
+    let mediaRecorder = null;
+    let recordedChunks = [];
+    let callTimerInterval = null;
+    let callSeconds = 0;
+    let visualizerRAF = null;
+    let currentTwin = null;
+    let isRecording = false;
+    let vadInterval = null;
+
+    const TWINS = {
+      max: { name: 'Max Lowenstein', avatar: '🧘‍♂️', cssClass: 'max-call', voiceGender: 'male' },
+      melini: { name: 'Melini Jesudason', avatar: '🧘‍♀️', cssClass: 'melini-call', voiceGender: 'female' },
+    };
+
+    // Build visualizer bars
+    const vizEl = document.getElementById('visualizer');
+    const BAR_COUNT = 16;
+    for (let i = 0; i < BAR_COUNT; i++) {
+      const bar = document.createElement('div');
+      bar.className = 'vis-bar';
+      bar.style.height = '4px';
+      vizEl.appendChild(bar);
+    }
+    const bars = vizEl.querySelectorAll('.vis-bar');
+
+    function startVAD() {
+      if (vadInterval) clearInterval(vadInterval);
+      let silenceStart = 0;
+      let speakingStart = 0;
+      
+      vadInterval = setInterval(() => {
+        if (!analyser) return;
+        const status = document.getElementById('callStatus').textContent;
+        // Do not listen while bot is thinking or speaking to prevent echo loops
+        if (status.includes('Thinking') || status.includes('Speaking')) return;
+        
+        const data = new Uint8Array(analyser.frequencyBinCount);
+        analyser.getByteFrequencyData(data);
+        let sum = 0;
+        for (let i = 0; i < data.length; i++) sum += data[i];
+        const avg = sum / data.length;
+        
+        const now = Date.now();
+        // 15 is standard for laptop/mobile balance
+        if (avg > 15) {
+          console.log('Voice detected, volume:', avg);
+          silenceStart = 0;
+          if (!speakingStart) speakingStart = now;
+          
+          if (!isRecording && (now - speakingStart > 200)) {
+            startRecording(new Event('vad'));
+          }
+        } else {
+           speakingStart = 0;
+           if (isRecording) {
+             if (!silenceStart) silenceStart = now;
+             
+             // Wait 1.8s of silence before cutting off
+             if (now - silenceStart > 1800) {
+               stopRecording(new Event('vad'));
+               silenceStart = 0;
+             }
+           }
+        }
+      }, 100);
+    }
+
+    function animateBars() {
+      if (!analyser) return;
+      const data = new Uint8Array(analyser.frequencyBinCount);
+      analyser.getByteFrequencyData(data);
+      const step = Math.floor(data.length / BAR_COUNT);
+      bars.forEach((bar, i) => {
+        const val = data[i * step] || 0;
+        bar.style.height = `${Math.max(4, (val / 255) * 36)}px`;
+      });
+      visualizerRAF = requestAnimationFrame(animateBars);
+    }
+
+    function updateTimer() {
+      callSeconds++;
+      const m = String(Math.floor(callSeconds / 60)).padStart(2, '0');
+      const s = String(callSeconds % 60).padStart(2, '0');
+      document.getElementById('callTimer').textContent = `${m}:${s}`;
+    }
+
+    // Pick the best browser voice for the twin
+    function pickVoice(gender) {
+      const voices = window.speechSynthesis.getVoices();
+      // Prefer English voices matching gender
+      const preferred = voices.filter(v =>
+        v.lang.startsWith('en') &&
+        (gender === 'female'
+          ? v.name.match(/female|woman|samantha|karen|victoria|moira|tessa|fiona/i)
+          : v.name.match(/male|man|daniel|alex|fred|arthur|thomas|oliver/i))
+      );
+      if (preferred.length) return preferred[0];
+      // Any English voice
+      const english = voices.filter(v => v.lang.startsWith('en'));
+      if (english.length) return english[0];
+      return null;
+    }
+
+    // Speak text aloud and show it on screen
+    function speakResponse(text, twin, audioBase64) {
+      const info = TWINS[twin];
+      document.getElementById('callStatus').textContent = `${info.avatar} Speaking...`;
+
+      // Show transcript — this is the GUARANTEED way the user sees the response
+      let transcriptEl = document.getElementById('callTranscript');
+      if (!transcriptEl) {
+        transcriptEl = document.createElement('div');
+        transcriptEl.id = 'callTranscript';
+        transcriptEl.style.cssText = `
+          max-width: 300px; padding: 12px 16px; border-radius: 16px;
+          background: rgba(255,255,255,0.07); font-size: 14px; line-height: 1.5;
+          color: #e0e0f0; text-align: center; margin: 0 auto;
+        `;
+        document.getElementById('callTimer').insertAdjacentElement('beforebegin', transcriptEl);
+      }
+      transcriptEl.textContent = `"${text}"`;
+
+      const resetToListening = () => {
+        document.getElementById('callStatus').textContent = '🎙️ Listening... speak naturally';
+      };
+
+      // Strategy 1: Play server-generated audio (Edge-TTS mp3)
+      if (audioBase64) {
+        try {
+          if (window.speechSynthesis) window.speechSynthesis.cancel();
+        } catch(e) {}
+        const audio = new Audio(`data:audio/mp3;base64,${audioBase64}`);
+        audio.onended = resetToListening;
+        audio.onerror = (e) => {
+          console.warn('Audio playback failed, showing text only', e);
+          resetToListening();
+        };
+        audio.play().catch(e => {
+          console.warn('Audio play() rejected:', e);
+          // On mobile/Telegram WebView, autoplay may be blocked — that's OK, text is visible
+          resetToListening();
+        });
+        return;
+      }
+
+      // Strategy 2: Try browser speechSynthesis (works on laptop, NOT on Telegram WebView)
+      if (window.speechSynthesis && typeof SpeechSynthesisUtterance !== 'undefined') {
+        try {
+          window.speechSynthesis.cancel();
+          const utt = new SpeechSynthesisUtterance(text);
+          utt.rate = 0.92;
+          utt.pitch = info.voiceGender === 'female' ? 1.1 : 0.9;
+          utt.volume = 1;
+          const voice = pickVoice(info.voiceGender);
+          if (voice) utt.voice = voice;
+          utt.onend = resetToListening;
+          utt.onerror = resetToListening;
+          window.speechSynthesis.speak(utt);
+          return;
+        } catch(e) {
+          console.warn('speechSynthesis not available:', e);
+        }
+      }
+
+      // Strategy 3: No audio available at all — just show text (Telegram WebView fallback)
+      setTimeout(resetToListening, 3000);
+    }
+
+    async function sendAudioToBackend(audioBlob, twin) {
+      document.getElementById('callStatus').textContent = '⏳ Thinking...';
+
+      // Debug: show blob info
+      console.log('Audio blob:', { size: audioBlob.size, type: audioBlob.type });
+
+      if (!audioBlob || audioBlob.size < 100) {
+        document.getElementById('callStatus').textContent = '⚠️ Mic recorded empty audio. Try again.';
+        setTimeout(() => {
+          document.getElementById('callStatus').textContent = '🎙️ Listening... speak naturally';
+        }, 3000);
+        return;
+      }
+
+      try {
+        if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+
+        const base64 = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const result = reader.result;
+            if (!result || typeof result !== 'string') {
+              reject(new Error('FileReader returned empty'));
+              return;
+            }
+            const b64 = result.split(',')[1];
+            if (!b64 || b64.length < 50) {
+              reject(new Error(`Base64 too small: ${b64?.length || 0} chars`));
+              return;
+            }
+            resolve(b64);
+          };
+          reader.onerror = () => reject(new Error('FileReader error'));
+          reader.readAsDataURL(audioBlob);
+        });
+
+        console.log('Sending to server, base64 length:', base64.length);
+        document.getElementById('callStatus').textContent = '⏳ Sending to AI...';
+
+        const response = await fetch(VOICE_API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            audioBase64: base64,
+            mimeType: audioBlob.type || 'audio/webm',
+            twin,
+          }),
+        });
+
+        console.log('Server response status:', response.status);
+
+        if (!response.ok) {
+           const errData = await response.json().catch(() => ({}));
+           throw new Error(errData.error || `Server ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('Server data:', { hasText: !!data.text, hasAudio: !!data.ttsAudioBase64, textLen: data.text?.length });
+
+        if (data.text) {
+          speakResponse(data.text, twin, data.ttsAudioBase64);
+        } else {
+          throw new Error('Server returned no text');
+        }
+      } catch (err) {
+        console.error('Voice API error:', err);
+        // Show the REAL error so we can debug
+        const errMsg = err.message || 'Unknown error';
+        document.getElementById('callStatus').textContent = '⚠️ Error: ' + errMsg;
+        // Show the error as spoken text too, so user knows what happened
+        speakResponse('I had a connection issue. Let me try again when you speak.', twin);
+        if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+      }
+    }
+
+    async function startCall(twin) {
+      currentTwin = twin;
+      const info = TWINS[twin];
+      const modal = document.getElementById('callModal');
+
+      // Unlock Mobile TTS API safely without crashing the button
+      try {
+        if ('speechSynthesis' in window && window.SpeechSynthesisUtterance) {
+          window.speechSynthesis.speak(new window.SpeechSynthesisUtterance(''));
+        }
+      } catch (e) {
+        console.warn('SpeechSynthesis disabled or unavailable:', e);
+      }
+
+      if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy');
+
+      document.getElementById('callAvatar').textContent = info.avatar;
+      document.getElementById('callName').textContent = info.name;
+      document.getElementById('callStatus').textContent = 'Requesting microphone...';
+      document.getElementById('callTimer').textContent = '00:00';
+      modal.className = `call-modal active ${info.cssClass}`;
+
+      try {
+        mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = audioContext.createAnalyser();
+        analyser.fftSize = 64;
+        const source = audioContext.createMediaStreamSource(mediaStream);
+        source.connect(analyser);
+
+        callSeconds = 0;
+        callTimerInterval = setInterval(updateTimer, 1000);
+
+        document.getElementById('callStatus').textContent = '🎙️ Listening... speak naturally';
+
+        const endBtn = document.querySelector('.end-call-btn');
+        endBtn.style.display = 'none'; // Hide Walkie-Talkie Button completely
+
+        // Add hang-up button in center
+        let hangup = document.getElementById('hangupBtn');
+        if (!hangup) {
+          hangup = document.createElement('button');
+          hangup.id = 'hangupBtn';
+          hangup.className = 'end-call-btn';
+          hangup.textContent = '📵';
+          hangup.onclick = endCall;
+          endBtn.insertAdjacentElement('afterend', hangup);
+        }
+
+        animateBars();
+        startVAD();
+      } catch (err) {
+        document.getElementById('callStatus').textContent = '❌ Microphone access denied';
+        console.error('Mic error:', err);
+      }
+    }
+
+    function startRecording(e) {
+      e.preventDefault();
+      if (isRecording || !mediaStream) return;
+      isRecording = true;
+      recordedChunks = [];
+
+      // Determine best supported format
+      const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+        ? 'audio/webm;codecs=opus'
+        : MediaRecorder.isTypeSupported('audio/webm')
+          ? 'audio/webm'
+          : 'audio/ogg';
+
+      mediaRecorder = new MediaRecorder(mediaStream, { mimeType });
+      mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) recordedChunks.push(e.data); };
+      mediaRecorder.start(100);
+
+      document.getElementById('callStatus').textContent = '🔴 Listening... (Wait till quiet to send)';
+      if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+    }
+
+    function stopRecording(e) {
+      if (e) e.preventDefault();
+      if (!isRecording || !mediaRecorder) return;
+      isRecording = false;
+
+      mediaRecorder.onstop = () => {
+        if (recordedChunks.length === 0) return;
+        const blob = new Blob(recordedChunks, { type: mediaRecorder.mimeType });
+        sendAudioToBackend(blob, currentTwin);
+      };
+      mediaRecorder.stop();
+
+      if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+    }
+
+    function endCall() {
+      const modal = document.getElementById('callModal');
+      modal.className = 'call-modal';
+
+      window.speechSynthesis.cancel();
+      if (mediaStream) { mediaStream.getTracks().forEach(t => t.stop()); mediaStream = null; }
+      if (mediaRecorder && isRecording) { try { mediaRecorder.stop(); } catch(e) {} }
+      mediaRecorder = null; isRecording = false;
+      if (audioContext) { audioContext.close(); audioContext = null; analyser = null; }
+      if (callTimerInterval) { clearInterval(callTimerInterval); callTimerInterval = null; }
+      if (visualizerRAF) { cancelAnimationFrame(visualizerRAF); visualizerRAF = null; }
+      if (vadInterval) { clearInterval(vadInterval); vadInterval = null; }
+
+      bars.forEach(bar => { bar.style.height = '4px'; });
+
+      // Reset buttons
+      const endBtn = document.querySelector('.end-call-btn');
+      if (endBtn) { endBtn.style.display = 'flex'; endBtn.textContent = '📵'; endBtn.style.background = '#ff3b30'; endBtn.style.boxShadow = '0 0 20px rgba(255,59,48,0.5)'; endBtn.setAttribute('data-mode', ''); endBtn.onclick = endCall; endBtn.onmousedown = endBtn.ontouchstart = endBtn.onmouseup = endBtn.ontouchend = null; }
+      const hangup = document.getElementById('hangupBtn');
+      if (hangup) hangup.remove();
+      const transcript = document.getElementById('callTranscript');
+      if (transcript) transcript.remove();
+
+      if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('warning');
+    }
+
+    // Preload voices on page load if supported
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+    }
+  </script>
+</body>
+
+</html>
