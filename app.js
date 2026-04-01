@@ -14,7 +14,7 @@ if (tg) {
 const tgUser    = tg?.initDataUnsafe?.user;
 const initData  = tg?.initData ?? '';  // passed to backend for auth
 
-const API_BASE = 'https://mini-app-service.onrender.com';
+const API_BASE = 'https://mini-app-service-production.up.railway.app';
 
 /* ─── Reward Toast ─── */
 const rewardToast      = document.getElementById('rewardToast');
