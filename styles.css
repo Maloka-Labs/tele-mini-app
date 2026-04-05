@@ -1921,3 +1921,44 @@ body {
   transform: scale(1.2);
 }
 
+/* ═══════════════════════════════
+   QUICK REPLIES (Chat)
+   ═══════════════════════════════ */
+.chat-quick-replies {
+  display: flex;
+  gap: 8px;
+  padding: 8px 16px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  background: rgba(0,0,0,0.1);
+  border-top: 1px solid var(--border);
+  scrollbar-width: none;
+}
+
+.chat-quick-replies::-webkit-scrollbar {
+  display: none;
+}
+
+.quick-reply-btn {
+  background: var(--card2);
+  border: 1px solid var(--border2);
+  color: var(--teal);
+  padding: 6px 14px;
+  border-radius: 18px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s var(--ease);
+}
+
+.quick-reply-btn:hover {
+  background: var(--teal-dim);
+  border-color: var(--teal);
+  transform: translateY(-2px);
+}
+
+.quick-reply-btn:active {
+  transform: scale(0.95);
+}
+

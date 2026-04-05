@@ -282,6 +282,7 @@ const gurus = [
     specialties: ['all'],
     ctaText: 'Seek Guidance',
     btnGradient: 'linear-gradient(135deg, var(--teal), var(--purple))',
+    chatUrl: 'https://nemoclawtelegrambackend-production.up.railway.app/chat',
     welcomeMsg: "Welcome back to the Den, Rebel. ☸️ I am the Thumb Lama. Whether you seek stillness or movement, I am here to orchestrate your practice. How are you feeling in this moment?",
   },
   {
@@ -564,24 +565,38 @@ let activeGuru = null;
 const conversations = {};
 
 /* Open chat */
-/* ─── Phase 5: Agent Orchestration (Thumb Lama) ─── */
+/* ─── Phase 5: Smart Orchestration ─── */
 function updateLamaNudge(data) {
   const nudgeEl = document.getElementById('lamaNudge');
   const nudgeText = document.getElementById('lamaNudgeText');
   if (!nudgeEl || !nudgeText) return;
 
+  const hr = new Date().getHours();
   const octantScores = data.octant_scores || {};
-  const octants = ['stillness', 'creation', 'sonic', 'wisdom', 'emotion', 'bridge', 'movement', 'nourish'];
+  const isHibernating = window.isHibernating || false;
+
+  let suggestedOctant = 'stillness';
   
-  // Find lowest score
-  let lowestOctant = 'stillness';
-  let minScore = 9999;
-  octants.forEach(o => {
-    if ((octantScores[o] || 0) < minScore) {
-      minScore = octantScores[o] || 0;
-      lowestOctant = o;
-    }
-  });
+  if (isHibernating) {
+    // Priority: Restoration
+    suggestedOctant = (octantScores.nourish < octantScores.stillness) ? 'nourish' : 'stillness';
+  } else if (hr >= 20 || hr <= 2) {
+    // Priority: Wind-down
+    suggestedOctant = (octantScores.sonic < octantScores.stillness) ? 'sonic' : 'stillness';
+  } else if (hr >= 6 && hr <= 11) {
+    // Priority: Activation
+    suggestedOctant = (octantScores.movement < octantScores.creation) ? 'movement' : 'creation';
+  } else {
+    // Default: Lowest score
+    const octants = ['stillness', 'creation', 'sonic', 'wisdom', 'emotion', 'bridge', 'movement', 'nourish'];
+    let minScore = 9999;
+    octants.forEach(o => {
+      if ((octantScores[o] || 0) < minScore) {
+        minScore = octantScores[o] || 0;
+        suggestedOctant = o;
+      }
+    });
+  }
 
   const nudges = {
     stillness: "Your mind is racing, Rebel. Five minutes of Stillness?",
@@ -594,13 +609,37 @@ function updateLamaNudge(data) {
     nourish:   "Nourish your temple. What did you feed your soul?"
   };
 
-  nudgeText.textContent = nudges[lowestOctant] || nudges.stillness;
+  nudgeText.textContent = nudges[suggestedOctant];
+  window.lastLamaSuggestion = suggestedOctant; // Track for auto-open
   nudgeEl.classList.remove('hidden');
 
-  // Trigger intake if not done
-  if (!localStorage.getItem('intake_done')) {
+  if (!window.intakeCompleted) {
     setTimeout(initiateThumbLamaIntake, 2000);
   }
+}
+
+function handleLamaIntervention(text) {
+  const affirmative = ['yes', 'okay', 'sure', 'let\'s go', 'ready', 'do it', 'yoga', 'breathe', 'meditate'];
+  const userSaysYes = affirmative.some(word => text.toLowerCase().includes(word));
+  
+  if (userSaysYes && window.lastLamaSuggestion) {
+    const oct = window.lastLamaSuggestion;
+    const msg = `Magnificent. Opening the ${oct.charAt(0).toUpperCase() + oct.slice(1)} Sanctuary for you...`;
+    
+    appendMessage('guru', msg, activeGuru);
+    
+    setTimeout(() => {
+      closeChat();
+      const octMap = { 
+        stillness: 'octStillness', movement: 'octMovement', wisdom: 'octWisdom', 
+        emotion: 'octEmotion', sonic: 'octSonic', creation: 'octCreation',
+        bridge: 'octBridge', nourish: 'octNourish'
+      };
+      document.getElementById(octMap[oct])?.click();
+    }, 1200);
+    return true;
+  }
+  return false;
 }
 
 function openThumbLamaChat() {
@@ -608,11 +647,77 @@ function openThumbLamaChat() {
   if (lama) openChat(lama);
 }
 
+/* ─── Phase 5: Multi-Step Intake Logic ─── */
+const LAMA_INTAKE_STEPS = [
+  {
+    step: 0,
+    question: "Welcome to the Rebellion, Rebel. ☸️ I am the Thumb Lama, the Librarian of this Den. Tell me, what brought you here today?",
+    options: ["Stress Relief", "Mental Clarity", "Focus & Flow", "Pure Curiosity"]
+  },
+  {
+    step: 1,
+    question: "Excellent. Which domain of wellness feels most 'blocked' or in need of mastery right now?",
+    options: ["🧘 Stillness", "✍️ Creation", "🎵 Sonic", "🧠 Wisdom", "🌪️ Movement"]
+  },
+  {
+    step: 2,
+    question: "Understood. I've adjusted the Den to your frequency. How much time can you reclaim for your practice daily?",
+    options: ["5 Minutes", "12 Minutes", "24 Minutes"]
+  }
+];
+
+let currentIntakeStep = 0;
+const chatQuickRepliesEl = document.getElementById('chatQuickReplies');
+
+function renderQuickReplies(options) {
+  if (!chatQuickRepliesEl) return;
+  chatQuickRepliesEl.innerHTML = '';
+  if (!options || options.length === 0) {
+    chatQuickRepliesEl.classList.add('hidden');
+    return;
+  }
+
+  options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'quick-reply-btn';
+    btn.textContent = opt;
+    btn.onclick = () => handleQuickReplyClick(opt);
+    chatQuickRepliesEl.appendChild(btn);
+  });
+  chatQuickRepliesEl.classList.remove('hidden');
+}
+
+function handleQuickReplyClick(text) {
+  chatInput.value = text;
+  sendMessage();
+}
+
+async function syncIntakeCompletion() {
+  if (!initData) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/complete-intake`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ initData })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      window.intakeCompleted = true;
+      console.log('[Phase 5] Backend intake state synced.');
+    }
+  } catch (e) {
+    console.error('[Phase 5] Sync error:', e);
+  }
+}
+
 function initiateThumbLamaIntake() {
-  if (localStorage.getItem('intake_done')) return;
+  if (window.intakeCompleted) return;
   
   const lama = gurus.find(g => g.id === 'lama');
   if (!lama) return;
+
+  // Reset steps
+  currentIntakeStep = 0;
 
   // Visual Nudge highlight
   const nudgeEl = document.getElementById('lamaNudge');
@@ -620,8 +725,6 @@ function initiateThumbLamaIntake() {
     nudgeEl.style.boxShadow = '0 0 30px var(--teal)';
     setTimeout(() => {
       openThumbLamaChat();
-      // We'll mark as done for now to prevent loops, but in production this follows a conversation
-      localStorage.setItem('intake_done', 'true');
     }, 1500);
   }
 }
@@ -644,6 +747,25 @@ function openChat(guru) {
 
   // Render messages
   renderMessages(guru);
+
+  // If Intake Mode: Start script
+  if (guru.id === 'lama' && !window.intakeCompleted) {
+    if (conversations['lama'].length === 0) {
+      setTimeout(() => {
+        const first = LAMA_INTAKE_STEPS[0];
+        conversations['lama'].push({ role: 'assistant', content: first.question });
+        renderMessages(guru);
+        renderQuickReplies(first.options);
+        scrollToBottom();
+      }, 500);
+    } else {
+      // Resume current step
+      const current = LAMA_INTAKE_STEPS[currentIntakeStep];
+      if (current) renderQuickReplies(current.options);
+    }
+  } else {
+    chatQuickRepliesEl.classList.add('hidden');
+  }
 
   // Scroll to bottom
   setTimeout(() => scrollToBottom(), 80);
@@ -782,6 +904,42 @@ async function sendMessage() {
   chatInput.style.height = 'auto';
   chatSend.disabled = true;
   showTyping();
+
+  // ─── Phase 5: Intake Intercept ───
+  if (activeGuru.id === 'lama' && !window.intakeCompleted) {
+    setTimeout(async () => {
+      hideTyping();
+      
+      currentIntakeStep++;
+      const next = LAMA_INTAKE_STEPS[currentIntakeStep];
+      
+      let reply;
+      if (next) {
+        reply = next.question;
+        renderQuickReplies(next.options);
+      } else {
+        // Intake Finished
+        reply = "Magnificent. I have established your frequency. You have been awarded a 25pt starting bonus for your journey. Welcome to the Rebellion.";
+        renderQuickReplies([]);
+        
+        // Sync and Reward
+        syncIntakeCompletion();
+        claimActivityReward('meditation'); // Bonus pts equivalent to a session
+      }
+      
+      appendMessage('guru', reply, activeGuru);
+      conversations['lama'].push({ role: 'assistant', content: reply });
+      scrollToBottom();
+    }, 1200);
+    
+    return;
+  }
+
+  // ─── Phase 5: Smart Navigation (Automation) ───
+  if (activeGuru.id === 'lama' && window.intakeCompleted) {
+    const intercepted = handleLamaIntervention(text);
+    if (intercepted) return;
+  }
 
   try {
     let reply;
@@ -1244,6 +1402,7 @@ async function loadProfile() {
 
     animateCounter(pointsEl, data.total_points);
     animateCounter(streakEl, data.streak);
+    window.intakeCompleted = !!data.intake_completed;
 
     if (data.events.length === 0) {
       feedEl.innerHTML = '<div class="feed-empty">No activity yet — complete a session to earn points!</div>';
