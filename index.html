@@ -55,13 +55,16 @@
     <!-- ═══ TAB BAR ═══ -->
     <div class="tab-bar">
       <button class="tab-btn active" id="tabGurus" data-tab="panelGurus">
-        <span class="tab-icon">🧘</span> AI Gurus
+        <span class="tab-icon">🧘</span> Gurus
       </button>
-      <button class="tab-btn" id="tabActivities" data-tab="panelActivities">
-        <span class="tab-icon">✨</span> Activities
+      <button class="tab-btn" id="tabDojo" data-tab="panelActivities">
+        <span class="tab-icon">🥋</span> Dojo
+      </button>
+      <button class="tab-btn" id="tabDashboard" data-tab="panelDashboard">
+        <span class="tab-icon">🐲</span> Vibe
       </button>
       <button class="tab-btn" id="tabProfile" data-tab="panelProfile">
-        <span class="tab-icon">🏆</span> Profile
+        <span class="tab-icon">🏆</span> Me
       </button>
     </div>
 
@@ -90,33 +93,147 @@
       <div id="guruList" class="guru-list"></div>
     </div>
 
-    <!-- ═══ PANEL: ACTIVITIES ═══ -->
+    <!-- ═══ PANEL: DOJO (8-OCTANTS) ═══ -->
     <div class="tab-panel hidden" id="panelActivities">
-      <div class="activities-grid">
-        <button class="activity-card" id="actBreathing">
-          <span class="activity-icon">🌬️</span>
-          <span class="activity-name">Breathing</span>
-          <span class="activity-sub">Box Method</span>
-          <span class="activity-reward-badge" id="badgeBreathing">+15 pts</span>
+      <div class="dojo-header">
+        <h2 class="dojo-title">The Dojo Den</h2>
+        <p class="dojo-subtitle">Master your wellness through the 8 Octants</p>
+      </div>
+      
+      <div class="octant-grid">
+        <!-- Octant 01: Stillness -->
+        <button class="octant-card o-violet" id="octStillness" data-octant="01">
+          <div class="octant-icon">🧘</div>
+          <div class="octant-info">
+            <span class="octant-name">Stillness</span>
+            <div class="octant-progress-wrap">
+              <div class="octant-progress-bar" id="pb-stillness" style="width: 0%"></div>
+            </div>
+            <span class="octant-belt-tag" id="bt-stillness">White Belt · Lvl 1</span>
+          </div>
         </button>
-        <button class="activity-card" id="actMeditation">
-          <span class="activity-icon">🧘</span>
-          <span class="activity-name">Meditate</span>
-          <span class="activity-sub">5 min session</span>
-          <span class="activity-reward-badge" id="badgeMeditation">+20 pts</span>
+        
+        <!-- Octant 02: Creation -->
+        <button class="octant-card o-coral" id="octCreation" data-octant="02">
+          <div class="octant-icon">🎨</div>
+          <div class="octant-info">
+            <span class="octant-name">Creation</span>
+            <div class="octant-progress-wrap">
+              <div class="octant-progress-bar" id="pb-creation" style="width: 0%"></div>
+            </div>
+            <span class="octant-belt-tag" id="bt-creation">White Belt · Lvl 1</span>
+          </div>
         </button>
-        <button class="activity-card" id="actAffirmation">
-          <span class="activity-icon">✨</span>
-          <span class="activity-name">Affirmation</span>
-          <span class="activity-sub">Daily boost</span>
-          <span class="activity-reward-badge" id="badgeAffirmation">+5 pts</span>
+
+        <!-- Octant 03: Sonic -->
+        <button class="octant-card o-green-glow" id="octSonic" data-octant="03">
+          <div class="octant-icon">🔊</div>
+          <div class="octant-info">
+            <span class="octant-name">Sonic</span>
+            <div class="octant-progress-wrap">
+              <div class="octant-progress-bar" id="pb-sonic" style="width: 0%"></div>
+            </div>
+            <span class="octant-belt-tag" id="bt-sonic">White Belt · Lvl 1</span>
+          </div>
         </button>
-        <button class="activity-card" id="actMood">
-          <span class="activity-icon">💜</span>
-          <span class="activity-name">Mood Check</span>
-          <span class="activity-sub">How are you?</span>
-          <span class="activity-reward-badge" id="badgeMood">+5 pts</span>
+
+        <!-- Octant 04: Wisdom -->
+        <button class="octant-card o-cyan" id="octWisdom" data-octant="04">
+          <div class="octant-icon">📚</div>
+          <div class="octant-info">
+            <span class="octant-name">Wisdom</span>
+            <div class="octant-progress-wrap">
+              <div class="octant-progress-bar" id="pb-wisdom" style="width: 0%"></div>
+            </div>
+            <span class="octant-belt-tag" id="bt-wisdom">White Belt · Lvl 1</span>
+          </div>
         </button>
+
+        <!-- Octant 05: Emotion -->
+        <button class="octant-card o-warm" id="octEmotion" data-octant="05">
+          <div class="octant-icon">❤️</div>
+          <div class="octant-info">
+            <span class="octant-name">Emotion</span>
+            <div class="octant-progress-wrap">
+              <div class="octant-progress-bar" id="pb-emotion" style="width: 0%"></div>
+            </div>
+            <span class="octant-belt-tag" id="bt-emotion">White Belt · Lvl 1</span>
+          </div>
+        </button>
+
+        <!-- Octant 06: Bridge -->
+        <button class="octant-card o-rose" id="octBridge" data-octant="06">
+          <div class="octant-icon">🤝</div>
+          <div class="octant-info">
+            <span class="octant-name">Bridge</span>
+            <div class="octant-progress-wrap">
+              <div class="octant-progress-bar" id="pb-bridge" style="width: 0%"></div>
+            </div>
+            <span class="octant-belt-tag" id="bt-bridge">White Belt · Lvl 1</span>
+          </div>
+        </button>
+
+        <!-- Octant 07: Movement -->
+        <button class="octant-card o-green" id="octMovement" data-octant="07">
+          <div class="octant-icon">🤸</div>
+          <div class="octant-info">
+            <span class="octant-name">Movement</span>
+            <div class="octant-progress-wrap">
+              <div class="octant-progress-bar" id="pb-movement" style="width: 0%"></div>
+            </div>
+            <span class="octant-belt-tag" id="bt-movement">White Belt · Lvl 1</span>
+          </div>
+        </button>
+
+        <!-- Octant 08: Nourishment -->
+        <button class="octant-card o-violet-deep" id="octNourish" data-octant="08">
+          <div class="octant-icon">🥗</div>
+          <div class="octant-info">
+            <span class="octant-name">Nourish</span>
+            <div class="octant-progress-wrap">
+              <div class="octant-progress-bar" id="pb-nourish" style="width: 0%"></div>
+            </div>
+            <span class="octant-belt-tag" id="bt-nourish">White Belt · Lvl 1</span>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <!-- ═══ PANEL: DASHBOARD (THUMBAGOTCHI) ═══ -->
+    <div class="tab-panel hidden" id="panelDashboard">
+      <div class="dashboard-hero">
+        <div class="vibe-check-ring">
+          <div class="thumbagotchi-wrap">
+            <div id="thumbagotchi" class="thumbagotchi-char">🦖</div>
+            <div class="thumbagotchi-aura"></div>
+          </div>
+          <svg viewBox="0 0 100 100" class="vibe-progress">
+            <circle cx="50" cy="50" r="45" class="vibe-track"></circle>
+            <circle cx="50" cy="50" r="45" class="vibe-bar" id="vibeBar"></circle>
+          </svg>
+        </div>
+        <div class="vibe-status">
+          <h2 class="vibe-title" id="vibeTitle">Glow State</h2>
+          <p class="vibe-desc" id="vibeDesc">You're radiating positive energy today!</p>
+        </div>
+      </div>
+
+      <div class="stats-grid-compact">
+        <div class="stat-card-compact">
+          <span class="stat-icon-s">🔥</span>
+          <span class="stat-val-s" id="dashStreak">0d</span>
+          <span class="stat-lab-s">STREAK</span>
+        </div>
+        <div class="stat-card-compact">
+          <span class="stat-icon-s">⭐</span>
+          <span class="stat-val-s" id="dashPoints">0</span>
+          <span class="stat-lab-s">VIBE</span>
+        </div>
+        <div class="stat-card-compact">
+          <span class="stat-icon-s">🥋</span>
+          <span class="stat-val-s" id="dashBelt">White</span>
+          <span class="stat-lab-s">BELT</span>
+        </div>
       </div>
     </div>
 
@@ -132,6 +249,7 @@
         <div class="profile-info">
           <div class="profile-username" id="profileUsername">Loading…</div>
           <div class="profile-handle" id="profileHandle"></div>
+          <div class="belt-pill" id="profileBeltPill">White Belt · Octant 01</div>
         </div>
       </div>
 

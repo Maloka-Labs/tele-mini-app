@@ -16,6 +16,56 @@ const initData  = tg?.initData ?? '';  // passed to backend for auth
 
 const API_BASE = 'https://mini-app-service-production.up.railway.app';
 
+/* ─── Thumb Fu & Vibe Config ─── */
+const BELTS = [
+  { name: 'White',  pts: 0,    color: 'belt-white',  char: '🦖' },
+  { name: 'Yellow', pts: 50,   color: 'belt-yellow', char: '🦕' },
+  { name: 'Orange', pts: 150,  color: 'belt-orange', char: '🐊' },
+  { name: 'Green',  pts: 300,  color: 'belt-green',  char: '🐢' },
+  { name: 'Blue',   pts: 600,  color: 'belt-blue',   char: '🐉' },
+  { name: 'Purple', pts: 1000, color: 'belt-purple', char: '🦚' },
+  { name: 'Brown',  pts: 2000, color: 'belt-brown',  char: '🦁' },
+  { name: 'Black',  pts: 4000, color: 'belt-black',  char: '🧙' },
+];
+
+function getBelt(points) {
+  for (let i = BELTS.length - 1; i >= 0; i--) {
+    if (points >= BELTS[i].pts) return BELTS[i];
+  }
+  return BELTS[0];
+}
+
+/* ─── Audio Controller ─── */
+const AUDIO_SOURCES = {
+  stillness: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', // Placeholder Zen
+  movement:  'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3', // Placeholder Nature
+  sonic:     'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3', // Placeholder Deep
+  wisdom:    'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3', // Placeholder Light
+  emotion:   'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3', // Placeholder Soft
+};
+
+let currentAudio = null;
+
+function playAmbient(type) {
+  const src = AUDIO_SOURCES[type];
+  if (!src) return;
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio = null;
+  }
+  currentAudio = new Audio(src);
+  currentAudio.loop = true;
+  currentAudio.volume = 0.4;
+  currentAudio.play().catch(e => console.warn('Audio play blocked:', e));
+}
+
+function stopAmbient() {
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio = null;
+  }
+}
+
 /* ─── Reward Toast ─── */
 const rewardToast      = document.getElementById('rewardToast');
 const rewardToastPts   = document.getElementById('rewardToastPts');
@@ -80,9 +130,8 @@ async function claimActivityReward(activity) {
       const info = ACTIVITY_LABELS[activity];
       showRewardToast(data.points_earned, info.label);
       // Mark badge as claimed
-      const badgeMap = { breathing: 'badgeBreathing', meditation: 'badgeMeditation', affirmation: 'badgeAffirmation', mood_check: 'badgeMood' };
-      const actMap   = { breathing: 'actBreathing', meditation: 'actMeditation', affirmation: 'actAffirmation', mood_check: 'actMood' };
-      document.getElementById(badgeMap[activity])?.closest('.activity-card')?.classList.add('claimed');
+      const actMap   = { breathing: 'octMovement', meditation: 'octStillness', affirmation: 'octWisdom', mood_check: 'octEmotion' };
+      document.getElementById(actMap[activity])?.classList.add('claimed');
     }
   } catch (e) {
     console.warn('[activity-reward]', e);
@@ -316,11 +365,17 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.classList.add('active');
 
     // Show corresponding panel (re-trigger animation)
-    const panel = document.getElementById(btn.dataset.tab);
+    const panelId = btn.dataset.tab;
+    const panel = document.getElementById(panelId);
     panel.classList.remove('hidden');
     panel.style.animation = 'none';
     panel.offsetHeight; // reflow to restart animation
     panel.style.animation = '';
+
+    // Refresh data if switching to Profile or Dashboard
+    if (panelId === 'panelProfile' || panelId === 'panelDashboard') {
+      loadProfile();
+    }
   });
 });
 
@@ -350,11 +405,17 @@ function openModal(id) {
   document.getElementById(id).classList.remove('hidden');
   overlay.classList.remove('hidden');
   document.body.style.overflow = 'hidden';
+  
+  // 🎵 Play audio based on modal
+  if (id === 'breathingModal') playAmbient('movement');
+  if (id === 'meditationModal') playAmbient('stillness');
+  if (id === 'affirmationModal') playAmbient('wisdom');
 }
 function closeModal(id) {
   document.getElementById(id).classList.add('hidden');
   overlay.classList.add('hidden');
   document.body.style.overflow = '';
+  stopAmbient();
 }
 overlay.addEventListener('click', () => {
   ['breathingModal','meditationModal','affirmationModal','moodModal','onboardingModal'].forEach(closeModal);
@@ -623,7 +684,8 @@ const breathRing     = document.getElementById('breathingRing');
 const startBreathBtn = document.getElementById('startBreathing');
 const closeBreathBtn = document.getElementById('closeBreathing');
 
-document.getElementById('actBreathing').addEventListener('click', () => openModal('breathingModal'));
+document.getElementById('octMovement')?.addEventListener('click', () => openModal('breathingModal'));
+document.getElementById('octSonic')?.addEventListener('click', () => openModal('breathingModal'));
 closeBreathBtn.addEventListener('click', () => { closeModal('breathingModal'); stopBreathing(); });
 
 const PHASES = [
@@ -688,7 +750,7 @@ const durBtns           = document.querySelectorAll('.dur-btn');
 
 let meditationTimer = null, meditationActive = false, meditationSecs = 300, selectedMins = 5;
 
-document.getElementById('actMeditation').addEventListener('click', () => openModal('meditationModal'));
+document.getElementById('octStillness')?.addEventListener('click', () => openModal('meditationModal'));
 closeMeditateBtn.addEventListener('click', () => { closeModal('meditationModal'); stopMeditation(); });
 
 durBtns.forEach(btn => {
@@ -764,7 +826,7 @@ function showAffirmation(idx) {
   }, 150);
 }
 
-document.getElementById('actAffirmation').addEventListener('click', () => {
+document.getElementById('octWisdom')?.addEventListener('click', () => {
   showAffirmation(affIdx);
   openModal('affirmationModal');
   // ⭐ Award affirmation reward on viewing
@@ -786,7 +848,7 @@ const moodResponses = {
   anxious: { msg: '💛 You\'re safe right now.',       tip: 'Try the box breathing exercise — it signals your nervous system to calm down.' },
 };
 
-document.getElementById('actMood').addEventListener('click', () => openModal('moodModal'));
+document.getElementById('octEmotion')?.addEventListener('click', () => openModal('moodModal'));
 document.getElementById('closeMood').addEventListener('click', () => closeModal('moodModal'));
 
 document.querySelectorAll('.mood-btn').forEach(btn => {
@@ -878,6 +940,82 @@ async function loadProfile() {
       feedEl.innerHTML = '<div class="feed-empty">No activity yet — complete a session to earn points!</div>';
       return;
     }
+
+    // ── Update Belts & Dashboard (NEW) ──
+    const currentBelt = getBelt(data.total_points);
+    const beltPill    = document.getElementById('profileBeltPill');
+    if (beltPill) {
+      beltPill.textContent = `${currentBelt.name} Belt · Level ${BELTS.indexOf(currentBelt) + 1}`;
+      beltPill.className = `belt-pill ${currentBelt.color}`;
+    }
+
+    // Dashboard Updates
+    const dashStreak = document.getElementById('dashStreak');
+    const dashPoints = document.getElementById('dashPoints');
+    const dashBelt   = document.getElementById('dashBelt');
+    const vibeTitle  = document.getElementById('vibeTitle');
+    const vibeDesc   = document.getElementById('vibeDesc');
+    const vibeBar    = document.getElementById('vibeBar');
+    const thumbaChar = document.getElementById('thumbagotchi');
+
+    if (dashStreak) dashStreak.textContent = data.streak + 'd';
+    if (dashPoints) dashPoints.textContent = data.total_points;
+    if (dashBelt) dashBelt.textContent = currentBelt.name;
+    if (thumbaChar) thumbaChar.textContent = currentBelt.char;
+
+    // Vibe Progress (0 to 100% of next belt tier)
+    const nextBelt = BELTS[BELTS.indexOf(currentBelt) + 1];
+    let percent = 100;
+    if (nextBelt) {
+      const tierSize = nextBelt.pts - currentBelt.pts;
+      const progress = data.total_points - currentBelt.pts;
+      percent = Math.min(Math.round((progress / tierSize) * 100), 99);
+    }
+    
+    if (vibeBar) {
+      const offset = 283 - (283 * (percent / 100)); // 283 is circle circumference
+      vibeBar.style.strokeDashoffset = offset;
+    }
+
+    if (vibeTitle) {
+      if (data.streak >= 3) {
+        vibeTitle.textContent = 'Glow State';
+        vibeDesc.textContent  = "You're radiating positive energy today!";
+      } else if (data.streak > 0) {
+        vibeTitle.textContent = 'Active Vibe';
+        vibeDesc.textContent  = "Keep it up! Your Thumbagotchi is feeling great.";
+      } else {
+        vibeTitle.textContent = 'Chill Mode';
+        vibeDesc.textContent  = "Time for a quick wellness session?";
+      }
+    }
+
+    // Update Dojo Octant Belts (NEW - Rule of 64)
+    const octantScores = data.octant_scores || {};
+    const octantIds = ['stillness', 'creation', 'sonic', 'wisdom', 'emotion', 'bridge', 'movement', 'nourish'];
+    
+    octantIds.forEach(id => {
+      const pts = octantScores[id] || 0;
+      const belt = getBelt(pts);
+      const nextBelt = BELTS[BELTS.indexOf(belt) + 1] || belt;
+      
+      const pb = document.getElementById(`pb-${id}`);
+      const bt = document.getElementById(`bt-${id}`);
+      
+      if (bt) {
+        bt.textContent = `${belt.name} Belt · Lvl ${BELTS.indexOf(belt) + 1}`;
+      }
+      
+      if (pb) {
+        let pct = 100;
+        if (nextBelt !== belt) {
+          const tierSize = nextBelt.pts - belt.pts;
+          const progress = pts - belt.pts;
+          pct = Math.min(Math.round((progress / tierSize) * 100), 100);
+        }
+        pb.style.width = `${pct}%`;
+      }
+    });
 
     feedEl.innerHTML = '';
     data.events.forEach((ev, i) => {
