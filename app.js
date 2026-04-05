@@ -93,6 +93,7 @@ function getScaledDuration(pts) {
 /* ─── Audio Controller ─── */
 let audioCatalogue = null;
 let currentAudio = null;
+window.currentVolume = 0.4; // Default volume per Doxa
 
 async function loadAudioCatalogue() {
   try {
@@ -132,7 +133,7 @@ function playAmbient(type, beltIdx = 0) {
   
   currentAudio = new Audio(src);
   currentAudio.loop = true;
-  currentAudio.volume = 0.4;
+  currentAudio.volume = window.currentVolume || 0.4;
   currentAudio.play().catch(e => console.warn('Audio play blocked:', e));
 
   // Update UI if trackTitle exists
@@ -149,6 +150,19 @@ function stopAmbient() {
     currentAudio = null;
   }
 }
+
+// ─── Volume Control Sync ───
+function handleVolumeChange(e) {
+  const val = parseFloat(e.target.value);
+  window.currentVolume = val;
+  if (currentAudio) currentAudio.volume = val;
+  
+  // Sync all sliders
+  document.querySelectorAll('.volume-slider').forEach(s => s.value = val);
+}
+
+document.getElementById('meditationVolume')?.addEventListener('input', handleVolumeChange);
+document.getElementById('sonicVolume')?.addEventListener('input', handleVolumeChange);
 
 /* ─── Reward Toast ─── */
 const rewardToast      = document.getElementById('rewardToast');
