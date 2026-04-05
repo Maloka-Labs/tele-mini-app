@@ -255,6 +255,22 @@ if (tgUser) {
 ══════════════════════════════════════════════ */
 const gurus = [
   {
+    id: 'lama',
+    name: 'Thumb Lama',
+    handle: '@thumb.lama',
+    emoji: '🧘‍♂️',
+    gradient: 'linear-gradient(135deg, #00e5cc 0%, #a855f7 100%)',
+    tagBg: '#00e5cc',
+    tagColor: '#ffffff',
+    followers: '1.2M',
+    bio: 'The Librarian and Host of the Dojo Den. Here to orchestrate your rebellion against the mindless scroll. Wellness is a quiet revolution.',
+    tags: ['☸️ Host', '🧘‍♂️ Master', '📜 Librarian', '✨ Rebellion'],
+    specialties: ['all'],
+    ctaText: 'Seek Guidance',
+    btnGradient: 'linear-gradient(135deg, var(--teal), var(--purple))',
+    welcomeMsg: "Welcome back to the Den, Rebel. ☸️ I am the Thumb Lama. Whether you seek stillness or movement, I am here to orchestrate your practice. How are you feeling in this moment?",
+  },
+  {
     id: 'arjun',
     name: 'Arjun Sharma',
     handle: '@arjun.wellness',
@@ -534,6 +550,68 @@ let activeGuru = null;
 const conversations = {};
 
 /* Open chat */
+/* ─── Phase 5: Agent Orchestration (Thumb Lama) ─── */
+function updateLamaNudge(data) {
+  const nudgeEl = document.getElementById('lamaNudge');
+  const nudgeText = document.getElementById('lamaNudgeText');
+  if (!nudgeEl || !nudgeText) return;
+
+  const octantScores = data.octant_scores || {};
+  const octants = ['stillness', 'creation', 'sonic', 'wisdom', 'emotion', 'bridge', 'movement', 'nourish'];
+  
+  // Find lowest score
+  let lowestOctant = 'stillness';
+  let minScore = 9999;
+  octants.forEach(o => {
+    if ((octantScores[o] || 0) < minScore) {
+      minScore = octantScores[o] || 0;
+      lowestOctant = o;
+    }
+  });
+
+  const nudges = {
+    stillness: "Your mind is racing, Rebel. Five minutes of Stillness?",
+    creation:  "The spark is low. Shall we create something today?",
+    sonic:     "The world is noisy. Retreat into a Sonic Haven.",
+    wisdom:    "A moment of Wisdom dissolves a day of confusion.",
+    emotion:   "Check your vibe. High-frequency emotions only.",
+    bridge:    "Service is wellness. Connect with a fellow Rebel.",
+    movement:  "Stagnant energy is the enemy. Move your body.",
+    nourish:   "Nourish your temple. What did you feed your soul?"
+  };
+
+  nudgeText.textContent = nudges[lowestOctant] || nudges.stillness;
+  nudgeEl.classList.remove('hidden');
+
+  // Trigger intake if not done
+  if (!localStorage.getItem('intake_done')) {
+    setTimeout(initiateThumbLamaIntake, 2000);
+  }
+}
+
+function openThumbLamaChat() {
+  const lama = gurus.find(g => g.id === 'lama');
+  if (lama) openChat(lama);
+}
+
+function initiateThumbLamaIntake() {
+  if (localStorage.getItem('intake_done')) return;
+  
+  const lama = gurus.find(g => g.id === 'lama');
+  if (!lama) return;
+
+  // Visual Nudge highlight
+  const nudgeEl = document.getElementById('lamaNudge');
+  if (nudgeEl) {
+    nudgeEl.style.boxShadow = '0 0 30px var(--teal)';
+    setTimeout(() => {
+      openThumbLamaChat();
+      // We'll mark as done for now to prevent loops, but in production this follows a conversation
+      localStorage.setItem('intake_done', 'true');
+    }, 1500);
+  }
+}
+
 function openChat(guru) {
   activeGuru = guru;
 
@@ -1225,6 +1303,9 @@ async function loadProfile() {
 
       // ─── Update SVG State (Phase 3) ───
       updateThumbagotchiUI(data.total_points, data.streak, isHibernating);
+
+      // ─── Update Lama Nudge (Phase 5) ───
+      updateLamaNudge(data);
     }
 
     // Update Dojo Octant Belts (NEW - Rule of 64)
