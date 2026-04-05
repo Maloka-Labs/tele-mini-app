@@ -91,27 +91,56 @@ function getScaledDuration(pts) {
 }
 
 /* ─── Audio Controller ─── */
-const AUDIO_SOURCES = {
-  stillness: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', // Placeholder Zen
-  movement:  'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3', // Placeholder Nature
-  sonic:     'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3', // Placeholder Deep
-  wisdom:    'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3', // Placeholder Light
-  emotion:   'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3', // Placeholder Soft
-};
-
+let audioCatalogue = null;
 let currentAudio = null;
 
-function playAmbient(type) {
-  const src = AUDIO_SOURCES[type];
+async function loadAudioCatalogue() {
+  try {
+    const res = await fetch('./audio_catalogue.json');
+    audioCatalogue = await res.json();
+  } catch (e) {
+    console.error('[audio-catalogue]', e);
+  }
+}
+loadAudioCatalogue();
+
+function playAmbient(type, beltIdx = 0) {
+  let src = '';
+  let trackTitle = '';
+
+  if (audioCatalogue && audioCatalogue[type]) {
+    const track = audioCatalogue[type][beltIdx] || audioCatalogue[type][0];
+    src = track.url;
+    trackTitle = track.title;
+  } else {
+    // Fallback if catalogue not loaded
+    const fallbacks = {
+      stillness: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+      movement:  'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
+      sonic:     'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3',
+      wisdom:    'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3',
+      emotion:   'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3',
+    };
+    src = fallbacks[type];
+  }
+
   if (!src) return;
   if (currentAudio) {
     currentAudio.pause();
     currentAudio = null;
   }
+  
   currentAudio = new Audio(src);
   currentAudio.loop = true;
   currentAudio.volume = 0.4;
   currentAudio.play().catch(e => console.warn('Audio play blocked:', e));
+
+  // Update UI if trackTitle exists
+  const infoEl = document.getElementById(type === 'sonic' ? 'sonicAudioInfo' : 'meditationAudioInfo');
+  if (infoEl) {
+    infoEl.textContent = trackTitle ? `🎵 ${trackTitle}` : '';
+    infoEl.classList.remove('hidden');
+  }
 }
 
 function stopAmbient() {
@@ -866,6 +895,8 @@ startMeditateBtn.addEventListener('click', () => {
   meditationOrb.classList.add('pulsing');
   meditationInstEl.textContent = 'Focus on your breath…';
   startMeditateBtn.textContent = '⏹  Stop Session';
+  const pts = window.currentOctantScores?.stillness || 0;
+  playAmbient('stillness', BELTS.indexOf(getBelt(pts)));
   meditationTimer = setInterval(() => {
     meditationSecs--;
     meditationTimeEl.textContent = formatTime(meditationSecs);
@@ -996,7 +1027,8 @@ startSonicBtn.addEventListener('click', () => {
   sonicActive = true;
   sonicOrb.classList.add('pulsing');
   startSonicBtn.textContent = '⏹  Stop Bath';
-  playAmbient('sonic');
+  const pts = window.currentOctantScores?.sonic || 0;
+  playAmbient('sonic', BELTS.indexOf(getBelt(pts)));
   sonicTimer = setInterval(() => {
     sonicSecs--;
     sonicTimeEl.textContent = formatTime(sonicSecs);

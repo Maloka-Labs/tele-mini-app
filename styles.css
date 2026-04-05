@@ -1795,4 +1795,18 @@ body {
 .belt-brown  { background: #a52a2a !important; color: #fff !important; }
 .belt-black  { background: #1a1a1a !important; color: var(--teal) !important; border: 1px solid var(--teal) !important; }
 
+/* ═══════════════════════════════
+   AUDIO INFO
+   ═══════════════════════════════ */
+.audio-info {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--teal);
+  background: var(--teal-dim);
+  padding: 4px 12px;
+  border-radius: 20px;
+  margin-bottom: -4px;
+  animation: fadeIn 0.5s ease;
+}
+
 

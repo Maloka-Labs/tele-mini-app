@@ -1,0 +1,82 @@
+{
+  "stillness": [
+    { "belt": "White", "duration": 5, "title": "White Zen Morning", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
+    { "belt": "Yellow", "duration": 6, "title": "Yellow Sunlight Meditation", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
+    { "belt": "Orange", "duration": 7, "title": "Orange Sunset Clarity", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
+    { "belt": "Green", "duration": 8, "title": "Green Forest Whisper", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
+    { "belt": "Blue", "duration": 9, "title": "Blue Ocean Depths", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
+    { "belt": "Purple", "duration": 10, "title": "Purple Twilight Bliss", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
+    { "belt": "Brown", "duration": 11, "title": "Brown Earth Grounding", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
+    { "belt": "Black", "duration": 12, "title": "Black Void Transcendence", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" }
+  ],
+  "creation": [
+    { "belt": "White", "duration": 5, "title": "White Creation Spark", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
+    { "belt": "Yellow", "duration": 6, "title": "Yellow Canvas Flow", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
+    { "belt": "Orange", "duration": 7, "title": "Orange Clay Shaping", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
+    { "belt": "Green", "duration": 8, "title": "Green Sprout Growth", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
+    { "belt": "Blue", "duration": 9, "title": "Blue Ink Rivers", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
+    { "belt": "Purple", "duration": 10, "title": "Purple Visionary Flow", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
+    { "belt": "Brown", "duration": 11, "title": "Brown Foundation Craft", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
+    { "belt": "Black", "duration": 12, "title": "Black Masterpiece Silence", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" }
+  ],
+  "sonic": [
+    { "belt": "White", "duration": 5, "title": "White Noise Haven", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" },
+    { "belt": "Yellow", "duration": 6, "title": "Yellow Frequency Shift", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" },
+    { "belt": "Orange", "duration": 7, "title": "Orange Resonance Glow", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" },
+    { "belt": "Green", "duration": 8, "title": "Green Harmonic Balance", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" },
+    { "belt": "Blue", "duration": 9, "title": "Blue Sonic Ripple", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" },
+    { "belt": "Purple", "duration": 10, "title": "Purple Deep Sound Bath", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" },
+    { "belt": "Brown", "duration": 11, "title": "Brown Lo-Fi Earth", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" },
+    { "belt": "Black", "duration": 12, "title": "Black Absolute Pitch", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" }
+  ],
+  "wisdom": [
+    { "belt": "White", "duration": 5, "title": "White Wisdom Scroll", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" },
+    { "belt": "Yellow", "duration": 6, "title": "Yellow Insight Ray", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" },
+    { "belt": "Orange", "duration": 7, "title": "Orange Reflective Glow", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" },
+    { "belt": "Green", "duration": 8, "title": "Green Growth Lesson", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" },
+    { "belt": "Blue", "duration": 9, "title": "Blue Deep Philosophy", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" },
+    { "belt": "Purple", "duration": 10, "title": "Purple Ancient Echoes", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" },
+    { "belt": "Brown", "duration": 11, "title": "Brown Practical Wisdom", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" },
+    { "belt": "Black", "duration": 12, "title": "Black Universal Oneness", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" }
+  ],
+  "emotion": [
+    { "belt": "White", "duration": 5, "title": "White Pure Feeling", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3" },
+    { "belt": "Yellow", "duration": 6, "title": "Yellow Sunny Temper", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3" },
+    { "belt": "Orange", "duration": 7, "title": "Orange Warm Release", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3" },
+    { "belt": "Green", "duration": 8, "title": "Green Heartbeat Rhythm", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3" },
+    { "belt": "Blue", "duration": 9, "title": "Blue Tears of Joy", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3" },
+    { "belt": "Purple", "duration": 10, "title": "Purple Soul Vibration", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3" },
+    { "belt": "Brown", "duration": 11, "title": "Brown Earthly Comfort", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3" },
+    { "belt": "Black", "duration": 12, "title": "Black Eternal Peace", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3" }
+  ],
+  "bridge": [
+    { "belt": "White", "duration": 5, "title": "White Bridge Crossing", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
+    { "belt": "Yellow", "duration": 6, "title": "Yellow Bridge Unity", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
+    { "belt": "Orange", "duration": 7, "title": "Orange Warm Greeting", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
+    { "belt": "Green", "duration": 8, "title": "Green Collaborative Echo", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
+    { "belt": "Blue", "duration": 9, "title": "Blue Communal Flow", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
+    { "belt": "Purple", "duration": 10, "title": "Purple Sacred Bond", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
+    { "belt": "Brown", "duration": 11, "title": "Brown Shared Earth", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
+    { "belt": "Black", "duration": 12, "title": "Black Soul Fusion", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" }
+  ],
+  "movement": [
+    { "belt": "White", "duration": 5, "title": "White Breath Wave", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
+    { "belt": "Yellow", "duration": 6, "title": "Yellow Flex Motion", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
+    { "belt": "Orange", "duration": 7, "title": "Orange Dynamic Pulse", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
+    { "belt": "Green", "duration": 8, "title": "Green Forest Flow", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
+    { "belt": "Blue", "duration": 9, "title": "Blue Ocean Kriya", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
+    { "belt": "Purple", "duration": 10, "title": "Purple Astral Stretch", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
+    { "belt": "Brown", "duration": 11, "title": "Brown Earthy Dance", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
+    { "belt": "Black", "duration": 12, "title": "Black Still Movement", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" }
+  ],
+  "nourish": [
+    { "belt": "White", "duration": 5, "title": "White Sip Clarity", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" },
+    { "belt": "Yellow", "duration": 6, "title": "Yellow Harvest Warmth", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" },
+    { "belt": "Orange", "duration": 7, "title": "Orange Honey Sensation", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" },
+    { "belt": "Green", "duration": 8, "title": "Green Leafy Vitality", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" },
+    { "belt": "Blue", "duration": 9, "title": "Blue Water Refresh", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" },
+    { "belt": "Purple", "duration": 10, "title": "Purple Royal Nectar", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" },
+    { "belt": "Brown", "duration": 11, "title": "Brown Root Nutrients", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" },
+    { "belt": "Black", "duration": 12, "title": "Black Absolute Sustenance", "artist": "Zen Master", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" }
+  ]
+}
