@@ -35,6 +35,15 @@ function getBelt(points) {
   return BELTS[0];
 }
 
+/* ─── Scaled Duration Logic (Thumb Fu Scaling) ─── */
+function getScaledDuration(pts) {
+  const belt = getBelt(pts);
+  const beltIdx = BELTS.indexOf(belt);
+  // Doxa Principle: scaling from 5 to 12 minutes
+  // White (0) -> 5m, Black (7) -> 12m
+  return 5 + beltIdx;
+}
+
 /* ─── Audio Controller ─── */
 const AUDIO_SOURCES = {
   stillness: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', // Placeholder Zen
@@ -115,6 +124,10 @@ const ACTIVITY_LABELS = {
   meditation:  { label: 'Meditation Complete!',    pts: 20 },
   affirmation: { label: 'Daily Affirmation!',      pts: 5  },
   mood_check:  { label: 'Mood Check Done!',         pts: 5  },
+  creation:    { label: 'Creative Spark Ignited!',  pts: 10 },
+  nourish:     { label: 'Mindful Nourishment!',     pts: 10 },
+  bridge:      { label: 'Connection Bridge Built!', pts: 10 },
+  sonic:       { label: 'Sonic Haven Reached!',    pts: 15 },
 };
 
 async function claimActivityReward(activity) {
@@ -684,8 +697,28 @@ const breathRing     = document.getElementById('breathingRing');
 const startBreathBtn = document.getElementById('startBreathing');
 const closeBreathBtn = document.getElementById('closeBreathing');
 
-document.getElementById('octMovement')?.addEventListener('click', () => openModal('breathingModal'));
-document.getElementById('octSonic')?.addEventListener('click', () => openModal('breathingModal'));
+document.getElementById('octStillness')?.addEventListener('click', () => {
+  const pts = window.currentOctantScores?.stillness || 0;
+  selectedMins = getScaledDuration(pts);
+  meditationSecs = selectedMins * 60;
+  meditationTimeEl.textContent = formatTime(meditationSecs);
+  durBtns.forEach(b => {
+    b.classList.toggle('active', +b.dataset.mins === selectedMins);
+    b.style.display = (+b.dataset.mins === selectedMins) ? 'inline-block' : 'none'; // Lock to scaled duration
+  });
+  openModal('meditationModal');
+});
+
+document.getElementById('octMovement')?.addEventListener('click', () => {
+  const pts = window.currentOctantScores?.movement || 0;
+  const mins = getScaledDuration(pts);
+  // Rule: each 4-cycle takes ~16s. 1 min ≈ 4 cycles.
+  // We'll set cycle goal = mins * 1.5 (approx 6-18 cycles)
+  window.breathCycleGoal = Math.max(3, Math.floor(mins * 1.5));
+  breathCyclesEl.innerHTML = `Goal: <strong>${window.breathCycleGoal} cycles</strong>`;
+  openModal('breathingModal');
+});
+
 closeBreathBtn.addEventListener('click', () => { closeModal('breathingModal'); stopBreathing(); });
 
 const PHASES = [
@@ -728,9 +761,9 @@ function tick() {
     phaseIdx = (phaseIdx + 1) % PHASES.length;
     if (phaseIdx === 0) {
       breathCycles++;
-      breathCyclesEl.innerHTML = `Cycles completed: <strong>${breathCycles}</strong>`;
-      // ⭐ Award breathing reward after 3 cycles
-      if (breathCycles === 3) {
+      breathCyclesEl.innerHTML = `Cycles completed: <strong>${breathCycles}</strong> / ${window.breathCycleGoal || 3}`;
+      // ⭐ Award breathing reward after goal met
+      if (breathCycles === (window.breathCycleGoal || 3)) {
         claimActivityReward('breathing');
       }
     }
@@ -825,6 +858,108 @@ function showAffirmation(idx) {
     affTextEl.style.opacity = '1';
   }, 150);
 }
+
+/* ══════════════════════════════════════════════
+   🎨 CREATION STATION
+   🤝 BRIDGE SPACE
+   🥗 NOURISHMENT GARDEN
+══════════════════════════════════════════════ */
+const creationPrompts = [
+  "Write 3 things you're grateful for today.",
+  "Doodle a symbol that represents your current state.",
+  "Describe a place where you feel completely at peace.",
+  "If your joy was a color, what would it be and why?"
+];
+const bridgePrompts = [
+  "Send a 'thinking of you' message to someone you haven't spoken to in a while.",
+  "What is one healthy boundary you've set recently?",
+  "Practice active listening in your next conversation.",
+  "Express appreciation to a colleague or friend today."
+];
+const nourishPrompts = [
+  "Drink a glass of water slowly, noticed the sensation.",
+  "Eat one meal today without any digital distractions.",
+  "What is one locally sourced food you can enjoy this week?",
+  "Notice the textures and flavors of your next snack."
+];
+
+document.getElementById('octCreation')?.addEventListener('click', () => {
+  document.getElementById('creationPrompt').textContent = creationPrompts[Math.floor(Math.random() * creationPrompts.length)];
+  openModal('creationModal');
+});
+document.getElementById('closeCreation').addEventListener('click', () => closeModal('creationModal'));
+document.getElementById('completeCreation').addEventListener('click', () => {
+  claimActivityReward('creation');
+  closeModal('creationModal');
+});
+
+document.getElementById('octBridge')?.addEventListener('click', () => {
+  document.getElementById('bridgePrompt').textContent = bridgePrompts[Math.floor(Math.random() * bridgePrompts.length)];
+  openModal('bridgeModal');
+});
+document.getElementById('closeBridge').addEventListener('click', () => closeModal('bridgeModal'));
+document.getElementById('completeBridge').addEventListener('click', () => {
+  claimActivityReward('bridge');
+  closeModal('bridgeModal');
+});
+
+document.getElementById('octNourish')?.addEventListener('click', () => {
+  document.getElementById('nourishPrompt').textContent = nourishPrompts[Math.floor(Math.random() * nourishPrompts.length)];
+  openModal('nourishModal');
+});
+document.getElementById('closeNourish').addEventListener('click', () => closeModal('nourishModal'));
+document.getElementById('completeNourish').addEventListener('click', () => {
+  claimActivityReward('nourish');
+  closeModal('nourishModal');
+});
+
+/* ══════════════════════════════════════════════
+   🎵 SONIC HAVEN
+══════════════════════════════════════════════ */
+const sonicTimeEl = document.getElementById('sonicTime');
+const sonicOrb    = document.getElementById('sonicOrb');
+const startSonicBtn = document.getElementById('startSonic');
+let sonicTimer = null, sonicActive = false, sonicSecs = 300;
+
+document.getElementById('octSonic')?.addEventListener('click', () => {
+  const pts = window.currentOctantScores?.sonic || 0;
+  sonicSecs = getScaledDuration(pts) * 60;
+  sonicTimeEl.textContent = formatTime(sonicSecs);
+  openModal('sonicModal');
+});
+document.getElementById('closeSonic').addEventListener('click', () => {
+  closeModal('sonicModal');
+  clearInterval(sonicTimer);
+  sonicActive = false;
+  sonicOrb.classList.remove('pulsing');
+  startSonicBtn.textContent = 'Begin Sound Bath';
+});
+
+startSonicBtn.addEventListener('click', () => {
+  if (sonicActive) {
+    clearInterval(sonicTimer);
+    sonicActive = false;
+    sonicOrb.classList.remove('pulsing');
+    startSonicBtn.textContent = 'Begin Sound Bath';
+    return;
+  }
+  sonicActive = true;
+  sonicOrb.classList.add('pulsing');
+  startSonicBtn.textContent = '⏹  Stop Bath';
+  playAmbient('sonic');
+  sonicTimer = setInterval(() => {
+    sonicSecs--;
+    sonicTimeEl.textContent = formatTime(sonicSecs);
+    if (sonicSecs <= 0) {
+      clearInterval(sonicTimer);
+      sonicActive = false;
+      sonicOrb.classList.remove('pulsing');
+      claimActivityReward('sonic');
+      stopAmbient();
+      startSonicBtn.textContent = 'Complete! ✨';
+    }
+  }, 1000);
+});
 
 document.getElementById('octWisdom')?.addEventListener('click', () => {
   showAffirmation(affIdx);
@@ -978,20 +1113,40 @@ async function loadProfile() {
     }
 
     if (vibeTitle) {
-      if (data.streak >= 3) {
-        vibeTitle.textContent = 'Glow State';
-        vibeDesc.textContent  = "You're radiating positive energy today!";
-      } else if (data.streak > 0) {
-        vibeTitle.textContent = 'Active Vibe';
-        vibeDesc.textContent  = "Keep it up! Your Thumbagotchi is feeling great.";
+      // Hibernation Check (Doxa: rest is wellness)
+      const lastLoginDate = data.last_login_date ? new Date(data.last_login_date) : null;
+      const today = new Date();
+      const isHibernating = lastLoginDate && (today - lastLoginDate) > (24 * 60 * 60 * 1000);
+
+      const hibBadge = document.getElementById('hibernationBadge');
+      const hibDesc  = document.getElementById('hibernationDesc');
+
+      if (isHibernating) {
+        vibeTitle.textContent = 'Hibernation';
+        vibeDesc.textContent  = '';
+        if (hibBadge) hibBadge.classList.remove('hidden');
+        if (hibDesc)  hibDesc.classList.remove('hidden');
+        thumbaChar.textContent = '💤'; // Sleep state
       } else {
-        vibeTitle.textContent = 'Chill Mode';
-        vibeDesc.textContent  = "Time for a quick wellness session?";
+        if (hibBadge) hibBadge.classList.add('hidden');
+        if (hibDesc)  hibDesc.classList.add('hidden');
+        
+        if (data.streak >= 3) {
+          vibeTitle.textContent = 'Glow State';
+          vibeDesc.textContent  = "You're radiating positive energy today!";
+        } else if (data.streak > 0) {
+          vibeTitle.textContent = 'Active Vibe';
+          vibeDesc.textContent  = "Keep it up! Your Thumbagotchi is feeling great.";
+        } else {
+          vibeTitle.textContent = 'Chill Mode';
+          vibeDesc.textContent  = "Time for a quick wellness session?";
+        }
       }
     }
 
     // Update Dojo Octant Belts (NEW - Rule of 64)
-    const octantScores = data.octant_scores || {};
+    window.currentOctantScores = data.octant_scores || {};
+    const octantScores = window.currentOctantScores;
     const octantIds = ['stillness', 'creation', 'sonic', 'wisdom', 'emotion', 'bridge', 'movement', 'nourish'];
     
     octantIds.forEach(id => {
@@ -1048,9 +1203,9 @@ document.getElementById('tabProfile')?.addEventListener('click', loadProfile);
    ONBOARDING
 ══════════════════════════════════════════════ */
 const onboardingSteps = [
-  { icon: '✨', title: 'Welcome to Good Vibes', desc: 'Your personal, AI-powered wellness sanctuary right inside Telegram. Let\'s take a quick tour.' },
-  { icon: '🧘', title: 'AI Wellness Gurus', desc: 'Chat with specialized AI gurus for yoga, sleep, stress, and more. They respond like real wellness experts.' },
-  { icon: '🌿', title: 'Wellness Activities', desc: 'Take a break with quick activities like box breathing, meditation, or daily affirmations.' }
+  { icon: '☯', title: 'The Thumb Rebellion', desc: 'Welcome to the 85%. You walked away from mindless tapping. Now, build a wellness practice that rewards your time on Earth.' },
+  { icon: '☸', title: 'The Dojo Den', desc: 'Master 8 domains of wellbeing through the 8-belt Thumb Fu system. Progression that builds real capability, not just stats.' },
+  { icon: '🦖', title: 'Your Thumbagotchi', desc: 'A living guide that mirrors your practice. It hibernates when you rest and glows when you grow. Embodied data, felt not read.' }
 ];
 
 let onboardingIndex = 0;

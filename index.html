@@ -105,7 +105,8 @@
         <button class="octant-card o-violet" id="octStillness" data-octant="01">
           <div class="octant-icon">🧘</div>
           <div class="octant-info">
-            <span class="octant-name">Stillness</span>
+            <span class="octant-name">Stillness Sanctuary</span>
+            <span class="octant-desc-sub text-xs opacity-70">Meditation & Breathwork</span>
             <div class="octant-progress-wrap">
               <div class="octant-progress-bar" id="pb-stillness" style="width: 0%"></div>
             </div>
@@ -117,7 +118,8 @@
         <button class="octant-card o-coral" id="octCreation" data-octant="02">
           <div class="octant-icon">🎨</div>
           <div class="octant-info">
-            <span class="octant-name">Creation</span>
+            <span class="octant-name">Creation Station</span>
+            <span class="octant-desc-sub text-xs opacity-70">Creative Expression</span>
             <div class="octant-progress-wrap">
               <div class="octant-progress-bar" id="pb-creation" style="width: 0%"></div>
             </div>
@@ -127,9 +129,10 @@
 
         <!-- Octant 03: Sonic -->
         <button class="octant-card o-green-glow" id="octSonic" data-octant="03">
-          <div class="octant-icon">🔊</div>
+          <div class="octant-icon">🎵</div>
           <div class="octant-info">
-            <span class="octant-name">Sonic</span>
+            <span class="octant-name">Sonic Haven</span>
+            <span class="octant-desc-sub text-xs opacity-70">Sound Healing</span>
             <div class="octant-progress-wrap">
               <div class="octant-progress-bar" id="pb-sonic" style="width: 0%"></div>
             </div>
@@ -139,9 +142,10 @@
 
         <!-- Octant 04: Wisdom -->
         <button class="octant-card o-cyan" id="octWisdom" data-octant="04">
-          <div class="octant-icon">📚</div>
+          <div class="octant-icon">📖</div>
           <div class="octant-info">
-            <span class="octant-name">Wisdom</span>
+            <span class="octant-name">Wisdom Corner</span>
+            <span class="octant-desc-sub text-xs opacity-70">Learning & Philosophy</span>
             <div class="octant-progress-wrap">
               <div class="octant-progress-bar" id="pb-wisdom" style="width: 0%"></div>
             </div>
@@ -153,7 +157,8 @@
         <button class="octant-card o-warm" id="octEmotion" data-octant="05">
           <div class="octant-icon">❤️</div>
           <div class="octant-info">
-            <span class="octant-name">Emotion</span>
+            <span class="octant-name">Emotion Transmutation</span>
+            <span class="octant-desc-sub text-xs opacity-70">Emotional Processing</span>
             <div class="octant-progress-wrap">
               <div class="octant-progress-bar" id="pb-emotion" style="width: 0%"></div>
             </div>
@@ -165,7 +170,8 @@
         <button class="octant-card o-rose" id="octBridge" data-octant="06">
           <div class="octant-icon">🤝</div>
           <div class="octant-info">
-            <span class="octant-name">Bridge</span>
+            <span class="octant-name">Bridge Space</span>
+            <span class="octant-desc-sub text-xs opacity-70">Social Connection</span>
             <div class="octant-progress-wrap">
               <div class="octant-progress-bar" id="pb-bridge" style="width: 0%"></div>
             </div>
@@ -177,7 +183,8 @@
         <button class="octant-card o-green" id="octMovement" data-octant="07">
           <div class="octant-icon">🤸</div>
           <div class="octant-info">
-            <span class="octant-name">Movement</span>
+            <span class="octant-name">Movement Dojo</span>
+            <span class="octant-desc-sub text-xs opacity-70">Yoga & Movement</span>
             <div class="octant-progress-wrap">
               <div class="octant-progress-bar" id="pb-movement" style="width: 0%"></div>
             </div>
@@ -189,7 +196,8 @@
         <button class="octant-card o-violet-deep" id="octNourish" data-octant="08">
           <div class="octant-icon">🥗</div>
           <div class="octant-info">
-            <span class="octant-name">Nourish</span>
+            <span class="octant-name">Nourishment Garden</span>
+            <span class="octant-desc-sub text-xs opacity-70">Mindful Nutrition</span>
             <div class="octant-progress-wrap">
               <div class="octant-progress-bar" id="pb-nourish" style="width: 0%"></div>
             </div>
@@ -205,6 +213,7 @@
         <div class="vibe-check-ring">
           <div class="thumbagotchi-wrap">
             <div id="thumbagotchi" class="thumbagotchi-char">🦖</div>
+            <div id="hibernationBadge" class="hibernation-badge hidden">💤 Hibernating</div>
             <div class="thumbagotchi-aura"></div>
           </div>
           <svg viewBox="0 0 100 100" class="vibe-progress">
@@ -215,6 +224,7 @@
         <div class="vibe-status">
           <h2 class="vibe-title" id="vibeTitle">Glow State</h2>
           <p class="vibe-desc" id="vibeDesc">You're radiating positive energy today!</p>
+          <p class="hibernation-desc hidden" id="hibernationDesc">Rest is wellness. Your guide is recharging with you.</p>
         </div>
       </div>
 
@@ -271,8 +281,12 @@
       <div class="profile-section-title">How to Earn Points</div>
       <div class="profile-rewards-info">
         <div class="reward-info-row"><span>🔐 Daily Login</span><span class="reward-pts">+10 pts</span></div>
-        <div class="reward-info-row"><span>🌬️ Box Breathing (3+ cycles)</span><span class="reward-pts">+15 pts</span></div>
-        <div class="reward-info-row"><span>🧘 Meditation (full session)</span><span class="reward-pts">+20 pts</span></div>
+        <div class="reward-info-row"><span>🌬️ Box Breathing (Thumb Fu Scaled)</span><span class="reward-pts">+15 pts</span></div>
+        <div class="reward-info-row"><span>🧘 Meditation (Thumb Fu Scaled)</span><span class="reward-pts">+20 pts</span></div>
+        <div class="reward-info-row"><span>🎨 Creation Prompt</span><span class="reward-pts">+10 pts</span></div>
+        <div class="reward-info-row"><span>🎵 Sound Bath</span><span class="reward-pts">+15 pts</span></div>
+        <div class="reward-info-row"><span>🤝 Connection Bridge</span><span class="reward-pts">+10 pts</span></div>
+        <div class="reward-info-row"><span>🥗 Mindful Nourishment</span><span class="reward-pts">+10 pts</span></div>
         <div class="reward-info-row"><span>✨ Daily Affirmation</span><span class="reward-pts">+5 pts</span></div>
         <div class="reward-info-row"><span>💜 Mood Check</span><span class="reward-pts">+5 pts</span></div>
       </div>
@@ -402,7 +416,61 @@
       </div>
     </div>
 
-    <!-- ── Onboarding Modal ── -->
+    <!-- ── Creation Modal ── -->
+    <div id="creationModal" class="modal hidden" role="dialog" aria-label="Creation Station">
+      <div class="modal-content">
+        <button class="modal-close" id="closeCreation">✕</button>
+        <h3 class="modal-title">🎨 Creation Station</h3>
+        <p class="modal-subtitle">Channel your energy into making, not consuming</p>
+        <div class="activity-prompt-card">
+          <p id="creationPrompt" class="prompt-text">Loading inspiration…</p>
+        </div>
+        <button id="completeCreation" class="btn-primary btn-full">I've Created Something ✨</button>
+      </div>
+    </div>
+
+    <!-- ── Bridge Modal ── -->
+    <div id="bridgeModal" class="modal hidden" role="dialog" aria-label="Bridge Space">
+      <div class="modal-content">
+        <button class="modal-close" id="closeBridge">✕</button>
+        <h3 class="modal-title">🤝 Bridge Space</h3>
+        <p class="modal-subtitle">Relational wellness and connection</p>
+        <div class="activity-prompt-card">
+          <p id="bridgePrompt" class="prompt-text">Loading connection prompt…</p>
+        </div>
+        <button id="completeBridge" class="btn-primary btn-full">I've Built a Bridge 🤝</button>
+      </div>
+    </div>
+
+    <!-- ── Nourish Modal ── -->
+    <div id="nourishModal" class="modal hidden" role="dialog" aria-label="Nourishment Garden">
+      <div class="modal-content">
+        <button class="modal-close" id="closeNourish">✕</button>
+        <h3 class="modal-title">🥗 Nourishment Garden</h3>
+        <p class="modal-subtitle">Mindful consumption and hydration</p>
+        <div class="activity-prompt-card">
+          <p id="nourishPrompt" class="prompt-text">Loading nourishment tip…</p>
+        </div>
+        <button id="completeNourish" class="btn-primary btn-full">I feel Nourished 🥗</button>
+      </div>
+    </div>
+
+    <!-- ── Sonic Modal ── -->
+    <div id="sonicModal" class="modal hidden" role="dialog" aria-label="Sonic Haven">
+      <div class="modal-content">
+        <button class="modal-close" id="closeSonic">✕</button>
+        <h3 class="modal-title">🎵 Sonic Haven</h3>
+        <p class="modal-subtitle">Sound-based healing and active listening</p>
+        <div class="meditation-wrap">
+          <div class="meditation-orb" id="sonicOrb" style="background: var(--accent-green-soft);">
+            <div class="orb-inner" style="background: var(--accent-green);"></div>
+          </div>
+          <div class="meditation-time" id="sonicTime">5:00</div>
+          <p class="meditation-instruction" id="sonicInstruction">Prepare for a Sound Bath</p>
+        </div>
+        <button id="startSonic" class="btn-primary btn-full">Begin Sound Bath</button>
+      </div>
+    </div>
     <div id="onboardingModal" class="modal hidden" role="dialog" aria-label="Welcome Guide">
       <div class="modal-content" style="text-align: center;">
         <div class="onboarding-icon" id="onboardingIcon" style="font-size: 48px; margin-bottom: 16px;">✨</div>
