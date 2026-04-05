@@ -35,6 +35,52 @@ function getBelt(points) {
   return BELTS[0];
 }
 
+/* ─── Thumbagotchi SVG Controller ─── */
+function updateThumbagotchiUI(pts, streak, hibernating) {
+    const svg = document.getElementById('thumbagotchiSVG');
+    const body = document.getElementById('tgBody');
+    const aura = document.getElementById('tgAura');
+    if (!svg || !body) return;
+
+    const belt = getBelt(pts);
+    const beltIdx = BELTS.indexOf(belt);
+
+    // Color Logic: Use belt colors or derived HSL for smoothing
+    const colors = [
+        '#ffffff', // White
+        '#ffd700', // Yellow
+        '#ffa500', // Orange
+        '#22c55e', // Green
+        '#3b82f6', // Blue
+        '#a855f7', // Purple
+        '#a52a2a', // Brown
+        '#00e5cc'  // Black (Teal accent)
+    ];
+    const bodyColor = colors[beltIdx] || '#00e5cc';
+    
+    // Set variables or direct attributes
+    body.style.fill = bodyColor;
+    if (aura) {
+        aura.style.opacity = 0.2 + (streak * 0.05); // More streak = more glow
+        document.documentElement.style.setProperty('--tg-aura-color', bodyColor + '66');
+    }
+
+    // Expression Logic
+    const wrap = svg.parentElement;
+    if (hibernating) {
+        wrap.classList.add('hibernating');
+    } else {
+        wrap.classList.remove('hibernating');
+    }
+}
+
+function reactToSuccess() {
+    const svg = document.getElementById('thumbagotchiSVG');
+    if (!svg) return;
+    svg.classList.add('react-success');
+    setTimeout(() => svg.classList.remove('react-success'), 800);
+}
+
 /* ─── Scaled Duration Logic (Thumb Fu Scaling) ─── */
 function getScaledDuration(pts) {
   const belt = getBelt(pts);
@@ -142,6 +188,10 @@ async function claimActivityReward(activity) {
     if (data.ok && !data.already_claimed && data.points_earned > 0) {
       const info = ACTIVITY_LABELS[activity];
       showRewardToast(data.points_earned, info.label);
+      
+      // Phase 3: Trigger visual reaction
+      reactToSuccess();
+
       // Mark badge as claimed
       const actMap   = { breathing: 'octMovement', meditation: 'octStillness', affirmation: 'octWisdom', mood_check: 'octEmotion' };
       document.getElementById(actMap[activity])?.classList.add('claimed');
@@ -1091,12 +1141,11 @@ async function loadProfile() {
     const vibeTitle  = document.getElementById('vibeTitle');
     const vibeDesc   = document.getElementById('vibeDesc');
     const vibeBar    = document.getElementById('vibeBar');
-    const thumbaChar = document.getElementById('thumbagotchi');
 
     if (dashStreak) dashStreak.textContent = data.streak + 'd';
     if (dashPoints) dashPoints.textContent = data.total_points;
     if (dashBelt) dashBelt.textContent = currentBelt.name;
-    if (thumbaChar) thumbaChar.textContent = currentBelt.char;
+    // (SVG Thumbagotchi updated below in vibeTitle block)
 
     // Vibe Progress (0 to 100% of next belt tier)
     const nextBelt = BELTS[BELTS.indexOf(currentBelt) + 1];
@@ -1126,7 +1175,6 @@ async function loadProfile() {
         vibeDesc.textContent  = '';
         if (hibBadge) hibBadge.classList.remove('hidden');
         if (hibDesc)  hibDesc.classList.remove('hidden');
-        thumbaChar.textContent = '💤'; // Sleep state
       } else {
         if (hibBadge) hibBadge.classList.add('hidden');
         if (hibDesc)  hibDesc.classList.add('hidden');
@@ -1142,6 +1190,9 @@ async function loadProfile() {
           vibeDesc.textContent  = "Time for a quick wellness session?";
         }
       }
+
+      // ─── Update SVG State (Phase 3) ───
+      updateThumbagotchiUI(data.total_points, data.streak, isHibernating);
     }
 
     // Update Dojo Octant Belts (NEW - Rule of 64)
