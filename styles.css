@@ -2216,3 +2216,271 @@ body {
   100% { box-shadow: 0 0 0 0 rgba(0, 229, 204, 0.4); transform: scale(1); }
 }
 
+/* ═══════════════════════════════
+   PHYGITAL SURFACES (S01)
+   ═══════════════════════════════ */
+
+.phygital-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1/1.1;
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-xl);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  margin: 16px 0;
+  box-shadow: inset 0 0 40px rgba(0,0,0,0.5);
+  touch-action: none; /* Critical for custom interactions */
+}
+
+.phygital-surface {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 5;
+}
+
+/* ─ Reflection Dojo: Breathing Circle ─ */
+.breathing-ring-phygital {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  user-select: none;
+}
+
+.breathing-svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 0 20px var(--teal-glow));
+}
+
+.breathing-circle-bg {
+  stroke: var(--border2);
+  fill: none;
+  stroke-width: 2;
+}
+
+.breathing-circle-fill {
+  fill: var(--teal-dim);
+  stroke: var(--teal);
+  stroke-width: 4;
+  stroke-linecap: round;
+  transition: r 0.4s var(--ease), stroke-dashoffset 0.4s var(--ease), fill 0.4s var(--ease);
+}
+
+.touch-prompt-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(9, 9, 15, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 20;
+  transition: opacity 0.4s var(--ease);
+  pointer-events: none;
+}
+
+.touch-prompt-overlay.hidden {
+  opacity: 0;
+}
+
+.touch-guide-ring {
+  width: 80px;
+  height: 80px;
+  border: 4px solid var(--teal);
+  border-radius: 50%;
+  animation: touch-guide-pulse 2s infinite;
+}
+
+@keyframes touch-guide-pulse {
+  0% { transform: scale(0.8); opacity: 1; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+
+.touch-text {
+  margin-top: 16px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--teal);
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.phygital-hud {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  justify-content: space-between;
+  z-index: 15;
+  pointer-events: none;
+}
+
+.hud-item {
+  background: rgba(0,0,0,0.4);
+  padding: 4px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--text2);
+  text-transform: uppercase;
+}
+
+.hud-item.active {
+  color: var(--teal);
+  border-color: var(--teal-dim);
+}
+
+.contact-warning {
+  position: absolute;
+  bottom: 24px;
+  background: rgba(240, 98, 146, 0.9);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  animation: shake 0.5s ease-in-out;
+  z-index: 30;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+/* ══════════════════════════════════════════════
+   📝 PHASE 2: JOURNALING & DAN PROGRESSION
+   ══════════════════════════════════════════════ */
+.journal-card {
+  max-width: 90%;
+  border: 1px solid var(--purple-dim);
+  background: linear-gradient(135deg, rgba(8, 8, 16, 0.95) 0%, rgba(30, 20, 50, 0.9) 100%);
+  box-shadow: 0 10px 50px rgba(168, 85, 247, 0.2);
+}
+
+.journal-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.journal-dan-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  background: var(--purple);
+  color: white;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  box-shadow: 0 0 15px var(--purple-glow);
+  margin-bottom: 12px;
+}
+
+.journal-input-wrap {
+  margin-bottom: 24px;
+}
+
+#journalInput {
+  width: 100%;
+  height: 120px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  color: var(--text1);
+  font-family: inherit;
+  font-size: 14px;
+  resize: none;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+#journalInput:focus {
+  outline: none;
+  border-color: var(--purple);
+  box-shadow: 0 0 10px var(--purple-dim);
+}
+
+.journal-cooldown {
+  margin-top: 16px;
+  font-size: 12px;
+  color: var(--pink);
+  text-align: center;
+  font-weight: 700;
+}
+
+.btn-premium {
+  width: 100%;
+  padding: 14px;
+  background: var(--purple);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: 0 5px 20px rgba(168, 85, 247, 0.3);
+  transition: transform 0.2s, background 0.3s;
+}
+
+.btn-premium:active {
+  transform: scale(0.98);
+}
+
+.shodan-entrance {
+  background: rgba(168, 85, 247, 0.05);
+  border: 1px solid rgba(168, 85, 247, 0.2);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.shodan-title {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  color: var(--purple);
+  margin-bottom: 4px;
+}
+
+.shodan-desc {
+  font-size: 10px;
+  color: var(--text3);
+  margin: 0;
+}
+
+.btn-shodan {
+  background: var(--purple);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+.btn-shodan.disabled {
+  background: var(--border);
+  color: var(--text3);
+  cursor: not-allowed;
+  opacity: 0.5;
+}

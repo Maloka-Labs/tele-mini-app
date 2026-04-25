@@ -323,10 +323,22 @@
         </div>
       </div>
 
-      <!-- Ring Three: Sovereign Portal (NFT Bridge) -->
+      <!-- Ring Three: Sovereign Portal (Ring Three) -->
       <div class="profile-section-title" style="margin-top:20px;">Sovereign Portal (Ring Three)</div>
       <div class="sovereign-portal-card">
-        <div class="sovereign-header">
+        
+        <!-- Phase 2: Shodan Progression Entry -->
+        <div class="shodan-entrance">
+          <div class="shodan-info">
+            <h4 class="shodan-title">SHODAN PROGRESSION</h4>
+            <p class="shodan-desc">The Inward Turn: 20 Weeks of Directed Wisdom</p>
+          </div>
+          <button class="btn-shodan disabled" id="btnStartShodan">
+            Initiate Shodan
+          </button>
+        </div>
+
+        <div class="sovereign-header" style="margin-top:20px; border-top: 1px solid var(--border); padding-top: 16px;">
           <div class="sov-id-wrap">
             <span class="sov-label">AGENT ID</span>
             <span class="sov-id" id="agentId">SOV-#----</span>
@@ -400,6 +412,56 @@
           <span class="reward-toast-label" id="rewardToastLabel">Daily Login Bonus!</span>
         </div>
         <span class="reward-toast-multiplier" id="rewardToastMultiplier"></span>
+      </div>
+    </div>
+
+    <!-- ── Phygital Dojo Modal (S01 Universal) ── -->
+    <div id="phygitalModal" class="modal hidden" role="dialog" aria-label="Phygital Session">
+      <div class="modal-content" style="padding: 0; overflow: hidden; width: 100dvw; height: 100dvh; max-width: none; border: none; border-radius: 0; background: #000;">
+        <header class="phygital-header">
+          <button class="modal-close" id="closePhygital">✕</button>
+          <div class="phygital-hud">
+            <div id="hudLeft" class="hud-item">BELT: WHITE</div>
+            <div id="phygitalTime" class="hud-item">00:00</div>
+            <div id="hudRight" class="hud-item">LVL: 1</div>
+          </div>
+        </header>
+
+        <main class="phygital-main" style="height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative;">
+          <h2 id="phygitalTitle" class="premium-title" style="margin-top: 60px;">Reflection Dojo</h2>
+          <p id="phygitalSubtitle" class="premium-subtitle" style="margin-bottom: 20px;">Octant 01 · Stillness</p>
+          
+          <div id="phygitalSurface" class="phygital-surface" style="flex: 1; width: 100%; position: relative; display: flex; align-items: center; justify-content: center;">
+             <!-- Dynamic SVG/Canvas Inserted Here -->
+          </div>
+
+          <div id="phygitalStatus" class="phygital-status" style="margin-bottom: 80px; font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: var(--teal);">Awaiting Signal</div>
+        </main>
+
+        <footer class="phygital-footer" style="position: absolute; bottom: 0; left: 0; right: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+          <div id="touchPrompt" class="touch-prompt-overlay" style="position: static; background: transparent;">
+            <div class="touch-guide-ring"></div>
+            <p id="touchPromptText" class="touch-text">Hold Thumb to Anchor Breath</p>
+          </div>
+          <div id="contactWarning" class="contact-warning hidden">⚠️ SIGNAL LOST: RE-ESTABLISH CONTACT</div>
+          <p id="phygitalAudioInfo" class="audio-info" style="font-size: 10px; opacity: 0.5;"></p>
+        </footer>
+      </div>
+    </div>
+
+    <!-- 📝 Phase 2: JOURNALING MODAL (SHODAN REFLECTION) -->
+    <div id="journalModal" class="modal hidden" role="dialog" aria-label="Shodan Journal">
+      <div class="modal-content journal-card">
+        <header class="journal-header">
+          <div class="journal-dan-badge">SHODAN</div>
+          <h2 class="premium-title">Midnight Reflection</h2>
+          <p class="premium-subtitle">Convert your practice into wisdom.</p>
+        </header>
+        <div class="journal-input-wrap">
+          <textarea id="journalInput" placeholder="What shifted within your awareness during this session?"></textarea>
+        </div>
+        <button id="submitJournal" class="btn-premium">Seal the Reflection</button>
+        <div id="journalTimer" class="journal-cooldown hidden">Next session available in <span id="lockHours">24</span>h</div>
       </div>
     </div>
 

@@ -1170,152 +1170,519 @@ startMeditateBtn.addEventListener('click', () => {
 });
 
 /* ══════════════════════════════════════════════
+   🌀 S01 PHYGITAL CONTROLLER (THE REBELLION)
+   ══════════════════════════════════════════════ */
+
+const phygitalModal = document.getElementById('phygitalModal');
+const phygitalSurface = document.getElementById('phygitalSurface');
+const phygitalTimeEl = document.getElementById('phygitalTime');
+const phygitalStatusEl = document.getElementById('phygitalStatus');
+const touchPrompt = document.getElementById('touchPrompt');
+const contactWarning = document.getElementById('contactWarning');
+const phygitalTitle = document.getElementById('phygitalTitle');
+const phygitalSubtitle = document.getElementById('phygitalSubtitle');
+const phygitalAudioInfo = document.getElementById('phygitalAudioInfo');
+
+let activePhygitalSession = null;
+let phygitalTimer = null;
+let phygitalSecs = 0;
+let phygitalIsContact = false;
+
+const PHYGITAL_TYPES = {
+  STILLNESS: { 
+    id: 'stillness', 
+    name: 'Reflection Dojo', 
+    desc: 'Octant 01 · Stillness Sanctuary', 
+    instruction: 'Hold Thumb to Anchor Breath',
+    activityId: 'meditation'
+  },
+  CREATION: { id: 'creation', name: 'Creation Forge', desc: 'Octant 02 · Creative Expression', instruction: 'Touch to Ignite the Forge', activityId: 'creation' },
+  SONIC: { id: 'sonic', name: 'Sonic Sanctuary', desc: 'Octant 03 · Sound Healing', instruction: 'Tap to Resonate', activityId: 'sonic' },
+  WISDOM: { id: 'wisdom', name: 'Wisdom Chamber', desc: 'Octant 04 · Learning & Philosophy', instruction: 'Trace with Intent', activityId: 'affirmation' },
+  EMOTION: { id: 'emotion', name: 'Emotion Command', desc: 'Octant 05 · Emotional Transmutation', instruction: 'Press to Calibrate', activityId: 'mood_check' },
+  BRIDGE: { id: 'bridge', name: 'Connection Hub', desc: 'Octant 06 · Social Connection', instruction: 'Drag to Connect', activityId: 'bridge' },
+  MOVEMENT: { id: 'movement', name: 'Movement Arena', desc: 'Octant 07 · Yoga & Movement', instruction: 'Follow the Flow', activityId: 'breathing' },
+  SPIRIT: { id: 'nourish', name: 'Spirit Temple', desc: 'Octant 08 · Labyrinth Path', instruction: 'Enter the Labyrinth', activityId: 'nourish' }
+};
+
+let currentDanLevel = 0;
+let lastDanSessionTime = null;
+let activeDanSession = false;
+
+async function startDanSession() {
+  const res = await fetch(`${API_BASE}/api/start-dan-session`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ initData })
+  });
+  const data = await res.json();
+  
+  if (data.locked) {
+    alert(`Shodan lock active. Next session available in ${data.hours_remaining} hours. Use this time for integration.`);
+    return;
+  }
+  
+  if (data.ok) {
+    activeDanSession = true;
+    currentDanLevel = data.dan;
+    // For MVP S01: Dan sessions use 'Stillness' as the core phygital anchor
+    startPhygitalSession('STILLNESS');
+    phygitalTitle.textContent = data.session_type;
+    phygitalSubtitle.textContent = 'Act 1: Grounding Awareness';
+    
+    // Override completion logic for Dan sessions
+    window.danSessionAct = 1;
+  }
+}
+
+async function completeDanSession(reflection) {
+  const res = await fetch(`${API_BASE}/api/complete-dan-session`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ initData, reflection })
+  });
+  const data = await res.json();
+  if (data.ok) {
+    closeModal('journalModal');
+    tg.MainButton.setText('MASTERY ACHIEVED').show();
+    setTimeout(() => tg.MainButton.hide(), 3000);
+    loadProfile(); // Refresh locks
+  }
+}
+
+document.getElementById('submitJournal')?.addEventListener('click', () => {
+  const content = document.getElementById('journalInput').value;
+  if (content.length < 10) {
+    alert("Wisdom requires more than a few words. Share your shift.");
+    return;
+  }
+  completeDanSession(content);
+});
+
+function startPhygitalSession(typeKey) {
+  const meta = PHYGITAL_TYPES[typeKey];
+  if (!meta) return;
+
+  activePhygitalSession = meta;
+  phygitalTitle.textContent = meta.name;
+  phygitalSubtitle.textContent = meta.desc;
+  document.getElementById('touchPromptText').textContent = meta.instruction;
+  
+  const pts = window.currentOctantScores?.[meta.id] || 0;
+  phygitalSecs = getScaledDuration(pts) * 60;
+  phygitalTimeEl.textContent = formatTime(phygitalSecs);
+  
+  const belt = getBelt(pts);
+  document.getElementById('hudLeft').textContent = `Belt: ${belt.name}`;
+  document.getElementById('hudRight').textContent = `LVL: ${BELTS.indexOf(belt) + 1}`;
+  
+  openModal('phygitalModal');
+  renderPhygitalSurface(meta.id);
+  
+  phygitalAudioInfo.classList.add('hidden');
+  phygitalStatusEl.textContent = 'Awaiting Signal';
+}
+
+function renderPhygitalSurface(octantId) {
+  phygitalSurface.innerHTML = '';
+  touchPrompt.classList.remove('hidden');
+  contactWarning.classList.add('hidden');
+  
+  if (octantId === 'stillness') {
+    renderReflectionDojo();
+  } else if (octantId === 'creation') {
+    renderCreationForge();
+  } else if (octantId === 'sonic') {
+    renderSonicSanctuary();
+  } else if (octantId === 'wisdom') {
+    renderWisdomChamber();
+  } else if (octantId === 'emotion') {
+    renderEmotionCommand();
+  } else if (octantId === 'bridge') {
+    renderConnectionHub();
+  } else if (octantId === 'movement') {
+    renderMovementArena();
+  } else if (octantId === 'nourish') {
+    renderSpiritTemple();
+  } else {
+    phygitalSurface.innerHTML = `<div style="padding:40px; text-align:center; color:var(--text3); font-size:12px;">S01 Physical component for ${octantId} coming soon. <br><br> (Phygital logic ready)</div>`;
+  }
+}
+
+/* ─ Octant 05: Emotion Command ─ */
+function renderEmotionCommand() {
+  const wrap = document.createElement('div');
+  wrap.style.width = '100dvw';
+  wrap.style.height = '100dvw';
+  wrap.style.background = 'radial-gradient(circle, var(--purple-dim) 0%, transparent 70%)';
+  wrap.innerHTML = `
+    <div id="bioString" style="width:2px; height:60%; background:var(--purple); box-shadow: 0 0 20px var(--purple); transition: transform 0.1s linear, background 0.4s;"></div>
+    <div style="position:absolute; bottom:20px; font-size:10px; color:var(--text2);">MODULATE FREQUENCY BY TOUCH</div>
+  `;
+  wrap.style.display = 'flex';
+  wrap.style.alignItems = 'center';
+  wrap.style.justifyContent = 'center';
+  phygitalSurface.appendChild(wrap);
+}
+
+function updateEmotionCommand(e) {
+  const string = document.getElementById('bioString');
+  if (!string || !phygitalIsContact) return;
+  const touch = e.touches ? e.touches[0] : e;
+  const shake = (Math.random() - 0.5) * 10;
+  string.style.transform = `translateX(${shake}px) scaleX(${1 + Math.random()})`;
+}
+
+/* ─ Octant 06: Connection Hub ─ */
+function renderConnectionHub() {
+  const wrap = document.createElement('div');
+  wrap.style.display = 'flex';
+  wrap.style.gap = '20px';
+  wrap.innerHTML = `
+    <div style="width:60px; height:60px; background:var(--teal-dim); border:2px dashed var(--teal); border-radius:12px; display:flex; align-items:center; justify-content:center;">🧩</div>
+    <div style="width:60px; height:60px; background:var(--purple-dim); border:2px dashed var(--purple); border-radius:12px; display:flex; align-items:center; justify-content:center;">🤝</div>
+    <div style="width:60px; height:60px; background:var(--pink-dim); border:2px dashed var(--pink); border-radius:12px; display:flex; align-items:center; justify-content:center;">💞</div>
+  `;
+  phygitalSurface.appendChild(wrap);
+}
+
+/* ─ Octant 07: Movement Arena ─ */
+function renderMovementArena() {
+  const wrap = document.createElement('div');
+  wrap.innerHTML = `
+    <div style="font-size:80px; filter: drop-shadow(0 0 20px var(--teal-glow));">🧘</div>
+    <div style="margin-top:20px; font-size:11px; text-align:center; color:var(--text2); font-weight:700;">ACUPRESSURE POINT: TEMPLE<br><span style="color:var(--teal)">HOLD SECURELY</span></div>
+  `;
+  wrap.style.display = 'flex';
+  wrap.style.flexDirection = 'column';
+  wrap.style.alignItems = 'center';
+  phygitalSurface.appendChild(wrap);
+}
+
+/* ─ Octant 08: Spirit Temple ─ */
+function renderSpiritTemple() {
+  phygitalSurface.innerHTML = `
+    <svg viewBox="0 0 200 200" style="width:100%; height:80%;">
+       <circle cx="100" cy="100" r="80" stroke="var(--border2)" stroke-width="40" fill="none" />
+       <circle cx="100" cy="100" r="80" stroke="var(--teal)" stroke-width="2" fill="none" stroke-dasharray="10 5" />
+       <circle id="labyrinthDot" cx="100" cy="20" r="10" fill="var(--teal)" style="transition: all 0.1s linear;" />
+    </svg>
+  `;
+}
+
+function updateSpiritTemple() {
+  const dot = document.getElementById('labyrinthDot');
+  if (!dot) return;
+  const angle = (phygitalSecs * 5) % 360;
+  const rad = (angle * Math.PI) / 180;
+  dot.setAttribute('cx', 100 + 80 * Math.cos(rad));
+  dot.setAttribute('cy', 100 + 80 * Math.sin(rad));
+}
+
+/* ─ Octant 03: Sonic Sanctuary ─ */
+function renderSonicSanctuary() {
+  const wrap = document.createElement('div');
+  wrap.style.display = 'grid';
+  wrap.style.gridTemplateColumns = '1fr 1fr';
+  wrap.style.gap = '10px';
+  wrap.style.width = '80%';
+  wrap.innerHTML = `
+    <div class="sonic-pad" data-note="C4" style="aspect-ratio:1; border:2px solid var(--teal); border-radius:20px; display:flex; align-items:center; justify-content:center; font-size:24px;">🥁</div>
+    <div class="sonic-pad" data-note="E4" style="aspect-ratio:1; border:2px solid var(--purple); border-radius:20px; display:flex; align-items:center; justify-content:center; font-size:24px;">🔔</div>
+    <div class="sonic-pad" data-note="G4" style="aspect-ratio:1; border:2px solid var(--pink); border-radius:20px; display:flex; align-items:center; justify-content:center; font-size:24px;">✨</div>
+    <div class="sonic-pad" data-note="C5" style="aspect-ratio:1; border:2px solid var(--gold); border-radius:20px; display:flex; align-items:center; justify-content:center; font-size:24px;">🌊</div>
+  `;
+  phygitalSurface.appendChild(wrap);
+  
+  wrap.querySelectorAll('.sonic-pad').forEach(pad => {
+    pad.addEventListener('touchstart', (e) => {
+      e.stopPropagation();
+      pad.style.transform = 'scale(0.9)';
+      pad.style.background = 'rgba(255,255,255,0.1)';
+      if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+    });
+    pad.addEventListener('touchend', () => {
+      pad.style.transform = 'scale(1)';
+      pad.style.background = 'transparent';
+    });
+  });
+}
+
+/* ─ Octant 04: Wisdom Chamber ─ */
+function renderWisdomChamber() {
+  const wrap = document.createElement('div');
+  wrap.className = 'wisdom-svg-wrap';
+  wrap.style.width = '100dvw';
+  wrap.style.height = '100%';
+  wrap.style.display = 'flex';
+  wrap.style.alignItems = 'center';
+  wrap.style.justifyContent = 'center';
+  wrap.innerHTML = `
+    <svg viewBox="0 0 200 200" style="width:100%; height:80%;">
+      <path d="M50 150 L100 50 L150 150 Z" stroke="rgba(255,255,255,0.1)" stroke-width="12" fill="none" stroke-linecap="round" />
+      <path id="tracePath" d="M50 150 L100 50 L150 150 Z" stroke="var(--teal)" stroke-width="12" fill="none" stroke-linecap="round" stroke-dasharray="400" stroke-dashoffset="400" />
+    </svg>
+    <div style="position:absolute; bottom:20px; font-size:11px; color:var(--text3); font-weight:700;">TRACE THE GEOMETRY</div>
+  `;
+  phygitalSurface.appendChild(wrap);
+}
+
+function updateWisdomTrace(e) {
+  if (!phygitalIsContact) return;
+  const path = document.getElementById('tracePath');
+  if (!path) return;
+  
+  // Fake tracking based on time and contact for now (MVP logic)
+  const progress = Math.max(0, 400 - ((phygitalSecs / (getScaledDuration(0)*60)) * 400));
+  path.style.strokeDashoffset = progress;
+}
+
+/* ─ Octant 02: Creation Forge ─ */
+let forgeCanvas = null, forgeCtx = null;
+function renderCreationForge() {
+  forgeCanvas = document.createElement('canvas');
+  forgeCanvas.width = 400;
+  forgeCanvas.height = 400;
+  forgeCanvas.style.width = '100%';
+  forgeCanvas.style.height = '100%';
+  forgeCtx = forgeCanvas.getContext('2d');
+  
+  // Dark background
+  forgeCtx.fillStyle = '#101018';
+  forgeCtx.fillRect(0,0,400,400);
+  
+  phygitalSurface.appendChild(forgeCanvas);
+}
+
+function updateCreationForge(e) {
+  if (!forgeCtx || !phygitalIsContact) return;
+  
+  const rect = forgeCanvas.getBoundingClientRect();
+  const touch = e.touches ? e.touches[0] : e;
+  const x = ((touch.clientX - rect.left) / rect.width) * 400;
+  const y = ((touch.clientY - rect.top) / rect.height) * 400;
+  
+  const pts = window.currentOctantScores?.creation || 0;
+  const beltIdx = BELTS.indexOf(getBelt(pts));
+  
+  // Symmetry patterns based on belt
+  const colors = ['#fff', '#fde047', '#fb923c', '#22c55e', '#3b82f6', '#a855f7', '#78350f', '#00e5cc'];
+  forgeCtx.fillStyle = colors[beltIdx];
+  
+  const size = 2 + beltIdx;
+  forgeCtx.beginPath();
+  forgeCtx.arc(x, y, size, 0, Math.PI * 2);
+  
+  // Symmetry
+  if (beltIdx > 2) { // Green belt+ adds mirror
+    forgeCtx.arc(400 - x, y, size, 0, Math.PI * 2);
+  }
+  if (beltIdx > 5) { // Purple belt+ adds quad
+    forgeCtx.arc(x, 400 - y, size, 0, Math.PI * 2);
+    forgeCtx.arc(400 - x, 400 - y, size, 0, Math.PI * 2);
+  }
+  
+  forgeCtx.fill();
+}
+
+function handleDanActTransition() {
+  phygitalSurface.style.opacity = '0';
+  phygitalSurface.style.transition = 'opacity 0.8s ease-in-out';
+  
+  setTimeout(() => {
+    if (window.danSessionAct === 1) {
+      window.danSessionAct = 2;
+      phygitalSubtitle.textContent = 'Act 2: The Deepen';
+      phygitalSecs = 120; // 2 min session
+      phygitalStatusEl.textContent = 'Act 1 Complete. Ready for Act 2.';
+      touchPrompt.classList.remove('hidden');
+      document.getElementById('touchPromptText').textContent = 'Hold to Enter the Void';
+      phygitalSurface.style.opacity = '1';
+    } else {
+      activeDanSession = false;
+      closeModal('phygitalModal');
+      openModal('journalModal');
+    }
+  }, 800);
+}
+
+function renderReflectionDojo() {
+  const wrap = document.createElement('div');
+  wrap.className = 'breathing-ring-phygital';
+  wrap.innerHTML = `
+    <svg class="breathing-svg" viewBox="0 0 100 100">
+      <circle class="breathing-circle-bg" cx="50" cy="50" r="40" />
+      <circle id="breathingFill" class="breathing-circle-fill" cx="50" cy="50" r="30" />
+    </svg>
+  `;
+  phygitalSurface.appendChild(wrap);
+}
+
+function conductPhygitalSession() {
+  if (phygitalTimer) return;
+  
+  phygitalStatusEl.textContent = 'Sync Active';
+  phygitalStatusEl.classList.add('active');
+  touchPrompt.classList.add('hidden');
+  
+  const pts = window.currentOctantScores?.[activePhygitalSession.id] || 0;
+  const beltIdx = BELTS.indexOf(getBelt(pts));
+  playAmbient(activePhygitalSession.id, beltIdx);
+  
+  phygitalTimer = setInterval(() => {
+    if (!phygitalIsContact) {
+      handlePhygitalDisconnect();
+      return;
+    }
+    
+    phygitalSecs--;
+    phygitalTimeEl.textContent = formatTime(phygitalSecs);
+    
+    // Animate Session Surface
+    if (activePhygitalSession.id === 'stillness') {
+      updateReflectionDojo();
+    } else if (activePhygitalSession.id === 'wisdom') {
+      updateWisdomTrace();
+    } else if (activePhygitalSession.id === 'nourish') {
+      updateSpiritTemple();
+    }
+    
+    if (phygitalSecs <= 0) {
+      completePhygitalSession();
+    }
+  }, 1000);
+}
+
+function updateReflectionDojo() {
+  const fill = document.getElementById('breathingFill');
+  if (!fill) return;
+  const cycle = (getScaledDuration(0) * 60 - phygitalSecs) % 16;
+  if (cycle < 4) { fill.setAttribute('r', 40); fill.style.fill = 'rgba(0, 229, 204, 0.3)'; }
+  else if (cycle < 8) { fill.style.fill = 'rgba(168, 85, 247, 0.4)'; }
+  else if (cycle < 12) { fill.setAttribute('r', 25); fill.style.fill = 'rgba(0, 229, 204, 0.2)'; }
+  else { fill.style.fill = 'rgba(168, 85, 247, 0.2)'; }
+}
+
+function handlePhygitalDisconnect() {
+  stopAmbient();
+  clearInterval(phygitalTimer);
+  phygitalTimer = null;
+  phygitalStatusEl.textContent = 'Signal Lost';
+  phygitalStatusEl.classList.remove('active');
+  contactWarning.classList.remove('hidden');
+  setTimeout(() => {
+    if (!phygitalIsContact) {
+      touchPrompt.classList.remove('hidden');
+      contactWarning.classList.add('hidden');
+    }
+  }, 1500);
+}
+
+function completePhygitalSession() {
+  clearInterval(phygitalTimer);
+  phygitalTimer = null;
+  stopAmbient();
+  
+  if (activeDanSession) {
+    handleDanActTransition();
+    return;
+  }
+
+  phygitalStatusEl.textContent = 'Mastery Achieved';
+  claimActivityReward(activePhygitalSession.activityId);
+  
+  setTimeout(() => {
+    closeModal('phygitalModal');
+  }, 2000);
+}
+
+phygitalSurface.addEventListener('touchstart', (e) => {
+  e.preventDefault();
+  phygitalIsContact = true;
+  contactWarning.classList.add('hidden');
+  conductPhygitalSession();
+  if (activePhygitalSession?.id === 'creation') updateCreationForge(e);
+  if (activePhygitalSession?.id === 'emotion') updateEmotionCommand(e);
+}, { passive: false });
+
+phygitalSurface.addEventListener('touchmove', (e) => {
+  if (activePhygitalSession?.id === 'creation') updateCreationForge(e);
+  if (activePhygitalSession?.id === 'emotion') updateEmotionCommand(e);
+});
+
+phygitalSurface.addEventListener('mousedown', (e) => {
+  phygitalIsContact = true;
+  contactWarning.classList.add('hidden');
+  conductPhygitalSession();
+  if (activePhygitalSession?.id === 'creation') updateCreationForge(e);
+  if (activePhygitalSession?.id === 'emotion') updateEmotionCommand(e);
+});
+
+phygitalSurface.addEventListener('mousemove', (e) => {
+  if (activePhygitalSession?.id === 'creation') updateCreationForge(e);
+  if (activePhygitalSession?.id === 'emotion') updateEmotionCommand(e);
+});
+
+phygitalSurface.addEventListener('touchend', () => { phygitalIsContact = false; });
+phygitalSurface.addEventListener('mouseup', () => { phygitalIsContact = false; });
+phygitalSurface.addEventListener('mouseleave', () => { phygitalIsContact = false; });
+
+document.getElementById('closePhygital')?.addEventListener('click', () => {
+  clearInterval(phygitalTimer);
+  phygitalTimer = null;
+  phygitalIsContact = false;
+  stopAmbient();
+  closeModal('phygitalModal');
+});
+
+document.getElementById('octStillness')?.addEventListener('click', () => startPhygitalSession('STILLNESS'));
+document.getElementById('octCreation')?.addEventListener('click', () => startPhygitalSession('CREATION'));
+document.getElementById('octSonic')?.addEventListener('click', () => startPhygitalSession('SONIC'));
+document.getElementById('octWisdom')?.addEventListener('click', () => startPhygitalSession('WISDOM'));
+document.getElementById('octEmotion')?.addEventListener('click', () => startPhygitalSession('EMOTION'));
+document.getElementById('octBridge')?.addEventListener('click', () => startPhygitalSession('BRIDGE'));
+document.getElementById('octMovement')?.addEventListener('click', () => startPhygitalSession('MOVEMENT'));
+document.getElementById('octNourish')?.addEventListener('click', () => startPhygitalSession('SPIRIT'));
+
+/* ══════════════════════════════════════════════
    ✨ AFFIRMATIONS
-══════════════════════════════════════════════ */
+   ══════════════════════════════════════════════ */
 const affirmations = [
-  { text: 'I am enough. I have always been enough.',                           author: '— Daily Mantra' },
-  { text: 'I choose peace over perfection.',                                    author: '— Wellness Wisdom' },
-  { text: 'My body is healing and becoming stronger every day.',               author: '— Arjun Sharma' },
-  { text: 'I release what no longer serves me with love.',                      author: '— Maya Patel' },
-  { text: 'I breathe in calm, and I breathe out tension.',                      author: '— Priya Nair' },
-  { text: 'I trust the process of life and welcome all that comes my way.',    author: '— Dev Krishnamurthy' },
-  { text: 'My mind is clear, my heart is open, my spirit is free.',           author: '— Luna Rivera' },
-  { text: 'Every morning I wake up grateful for another chance to grow.',      author: '— Ryu Nakamura' },
-  { text: 'I nourish my body with intention and gratitude.',                   author: '— Kai Tanaka' },
-  { text: 'I am stronger than I think, and braver than I know.',               author: '— Zara Ahmed' },
+  { text: 'I am enough. I have always been enough.', author: '— Daily Mantra' },
+  { text: 'I choose peace over perfection.', author: '— Wellness Wisdom' },
+  { text: 'My body is healing and becoming stronger every day.', author: '— Arjun Sharma' },
+  { text: 'I release what no longer serves me with love.', author: '— Maya Patel' },
+  { text: 'I breathe in calm, and I breathe out tension.', author: '— Priya Nair' },
+  { text: 'I trust the process of life and welcome all that comes my way.', author: '— Dev Krishnamurthy' },
+  { text: 'My mind is clear, my heart is open, my spirit is free.', author: '— Luna Rivera' },
+  { text: 'Every morning I wake up grateful for another chance to grow.', author: '— Ryu Nakamura' },
+  { text: 'I nourish my body with intention and gratitude.', author: '— Kai Tanaka' },
+  { text: 'I am stronger than I think, and braver than I know.', author: '— Zara Ahmed' }
 ];
 
 let affIdx = 0;
-const affTextEl   = document.getElementById('affirmationText');
+const affTextEl = document.getElementById('affirmationText');
 const affAuthorEl = document.getElementById('affirmationAuthor');
 
 function showAffirmation(idx) {
+  if (!affTextEl) return;
   affTextEl.style.opacity = '0';
   setTimeout(() => {
     const a = affirmations[idx];
-    affTextEl.textContent   = a.text;
+    affTextEl.textContent = a.text;
     affAuthorEl.textContent = a.author;
     affTextEl.style.transition = 'opacity 0.35s';
     affTextEl.style.opacity = '1';
   }, 150);
 }
 
-/* ══════════════════════════════════════════════
-   🎨 CREATION STATION
-   🤝 BRIDGE SPACE
-   🥗 NOURISHMENT GARDEN
-══════════════════════════════════════════════ */
-const creationPrompts = [
-  "Write 3 things you're grateful for today.",
-  "Doodle a symbol that represents your current state.",
-  "Describe a place where you feel completely at peace.",
-  "If your joy was a color, what would it be and why?"
-];
-const bridgePrompts = [
-  "Send a 'thinking of you' message to someone you haven't spoken to in a while.",
-  "What is one healthy boundary you've set recently?",
-  "Practice active listening in your next conversation.",
-  "Express appreciation to a colleague or friend today."
-];
-const nourishPrompts = [
-  "Drink a glass of water slowly, noticed the sensation.",
-  "Eat one meal today without any digital distractions.",
-  "What is one locally sourced food you can enjoy this week?",
-  "Notice the textures and flavors of your next snack."
-];
-
-document.getElementById('octCreation')?.addEventListener('click', () => {
-  document.getElementById('creationPrompt').textContent = creationPrompts[Math.floor(Math.random() * creationPrompts.length)];
-  openModal('creationModal');
-});
-document.getElementById('closeCreation').addEventListener('click', () => closeModal('creationModal'));
-document.getElementById('completeCreation').addEventListener('click', () => {
-  claimActivityReward('creation');
-  closeModal('creationModal');
-});
-
-document.getElementById('octBridge')?.addEventListener('click', () => {
-  document.getElementById('bridgePrompt').textContent = bridgePrompts[Math.floor(Math.random() * bridgePrompts.length)];
-  openModal('bridgeModal');
-});
-document.getElementById('closeBridge').addEventListener('click', () => closeModal('bridgeModal'));
-document.getElementById('completeBridge').addEventListener('click', () => {
-  claimActivityReward('bridge');
-  closeModal('bridgeModal');
-});
-
-document.getElementById('octNourish')?.addEventListener('click', () => {
-  document.getElementById('nourishPrompt').textContent = nourishPrompts[Math.floor(Math.random() * nourishPrompts.length)];
-  openModal('nourishModal');
-});
-document.getElementById('closeNourish').addEventListener('click', () => closeModal('nourishModal'));
-document.getElementById('completeNourish').addEventListener('click', () => {
-  claimActivityReward('nourish');
-  closeModal('nourishModal');
-});
-
-/* ══════════════════════════════════════════════
-   🎵 SONIC HAVEN
-══════════════════════════════════════════════ */
-const sonicTimeEl = document.getElementById('sonicTime');
-const sonicOrb    = document.getElementById('sonicOrb');
-const startSonicBtn = document.getElementById('startSonic');
-let sonicTimer = null, sonicActive = false, sonicSecs = 300;
-
-document.getElementById('octSonic')?.addEventListener('click', () => {
-  const pts = window.currentOctantScores?.sonic || 0;
-  sonicSecs = getScaledDuration(pts) * 60;
-  sonicTimeEl.textContent = formatTime(sonicSecs);
-  openModal('sonicModal');
-});
-document.getElementById('closeSonic').addEventListener('click', () => {
-  closeModal('sonicModal');
-  clearInterval(sonicTimer);
-  sonicActive = false;
-  sonicOrb.classList.remove('pulsing');
-  startSonicBtn.textContent = 'Begin Sound Bath';
-});
-
-startSonicBtn.addEventListener('click', () => {
-  if (sonicActive) {
-    clearInterval(sonicTimer);
-    sonicActive = false;
-    sonicOrb.classList.remove('pulsing');
-    startSonicBtn.textContent = 'Begin Sound Bath';
-    return;
-  }
-  sonicActive = true;
-  sonicOrb.classList.add('pulsing');
-  startSonicBtn.textContent = '⏹  Stop Bath';
-  const pts = window.currentOctantScores?.sonic || 0;
-  playAmbient('sonic', BELTS.indexOf(getBelt(pts)));
-  sonicTimer = setInterval(() => {
-    sonicSecs--;
-    sonicTimeEl.textContent = formatTime(sonicSecs);
-    if (sonicSecs <= 0) {
-      clearInterval(sonicTimer);
-      sonicActive = false;
-      sonicOrb.classList.remove('pulsing');
-      claimActivityReward('sonic');
-      stopAmbient();
-      startSonicBtn.textContent = 'Complete! ✨';
-    }
-  }, 1000);
-});
-
-document.getElementById('octWisdom')?.addEventListener('click', () => {
-  showAffirmation(affIdx);
-  openModal('affirmationModal');
-  // ⭐ Award affirmation reward on viewing
-  claimActivityReward('affirmation');
-});
-document.getElementById('closeAffirmation').addEventListener('click', () => closeModal('affirmationModal'));
-document.getElementById('nextAffirmation').addEventListener('click', () => { affIdx = (affIdx + 1) % affirmations.length; showAffirmation(affIdx); });
-document.getElementById('prevAffirmation').addEventListener('click', () => { affIdx = (affIdx - 1 + affirmations.length) % affirmations.length; showAffirmation(affIdx); });
+document.getElementById('closeAffirmation')?.addEventListener('click', () => closeModal('affirmationModal'));
+document.getElementById('nextAffirmation')?.addEventListener('click', () => { affIdx = (affIdx + 1) % affirmations.length; showAffirmation(affIdx); });
+document.getElementById('prevAffirmation')?.addEventListener('click', () => { affIdx = (affIdx - 1 + affirmations.length) % affirmations.length; showAffirmation(affIdx); });
 
 /* ══════════════════════════════════════════════
    💜 MOOD CHECK
-══════════════════════════════════════════════ */
+   ══════════════════════════════════════════════ */
 const moodResponses = {
   amazing: { msg: '🌟 That\'s incredible!',          tip: 'Channel this energy into your practice today. Try a challenging yoga flow with Arjun!' },
   good:    { msg: '😊 Love that for you!',            tip: 'A great day to deepen your meditation practice. Check out Dev\'s spiritual guidance.' },
@@ -1459,26 +1826,23 @@ function updateSovereignUI(data) {
   document.getElementById('t-cord').textContent = belts.wisdom + ' Cord';
   document.getElementById('t-sonic').textContent = belts.sonic + ' Res.';
 
-  const mintBtn = document.getElementById('btnMintSovereign');
-  const reqText = document.getElementById('mintRequirement');
-
-  if (masterMilestone) {
-    mintBtn.classList.remove('disabled');
-    reqText.textContent = "Mastery Achieved! Ready for Sovereign Mint.";
-    reqText.style.color = "var(--teal)";
-  } else {
-    mintBtn.classList.add('disabled');
+  document.getElementById('lockHours').textContent = data.hours_remaining || 24;
+  
+  // Unlock Shodan Button if ready
+  const canStartDan = data.total_points > 500; // Requirement for Shodan
+  const danBtn = document.getElementById('btnStartShodan');
+  if (danBtn) {
+    if (canStartDan) {
+      danBtn.classList.remove('disabled');
+      danBtn.innerHTML = 'Initiate Shodan';
+    } else {
+      danBtn.classList.add('disabled');
+      danBtn.innerHTML = 'Need 500 Mastery Pts';
+    }
   }
-
-  // Update SVG Aura based on highest rank
-  const highestBelt = getBelt(data.total_points);
-  const colors = {
-    White: '#ffffff', Yellow: '#fde047', Orange: '#fb923c', 
-    Green: '#22c55e', Blue: '#3b82f6', Purple: '#a855f7', 
-    Brown: '#78350f', Black: '#000000'
-  };
-  document.documentElement.style.setProperty('--tg-aura-color', colors[highestBelt] + '66');
 }
+
+document.getElementById('btnStartShodan')?.addEventListener('click', startDanSession);
 
 document.getElementById('btnConnectWallet')?.addEventListener('click', () => {
   const btn = document.getElementById('btnConnectWallet');
@@ -1733,5 +2097,3 @@ document.getElementById('onboardingNext')?.addEventListener('click', () => {
     dismissOnboarding();
   }
 });
-
-document.getElementById('onboardingSkip')?.addEventListener('click', dismissOnboarding);
