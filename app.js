@@ -170,8 +170,18 @@ const rewardToastPts   = document.getElementById('rewardToastPts');
 const rewardToastLabel = document.getElementById('rewardToastLabel');
 let toastTimer = null;
 
-function showRewardToast(points, label) {
+function showRewardToast(points, label, multiplier = 1.0) {
   if (toastTimer) clearTimeout(toastTimer);
+  
+  const multEl = document.getElementById('rewardToastMultiplier');
+  if (multiplier > 1.0) {
+    const bonus = Math.round(points - (points / multiplier));
+    multEl.textContent = `incl. ${bonus}pt Ring Two Bonus 🛰️`;
+    multEl.classList.remove('hidden');
+  } else {
+    multEl.classList.add('hidden');
+  }
+
   rewardToastPts.textContent   = `+${points} pts`;
   rewardToastLabel.textContent = label;
   rewardToast.classList.remove('hidden', 'hide');
@@ -230,7 +240,7 @@ async function claimActivityReward(activity) {
     const data = await res.json();
     if (data.ok && !data.already_claimed && data.points_earned > 0) {
       const info = ACTIVITY_LABELS[activity];
-      showRewardToast(data.points_earned, info.label);
+      showRewardToast(data.points_earned, info.label, window.nodeData?.multiplier || 1.0);
       
       // Phase 3: Trigger visual reaction
       reactToSuccess();
@@ -1362,6 +1372,129 @@ function animateCounter(el, target, duration = 800) {
   requestAnimationFrame(step);
 }
 
+/* ══════════════════════════════════════════════
+   🕸️ RING TWO: NETWORK HUB (DePIN)
+   ══════════════════════════════════════════════ */
+let nodeHeartbeatInterval = null;
+window.nodeData = null;
+
+async function syncNodeHeartbeat() {
+  if (!initData) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/node-ping`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ initData })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      window.nodeData = data.node;
+      updateNetworkUI(data);
+      console.log('[Ring Two] Node Heartbeat Synced. Uptime:', data.node.uptime, 'mins');
+    }
+  } catch (e) {
+    console.error('[Ring Two] Sync Error:', e);
+  }
+}
+
+function updateNetworkUI(data) {
+  const node = data.node;
+  if (!node) return;
+
+  document.getElementById('nodeId').textContent = `M-${node.id.slice(0, 8).toUpperCase()}`;
+  document.getElementById('nodeUptime').textContent = `${node.uptime}m`;
+  document.getElementById('nodeStatusDot').className = node.healthy ? 'status-dot healthy' : 'status-dot';
+  document.getElementById('nodeStatusText').textContent = node.healthy ? 'Node Active' : 'Node Degraded';
+  document.getElementById('nodeMultiplierBadge').textContent = `${node.multiplier}x Multiplier`;
+  
+  if (data.network) {
+    document.getElementById('totalNodes').textContent = data.network.total_active_nodes;
+  }
+}
+
+async function fetchNetworkStatus() {
+  if (!initData) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/network-status?initData=${encodeURIComponent(initData)}`);
+    const data = await res.json();
+    if (data.ok) {
+      window.nodeData = data.node;
+      updateNetworkUI(data);
+    }
+  } catch (e) {
+    console.error('[Ring Two] Status Fetch Error:', e);
+  }
+}
+
+function initNodeHeartbeat() {
+  if (nodeHeartbeatInterval) return;
+  syncNodeHeartbeat(); // initial ping
+  nodeHeartbeatInterval = setInterval(syncNodeHeartbeat, 5 * 60 * 1000); // every 5 mins
+}
+
+/* ══════════════════════════════════════════════
+   💎 RING THREE: SOVEREIGN PORTAL (NFT BRIDGE)
+   ══════════════════════════════════════════════ */
+function calculateAgentTraits(data) {
+  const scores = data.octant_scores || {};
+  const belts = {
+    stillness: getBelt(scores.stillness || 0),
+    movement:  getBelt(scores.movement || 0),
+    wisdom:    getBelt(scores.wisdom || 0),
+    sonic:     getBelt(scores.sonic || 0)
+  };
+
+  // Mastery Check: Need 3 Purple Belts to Mint
+  const masterMilestone = Object.values(belts).filter(b => BELTS.indexOf(b) >= 4).length >= 3;
+  
+  return { belts, masterMilestone };
+}
+
+function updateSovereignUI(data) {
+  const { belts, masterMilestone } = calculateAgentTraits(data);
+  const userId = parseUser(initData).userId;
+  
+  document.getElementById('agentId').textContent = `SOV-#${userId.toString().slice(0, 4)}`;
+  document.getElementById('t-aura').textContent = belts.stillness + ' Aura';
+  document.getElementById('t-cord').textContent = belts.wisdom + ' Cord';
+  document.getElementById('t-sonic').textContent = belts.sonic + ' Res.';
+
+  const mintBtn = document.getElementById('btnMintSovereign');
+  const reqText = document.getElementById('mintRequirement');
+
+  if (masterMilestone) {
+    mintBtn.classList.remove('disabled');
+    reqText.textContent = "Mastery Achieved! Ready for Sovereign Mint.";
+    reqText.style.color = "var(--teal)";
+  } else {
+    mintBtn.classList.add('disabled');
+  }
+
+  // Update SVG Aura based on highest rank
+  const highestBelt = getBelt(data.total_points);
+  const colors = {
+    White: '#ffffff', Yellow: '#fde047', Orange: '#fb923c', 
+    Green: '#22c55e', Blue: '#3b82f6', Purple: '#a855f7', 
+    Brown: '#78350f', Black: '#000000'
+  };
+  document.documentElement.style.setProperty('--tg-aura-color', colors[highestBelt] + '66');
+}
+
+document.getElementById('btnConnectWallet')?.addEventListener('click', () => {
+  const btn = document.getElementById('btnConnectWallet');
+  btn.innerHTML = '<span class="wallet-icon">💎</span> Linking...';
+  setTimeout(() => {
+    btn.innerHTML = '<span class="wallet-icon">✅</span> Wallet Linked';
+    btn.style.background = 'var(--teal)';
+  }, 1500);
+});
+
+document.getElementById('btnMintSovereign')?.addEventListener('click', () => {
+  const { masterMilestone } = calculateAgentTraits(window.lastProfileData || {});
+  if (!masterMilestone) return;
+  alert("Initiating Sovereign Mint... Prepare your TON wallet for the transaction.");
+});
+
 async function loadProfile() {
   const feedEl      = document.getElementById('profileFeed');
   const pointsEl    = document.getElementById('profilePoints');
@@ -1370,6 +1503,10 @@ async function loadProfile() {
   const handleEl    = document.getElementById('profileHandle');
   const avatarEl    = document.getElementById('profileAvatar');
   const placeholderEl = document.getElementById('profileAvatarPlaceholder');
+
+  // Network Check
+  initNodeHeartbeat();
+  fetchNetworkStatus();
 
   // Fill in local Telegram user data first (instant)
   if (tgUser) {
@@ -1403,6 +1540,9 @@ async function loadProfile() {
     animateCounter(pointsEl, data.total_points);
     animateCounter(streakEl, data.streak);
     window.intakeCompleted = !!data.intake_completed;
+    window.lastProfileData = data;
+
+    updateSovereignUI(data);
 
     if (data.events.length === 0) {
       feedEl.innerHTML = '<div class="feed-empty">No activity yet — complete a session to earn points!</div>';

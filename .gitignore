@@ -3,3 +3,5 @@ progress.md
 node_modules/
 dist/
 .env
+TodoRoadmap.md
+*.txt

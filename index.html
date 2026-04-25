@@ -296,6 +296,58 @@
         </div>
       </div>
 
+      <!-- Ring Two: Network Hub (DePIN Infrastructure) -->
+      <div class="profile-section-title" style="margin-top:20px;">Network Hub (Ring Two)</div>
+      <div class="network-hub-card">
+        <div class="network-status-row">
+          <div class="status-indicator">
+            <span class="status-dot healthy" id="nodeStatusDot"></span>
+            <span class="status-text" id="nodeStatusText">Node Active</span>
+          </div>
+          <div class="multiplier-badge" id="nodeMultiplierBadge">1.5x Multiplier</div>
+        </div>
+        
+        <div class="network-stats-grid">
+          <div class="n-stat">
+            <span class="n-label">NODE ID</span>
+            <span class="n-value" id="nodeId">M-DEPIN-7F2A</span>
+          </div>
+          <div class="n-stat">
+            <span class="n-label">UPTIME</span>
+            <span class="n-value" id="nodeUptime">0m</span>
+          </div>
+          <div class="n-stat">
+            <span class="n-label">NETWORK NODES</span>
+            <span class="n-value" id="totalNodes">...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ring Three: Sovereign Portal (NFT Bridge) -->
+      <div class="profile-section-title" style="margin-top:20px;">Sovereign Portal (Ring Three)</div>
+      <div class="sovereign-portal-card">
+        <div class="sovereign-header">
+          <div class="sov-id-wrap">
+            <span class="sov-label">AGENT ID</span>
+            <span class="sov-id" id="agentId">SOV-#----</span>
+          </div>
+          <button class="btn-wallet" id="btnConnectWallet">
+            <span class="wallet-icon">💎</span> Connect TON
+          </button>
+        </div>
+
+        <div class="trait-matrix" id="traitMatrix">
+          <div class="trait-row"><span>Focus Aura</span><span class="trait-val" id="t-aura">None</span></div>
+          <div class="trait-row"><span>Belief Cord</span><span class="trait-val" id="t-cord">None</span></div>
+          <div class="trait-row"><span>Sonic Resonance</span><span class="trait-val" id="t-sonic">None</span></div>
+        </div>
+
+        <button class="btn-mint-sovereign disabled" id="btnMintSovereign">
+          <span class="mint-icon">🔥</span> Mint Sovereign Agent
+        </button>
+        <p class="mint-requirement" id="mintRequirement">Mastery Required: Reach Purple Belt in any 3 Octants</p>
+      </div>
+
       <!-- Reward Breakdown -->
       <div class="profile-section-title">How to Earn Points</div>
       <div class="profile-rewards-info">
@@ -343,8 +395,11 @@
     <div id="rewardToast" class="reward-toast hidden" role="alert" aria-live="polite">
       <span class="reward-toast-icon">⭐</span>
       <div class="reward-toast-body">
-        <span class="reward-toast-pts" id="rewardToastPts">+10 pts</span>
-        <span class="reward-toast-label" id="rewardToastLabel">Daily Login Bonus!</span>
+        <div class="reward-toast-main">
+          <span class="reward-toast-pts" id="rewardToastPts">+10 pts</span>
+          <span class="reward-toast-label" id="rewardToastLabel">Daily Login Bonus!</span>
+        </div>
+        <span class="reward-toast-multiplier" id="rewardToastMultiplier"></span>
       </div>
     </div>
 
