@@ -15,6 +15,25 @@ const tgUser    = tg?.initDataUnsafe?.user;
 const initData  = tg?.initData ?? '';  // passed to backend for auth
 
 const API_BASE = 'https://mini-app-service-production.up.railway.app';
+let socket = null;
+
+function initSocket() {
+  if (socket) return;
+  socket = io(API_BASE);
+  
+  socket.on('connect', () => console.log('⚡ Connected to Wellness Hub'));
+  socket.on('campfire_state', (state) => updateCampfireUI(state));
+  socket.on('campfire_tick', ({ timeLeft }) => {
+    campfireTimeLeft = timeLeft;
+    updateCampfireTimerDisplay();
+  });
+  socket.on('campfire_complete', () => showCampfireReflection());
+  socket.on('campfire_status', (msg) => {
+    const el = document.getElementById('syncInstruction');
+    if (el) el.textContent = msg;
+  });
+  socket.on('error', (msg) => alert('Sync Error: ' + msg));
+}
 
 /* ─── Thumb Fu & Vibe Config ─── */
 const BELTS = [
@@ -1827,9 +1846,9 @@ function updateSovereignUI(data) {
   document.getElementById('t-sonic').textContent = belts.sonic + ' Res.';
 
   document.getElementById('lockHours').textContent = data.hours_remaining || 24;
-  
+
   // Unlock Shodan Button if ready
-  const canStartDan = data.total_points > 500; // Requirement for Shodan
+  const canStartDan = data.total_points >= 500;
   const danBtn = document.getElementById('btnStartShodan');
   if (danBtn) {
     if (canStartDan) {
@@ -1838,6 +1857,21 @@ function updateSovereignUI(data) {
     } else {
       danBtn.classList.add('disabled');
       danBtn.innerHTML = 'Need 500 Mastery Pts';
+    }
+  }
+
+  // Unlock Campfire (Nidan) if ready
+  const currentDan = data.current_dan || 0;
+  const campfireCard = document.getElementById('btnCampfire');
+  if (campfireCard) {
+    if (currentDan >= 2) {
+      campfireCard.classList.remove('locked');
+      const bt = document.getElementById('bt-campfire');
+      if (bt) bt.textContent = 'Nidan Active · Level 2';
+    } else {
+      campfireCard.classList.add('locked');
+      const bt = document.getElementById('bt-campfire');
+      if (bt) bt.textContent = 'Locked · Reach Dan 2';
     }
   }
 }
@@ -2097,3 +2131,133 @@ document.getElementById('onboardingNext')?.addEventListener('click', () => {
     dismissOnboarding();
   }
 });
+
+/* ══════════════════════════════════════════════
+   🔥 PHASE 3: CAMPFIRE CIRCLE (RELATIONAL TURN)
+   ══════════════════════════════════════════════ */
+let campfireRoom = null;
+let campfireSyncTimer = null;
+let campfireTimeLeft = 180;
+
+function initCampfireLobby() {
+  initSocket();
+  openModal('campfireModal');
+  document.getElementById('campfireLobbyView').classList.remove('hidden');
+  document.getElementById('campfireSyncView').classList.add('hidden');
+  document.getElementById('campfireReflectionView').classList.add('hidden');
+  socket.emit('join_campfire', { initData });
+}
+
+function updateCampfireUI(state) {
+  campfireRoom = state.roomId;
+  const lobbyStatus = document.getElementById('lobbyStatusText');
+  const partnerSlot = document.getElementById('partnerSlot');
+  const partnerName = document.getElementById('partnerName');
+
+  const myId = String(tgUser?.id || 'guest');
+  const me = state.users.find(u => String(u.userId) === myId) || state.users[0];
+  const partner = state.users.find(u => String(u.userId) !== myId);
+
+  if (partner) {
+    partnerSlot.classList.remove('vacant');
+    partnerSlot.classList.add('active');
+    partnerName.textContent = partner.username;
+    lobbyStatus.textContent = 'Partner Found! Establishing Resonance...';
+    if (state.ready && !document.getElementById('campfireLobbyView').classList.contains('hidden')) {
+      setTimeout(startCampfireSync, 1500);
+    }
+  } else {
+    partnerSlot.classList.add('vacant');
+    partnerSlot.classList.remove('active');
+    partnerName.textContent = 'Scanning Hub...';
+    lobbyStatus.textContent = 'Searching for a wellness partner...';
+  }
+
+  // Update Rings
+  const rMe = document.getElementById('ringMe');
+  const rPartner = document.getElementById('ringPartner');
+  if (rMe) {
+    rMe.style.opacity = me?.contact ? '1' : '0.2';
+    rMe.style.transform = me?.contact ? 'scale(1.1)' : 'scale(1)';
+  }
+  if (rPartner) {
+    rPartner.style.opacity = partner?.contact ? '1' : '0.2';
+    rPartner.style.transform = partner?.contact ? 'scale(1.1)' : 'scale(1)';
+  }
+
+  // Sync Check
+  const warning = document.getElementById('syncWarning');
+  if (warning) {
+    if (state.ready && !(me?.contact && partner?.contact)) {
+      warning.classList.remove('hidden');
+    } else {
+      warning.classList.add('hidden');
+    }
+  }
+}
+
+function startCampfireSync() {
+  document.getElementById('campfireLobbyView').classList.add('hidden');
+  document.getElementById('campfireSyncView').classList.remove('hidden');
+}
+
+function updateCampfireTimerDisplay() {
+  const m = Math.floor(campfireTimeLeft / 60);
+  const s = campfireTimeLeft % 60;
+  const el = document.getElementById('campfireTimerDisplay');
+  if (el) el.textContent = m + ':' + s.toString().padStart(2, '0');
+}
+
+function showCampfireReflection() {
+  document.getElementById('campfireSyncView').classList.add('hidden');
+  document.getElementById('campfireReflectionView').classList.remove('hidden');
+  // Shared audio loop shift or stop
+  if (currentAudio) currentAudio.pause();
+}
+
+document.getElementById('submitCampfireReflection')?.addEventListener('click', async () => {
+  const reflection = document.getElementById('campfireReflectionInput').value;
+  if (!reflection) return alert("Please share a reflection to seal the circle.");
+  
+  try {
+    const res = await fetch(`${API_BASE}/api/activity-reward`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ initData, activity: 'bridge' })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      reactToSuccess();
+      showRewardToast(data.points_earned || 25, 'Relational Mastery');
+      closeModal('campfireModal');
+      loadProfile(); // Refresh for belt update
+    }
+  } catch (e) {
+    console.error('[campfire reward]', e);
+  }
+});
+
+document.getElementById('btnCampfire')?.addEventListener('click', () => {
+    const dan = window.lastProfileData?.current_dan || 0;
+    if (dan < 2) {
+      alert("Nidan (2nd Dan) Required. Complete Phase 2 to unlock Relational Wellness.");
+      return;
+    }
+    initCampfireLobby();
+});
+
+document.getElementById('closeCampfire')?.addEventListener('click', () => {
+    clearInterval(campfireSyncTimer);
+    closeModal('campfireModal');
+});
+
+const syncSurface = document.querySelector('.sync-surface-wrap');
+if (syncSurface) {
+  const setContact = (val) => {
+    if (socket && campfireRoom) socket.emit('campfire_heartbeat', { roomId: campfireRoom, contact: val });
+  };
+  syncSurface.addEventListener('touchstart', (e) => { e.preventDefault(); setContact(true); });
+  syncSurface.addEventListener('touchend', (e) => { e.preventDefault(); setContact(false); });
+  syncSurface.addEventListener('mousedown', () => setContact(true));
+  syncSurface.addEventListener('mouseup', () => setContact(false));
+}

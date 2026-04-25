@@ -13,6 +13,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
 
     <link rel="stylesheet" href="styles.css" />
+    <!-- Phase 3: Socket.io Client -->
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
   </head>
   <body>
 
@@ -202,6 +204,18 @@
               <div class="octant-progress-bar" id="pb-nourish" style="width: 0%"></div>
             </div>
             <span class="octant-belt-tag" id="bt-nourish">White Belt · Lvl 1</span>
+          </div>
+        </button>
+        <!-- Phase 3: Campfire Circle (Nidan+) -->
+        <button class="octant-card o-fire locked" id="btnCampfire" data-dan="2" style="background: linear-gradient(135deg, rgba(255, 69, 0, 0.15) 0%, rgba(255, 140, 0, 0.05) 100%);">
+          <div class="octant-icon">🔥</div>
+          <div class="octant-info">
+            <span class="octant-name">Campfire Circle</span>
+            <span class="octant-desc-sub text-xs opacity-70">Relational Sync</span>
+            <div class="octant-progress-wrap">
+              <div class="octant-progress-bar" id="pb-campfire" style="width: 0%"></div>
+            </div>
+            <span class="octant-belt-tag" id="bt-campfire">Locked · Reach Dan 2</span>
           </div>
         </button>
       </div>
@@ -446,6 +460,54 @@
           <div id="contactWarning" class="contact-warning hidden">⚠️ SIGNAL LOST: RE-ESTABLISH CONTACT</div>
           <p id="phygitalAudioInfo" class="audio-info" style="font-size: 10px; opacity: 0.5;"></p>
         </footer>
+      </div>
+    </div>
+
+    <!-- 🤝 Phase 3: CAMPFIRE LOBBY MODAL -->
+    <div id="campfireModal" class="modal hidden" role="dialog" aria-label="Campfire Circle">
+      <div class="modal-content campfire-card">
+        <button class="modal-close" id="closeCampfire">✕</button>
+        <header class="campfire-header">
+          <div class="campfire-dan-badge">NIDAN</div>
+          <h2 class="premium-title">Campfire Circle</h2>
+          <p class="premium-subtitle">Shared presence. Synchronized breath.</p>
+        </header>
+        
+        <div id="campfireLobbyView" class="campfire-lobby-view">
+          <div class="lobby-status-wrap">
+            <div class="lobby-pulse-ring"></div>
+            <p id="lobbyStatusText">Searching for a wellness partner...</p>
+          </div>
+          <div class="partner-slots">
+            <div class="partner-slot active">
+              <span class="p-icon">👤</span>
+              <span class="p-name" id="lobbyMe">You</span>
+            </div>
+            <div class="partner-slot vacant" id="partnerSlot">
+              <span class="p-icon">❔</span>
+              <span class="p-name" id="partnerName">Scanning Hub...</span>
+            </div>
+          </div>
+          <button id="shareInvite" class="btn-secondary btn-full">Invite via Telegram</button>
+        </div>
+
+        <div id="campfireSyncView" class="campfire-sync-view hidden">
+          <div class="sync-surface-wrap">
+             <div class="sync-ring ring-me" id="ringMe"></div>
+             <div class="sync-ring ring-partner" id="ringPartner"></div>
+             <div class="sync-timer" id="campfireTimerDisplay">03:00</div>
+          </div>
+          <p id="syncInstruction" class="sync-instruction">Both must maintain contact to progress.</p>
+          <div id="syncWarning" class="contact-warning hidden">⚠️ SIGNAL LOST: RE-ESTABLISH SYNC</div>
+        </div>
+
+        <!-- Shared Reflection (Act 2) -->
+        <div id="campfireReflectionView" class="campfire-reflection-view hidden">
+           <h3 class="premium-title">Shared Resonance</h3>
+           <p class="premium-subtitle">Describe your state to each other.</p>
+           <textarea id="campfireReflectionInput" placeholder="I feel..."></textarea>
+           <button id="submitCampfireReflection" class="btn-premium">Seal Circle</button>
+        </div>
       </div>
     </div>
 
