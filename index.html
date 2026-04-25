@@ -230,6 +230,18 @@
             <span class="octant-belt-tag" id="bt-mentorship">Locked · Reach Dan 3</span>
           </div>
         </button>
+        <!-- Phase 5: Liberation Chamber (Yondan+) -->
+        <button class="octant-card o-obsidian locked" id="btnLiberation" data-dan="4" style="background: linear-gradient(135deg, rgba(30, 30, 45, 0.5) 0%, rgba(0, 0, 0, 0.8) 100%); border: 1px solid rgba(255,255,255,0.1);">
+          <div class="octant-icon">🦅</div>
+          <div class="octant-info">
+            <span class="octant-name">Liberation Chamber</span>
+            <span class="octant-desc-sub text-xs opacity-70">Integration Manifesto</span>
+            <div class="octant-progress-wrap">
+              <div class="octant-progress-bar" id="pb-liberation" style="width: 0%"></div>
+            </div>
+            <span class="octant-belt-tag" id="bt-liberation">Locked · Reach Dan 4</span>
+          </div>
+        </button>
       </div>
     </div>
 
@@ -384,6 +396,16 @@
           <span class="mint-icon">🔥</span> Mint Sovereign Agent
         </button>
         <p class="mint-requirement" id="mintRequirement">Mastery Required: Reach Purple Belt in any 3 Octants</p>
+      </div>
+
+      <!-- 🦅 Sovereign Essence (Phase 5) -->
+      <div id="sovereignEssenceSection" class="profile-section hidden" style="margin-top: 20px;">
+        <div class="profile-section-title">Sovereign Essence</div>
+        <div class="manifesto-scroll">
+           <div class="manifesto-quote-mark">❝</div>
+           <p id="profileManifestoText" class="manifesto-text" style="font-style: italic; color: var(--text2); line-height: 1.5; padding: 0 20px;"></p>
+           <div class="manifesto-author" id="manifestoAuthorName" style="text-align: right; font-size: 10px; color: var(--teal); margin-top: 10px; font-weight: 700;">— Sovereign Agent</div>
+        </div>
       </div>
 
       <!-- Reward Breakdown -->
@@ -563,6 +585,27 @@
           </div>
 
           <button id="submitWisdom" class="btn-premium btn-full">Dispatch Wisdom Drop</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 🦅 Phase 5: LIBERATION CHAMBER -->
+    <div id="liberationModal" class="modal hidden" role="dialog" aria-label="Liberation Chamber">
+      <div class="modal-content liberation-card">
+        <button class="modal-close" id="closeLiberation">✕</button>
+        <header class="liberation-header">
+          <div class="liberation-dan-badge">YONDAN</div>
+          <h2 class="premium-title">Liberation Chamber</h2>
+          <p class="premium-subtitle">Synthesize your journey. Author your truth.</p>
+        </header>
+
+        <div class="liberation-body">
+          <p class="liberation-prompt">What is the synthesis of your training? Author the manifesto that defines your digital sovereignty.</p>
+          <div class="liberation-input-wrap">
+            <textarea id="manifestoInput" placeholder="My Liberation Statement... (Min 50 characters)"></textarea>
+            <div id="manifestoCharCount" class="char-count">0 / 50</div>
+          </div>
+          <button id="publishManifesto" class="btn-premium btn-full">Seal My Essence</button>
         </div>
       </div>
     </div>

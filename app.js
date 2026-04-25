@@ -1893,6 +1893,20 @@ function updateSovereignUI(data) {
       if (bt) bt.textContent = 'Locked · Reach Dan 3';
     }
   }
+
+  // Unlock Liberation Chamber (Yondan) if ready
+  const liberationCard = document.getElementById('btnLiberation');
+  if (liberationCard) {
+    if (currentDan >= 4) {
+      liberationCard.classList.remove('locked');
+      const bt = document.getElementById('bt-liberation');
+      if (bt) bt.textContent = 'Yondan Active · Level 4';
+    } else {
+      liberationCard.classList.add('locked');
+      const bt = document.getElementById('bt-liberation');
+      if (bt) bt.textContent = 'Locked · Reach Dan 4';
+    }
+  }
 }
 
 document.getElementById('btnStartShodan')?.addEventListener('click', startDanSession);
@@ -1960,6 +1974,14 @@ async function loadProfile() {
     window.lastProfileData = data;
 
     updateSovereignUI(data);
+
+    // Phase 5: Liberation Display (Private to profile for now)
+    const manifestoSection = document.getElementById('sovereignEssenceSection');
+    const manifestoText = document.getElementById('profileManifestoText');
+    if (data.liberation_manifesto && manifestoSection && manifestoText) {
+      manifestoText.textContent = data.liberation_manifesto;
+      manifestoSection.classList.remove('hidden');
+    }
 
     if (data.events.length === 0) {
       feedEl.innerHTML = '<div class="feed-empty">No activity yet — complete a session to earn points!</div>';
@@ -2349,4 +2371,56 @@ document.getElementById('submitWisdom')?.addEventListener('click', async () => {
 
 document.getElementById('closeMentorWorkshop')?.addEventListener('click', () => {
   closeModal('mentorWorkshopModal');
+});
+
+/* ══════════════════════════════════════════════
+   🦅 PHASE 5: YONDAN (THE INTEGRATION TURN)
+   ══════════════════════════════════════════════ */
+document.getElementById('btnLiberation')?.addEventListener('click', () => {
+  const dan = window.lastProfileData?.current_dan || 0;
+  if (dan < 4) {
+    alert("Yondan (4th Dan) Required. Only those who have Mastered the Teaching Turn can enter the Chamber.");
+    return;
+  }
+  openModal('liberationModal');
+});
+
+document.getElementById('manifestoInput')?.addEventListener('input', (e) => {
+  const count = e.target.value.trim().length;
+  const countDisplay = document.getElementById('manifestoCharCount');
+  const publishBtn = document.getElementById('publishManifesto');
+  
+  if (countDisplay) {
+    countDisplay.textContent = `${count} / 50`;
+    countDisplay.classList.toggle('ready', count >= 50);
+  }
+  
+  if (publishBtn) {
+    publishBtn.classList.toggle('disabled', count < 50);
+  }
+});
+
+document.getElementById('publishManifesto')?.addEventListener('click', async () => {
+  const manifesto = document.getElementById('manifestoInput').value;
+  if (!manifesto || manifesto.trim().length < 50) return alert("Manifestocannot be less than 50 characters.");
+
+  try {
+    const res = await fetch(`${API_BASE}/api/publish-manifesto`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ initData, manifesto })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      alert("Your Digital Liberation Statement has been sealed.");
+      closeModal('liberationModal');
+      loadProfile(); // Refresh to show the essence
+    } else {
+      alert(data.error);
+    }
+  } catch (e) { alert("Publication failed."); }
+});
+
+document.getElementById('closeLiberation')?.addEventListener('click', () => {
+  closeModal('liberationModal');
 });
