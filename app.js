@@ -1064,6 +1064,7 @@ document.getElementById('octStillness')?.addEventListener('click', () => {
     b.classList.toggle('active', +b.dataset.mins === selectedMins);
     b.style.display = (+b.dataset.mins === selectedMins) ? 'inline-block' : 'none'; // Lock to scaled duration
   });
+  fetchAndShowWisdom('stillness', 'wisdom-stillness');
   openModal('meditationModal');
 });
 
@@ -1074,6 +1075,7 @@ document.getElementById('octMovement')?.addEventListener('click', () => {
   // We'll set cycle goal = mins * 1.5 (approx 6-18 cycles)
   window.breathCycleGoal = Math.max(3, Math.floor(mins * 1.5));
   breathCyclesEl.innerHTML = `Goal: <strong>${window.breathCycleGoal} cycles</strong>`;
+  fetchAndShowWisdom('movement', 'wisdom-breathing');
   openModal('breathingModal');
 });
 
@@ -1295,6 +1297,7 @@ function startPhygitalSession(typeKey) {
   document.getElementById('hudLeft').textContent = `Belt: ${belt.name}`;
   document.getElementById('hudRight').textContent = `LVL: ${BELTS.indexOf(belt) + 1}`;
   
+  fetchAndShowWisdom(meta.id, 'wisdom-phygital');
   openModal('phygitalModal');
   renderPhygitalSurface(meta.id);
   
@@ -1652,6 +1655,8 @@ document.getElementById('closePhygital')?.addEventListener('click', () => {
   phygitalIsContact = false;
   stopAmbient();
   closeModal('phygitalModal');
+  const overlay = document.getElementById('wisdom-phygital');
+  if (overlay) overlay.classList.add('hidden');
 });
 
 document.getElementById('octStillness')?.addEventListener('click', () => startPhygitalSession('STILLNESS'));
@@ -1872,6 +1877,20 @@ function updateSovereignUI(data) {
       campfireCard.classList.add('locked');
       const bt = document.getElementById('bt-campfire');
       if (bt) bt.textContent = 'Locked · Reach Dan 2';
+    }
+  }
+
+  // Unlock Mentor Workshop (Sandan) if ready
+  const mentorCard = document.getElementById('btnMentorWorkshop');
+  if (mentorCard) {
+    if (currentDan >= 3) {
+      mentorCard.classList.remove('locked');
+      const bt = document.getElementById('bt-mentorship');
+      if (bt) bt.textContent = 'Sandan Active · Level 3';
+    } else {
+      mentorCard.classList.add('locked');
+      const bt = document.getElementById('bt-mentorship');
+      if (bt) bt.textContent = 'Locked · Reach Dan 3';
     }
   }
 }
@@ -2261,3 +2280,73 @@ if (syncSurface) {
   syncSurface.addEventListener('mousedown', () => setContact(true));
   syncSurface.addEventListener('mouseup', () => setContact(false));
 }
+
+/* ══════════════════════════════════════════════
+   📜 PHASE 4: SANDAN (THE TEACHING TURN)
+   ══════════════════════════════════════════════ */
+async function fetchAndShowWisdom(octantId, overlayId) {
+  try {
+    const res = await fetch(`${API_BASE}/api/get-wisdom/${octantId}`);
+    const data = await res.json();
+    const overlay = document.getElementById(overlayId);
+    if (data.ok && overlay) {
+      overlay.querySelector('.wisdom-text').textContent = data.wisdom.content_text;
+      overlay.querySelector('.wisdom-author').textContent = `— ${data.wisdom.author_name} (Sandan)`;
+      const bowBtn = overlay.querySelector('.btn-bow');
+      bowBtn.onclick = () => bowToWisdom(data.id, bowBtn);
+      overlay.classList.remove('hidden');
+    } else if (overlay) {
+      overlay.classList.add('hidden');
+    }
+  } catch (e) { console.error('Wisdom fetch failed', e); }
+}
+
+async function bowToWisdom(id, btn) {
+  try {
+    const res = await fetch(`${API_BASE}/api/bow-wisdom`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ initData, mentorshipId: id })
+    });
+    if ((await res.json()).ok) {
+      btn.innerHTML = '✅ Bowed';
+      btn.disabled = true;
+      showRewardToast(5, 'Recognition Points');
+    }
+  } catch (e) { console.error('Bow failed', e); }
+}
+
+document.getElementById('btnMentorWorkshop')?.addEventListener('click', () => {
+  const dan = window.lastProfileData?.current_dan || 0;
+  if (dan < 3) {
+    alert("Sandan (3rd Dan) Required. Master the Relational Turn to become a Teacher.");
+    return;
+  }
+  openModal('mentorWorkshopModal');
+});
+
+document.getElementById('submitWisdom')?.addEventListener('click', async () => {
+  const octantId = document.getElementById('wisdomOctantSelect').value;
+  const content = document.getElementById('wisdomInput').value;
+  if (!content) return alert("Wisdom cannot be empty.");
+
+  try {
+    const res = await fetch(`${API_BASE}/api/submit-wisdom`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ initData, octantId, content })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      alert("Wisdom dispatched to the Sanctuary.");
+      closeModal('mentorWorkshopModal');
+      document.getElementById('wisdomInput').value = '';
+    } else {
+      alert(data.error);
+    }
+  } catch (e) { alert("Submission failed."); }
+});
+
+document.getElementById('closeMentorWorkshop')?.addEventListener('click', () => {
+  closeModal('mentorWorkshopModal');
+});
