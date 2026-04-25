@@ -15,6 +15,8 @@
     <link rel="stylesheet" href="styles.css" />
     <!-- Phase 3: Socket.io Client -->
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <!-- Phase 6: TON Connect SDK -->
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
   </head>
   <body>
 
@@ -388,8 +390,13 @@
 
         <div class="trait-matrix" id="traitMatrix">
           <div class="trait-row"><span>Focus Aura</span><span class="trait-val" id="t-aura">None</span></div>
-          <div class="trait-row"><span>Belief Cord</span><span class="trait-val" id="t-cord">None</span></div>
+          <div class="trait-row"><span>Creative Mark</span><span class="trait-val" id="t-mark">None</span></div>
           <div class="trait-row"><span>Sonic Resonance</span><span class="trait-val" id="t-sonic">None</span></div>
+          <div class="trait-row"><span>Wisdom Script</span><span class="trait-val" id="t-wisdom">None</span></div>
+          <div class="trait-row"><span>Emotion Freq.</span><span class="trait-val" id="t-emotion">None</span></div>
+          <div class="trait-row"><span>Social Bond</span><span class="trait-val" id="t-bridge">None</span></div>
+          <div class="trait-row"><span>Movement Flow</span><span class="trait-val" id="t-movement">None</span></div>
+          <div class="trait-row"><span>Spirit Insight</span><span class="trait-val" id="t-nourish">None</span></div>
         </div>
 
         <button class="btn-mint-sovereign disabled" id="btnMintSovereign">
@@ -606,6 +613,35 @@
             <div id="manifestoCharCount" class="char-count">0 / 50</div>
           </div>
           <button id="publishManifesto" class="btn-premium btn-full">Seal My Essence</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 💎 Phase 6: MINTING CHAMBER (THE FORGE) -->
+    <div id="mintModal" class="modal hidden" role="dialog" aria-label="Minting Chamber">
+      <div class="modal-content forge-card">
+        <button class="modal-close" id="closeMint">✕</button>
+        <header class="forge-header">
+          <div class="forge-badge">RING THREE</div>
+          <h2 class="premium-title">The Sovereign Forge</h2>
+          <p class="premium-subtitle">Branding your progress onto the blockchain.</p>
+        </header>
+
+        <div class="forge-body">
+          <div id="forgeAnimation" class="forge-anim">
+            <div class="plasma-orb"></div>
+            <div class="forge-belt-preview" id="forgeBeltPreview">WHITE</div>
+          </div>
+
+          <div class="forge-details">
+             <div class="detail-row"><span>Agent ID:</span><span id="mintAgentId">SOV-XXXX</span></div>
+             <div class="detail-row"><span>Status:</span><span id="mintStatusText">Awaiting Wallet</span></div>
+          </div>
+
+          <div id="ton-connect-btn" class="ton-connect-wrap"></div>
+          <button id="triggerMint" class="btn-premium btn-full hidden">Forge My Sovereign Agent</button>
+          
+          <p class="forge-dev-note" style="font-size: 8px; opacity: 0.3; margin-top: 15px; text-align: center;">PRODUCTION REQ: TON Mainnet Contract + 0.05 TON Gas</p>
         </div>
       </div>
     </div>

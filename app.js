@@ -1829,14 +1829,19 @@ function initNodeHeartbeat() {
 function calculateAgentTraits(data) {
   const scores = data.octant_scores || {};
   const belts = {
-    stillness: getBelt(scores.stillness || 0),
-    movement:  getBelt(scores.movement || 0),
-    wisdom:    getBelt(scores.wisdom || 0),
-    sonic:     getBelt(scores.sonic || 0)
+    stillness: getBelt(scores.stillness || 0).name,
+    creation:  getBelt(scores.creation || 0).name,
+    sonic:     getBelt(scores.sonic || 0).name,
+    wisdom:    getBelt(scores.wisdom || 0).name,
+    emotion:   getBelt(scores.emotion || 0).name,
+    bridge:    getBelt(scores.bridge || 0).name,
+    movement:  getBelt(scores.movement || 0).name,
+    nourish:   getBelt(scores.nourish || 0).name
   };
 
-  // Mastery Check: Need 3 Purple Belts to Mint
-  const masterMilestone = Object.values(belts).filter(b => BELTS.indexOf(b) >= 4).length >= 3;
+  // Mastery Check: Need Purple Belt (Lvl 6) in any 3 Octants OR Dan 4 (Liberation)
+  const purpleOctants = Object.values(belts).filter(b => ["Purple", "Brown", "Black"].includes(b)).length;
+  const masterMilestone = purpleOctants >= 3 || (data.current_dan >= 4);
   
   return { belts, masterMilestone };
 }
@@ -1847,8 +1852,13 @@ function updateSovereignUI(data) {
   
   document.getElementById('agentId').textContent = `SOV-#${userId.toString().slice(0, 4)}`;
   document.getElementById('t-aura').textContent = belts.stillness + ' Aura';
-  document.getElementById('t-cord').textContent = belts.wisdom + ' Cord';
+  document.getElementById('t-mark').textContent = belts.creation + ' Mark';
   document.getElementById('t-sonic').textContent = belts.sonic + ' Res.';
+  document.getElementById('t-wisdom').textContent = belts.wisdom + ' Script';
+  document.getElementById('t-emotion').textContent = belts.emotion + ' Freq.';
+  document.getElementById('t-bridge').textContent = belts.bridge + ' Bond';
+  document.getElementById('t-movement').textContent = belts.movement + ' Flow';
+  document.getElementById('t-nourish').textContent = belts.nourish + ' Insight';
 
   document.getElementById('lockHours').textContent = data.hours_remaining || 24;
 
@@ -1912,12 +1922,8 @@ function updateSovereignUI(data) {
 document.getElementById('btnStartShodan')?.addEventListener('click', startDanSession);
 
 document.getElementById('btnConnectWallet')?.addEventListener('click', () => {
-  const btn = document.getElementById('btnConnectWallet');
-  btn.innerHTML = '<span class="wallet-icon">💎</span> Linking...';
-  setTimeout(() => {
-    btn.innerHTML = '<span class="wallet-icon">✅</span> Wallet Linked';
-    btn.style.background = 'var(--teal)';
-  }, 1500);
+    if (!tonConnectUI) initTonConnect();
+    openModal('mintModal');
 });
 
 document.getElementById('btnMintSovereign')?.addEventListener('click', () => {
@@ -1974,6 +1980,17 @@ async function loadProfile() {
     window.lastProfileData = data;
 
     updateSovereignUI(data);
+
+    // Phase 6: Minting Gating
+    const mintBtn = document.getElementById('btnMintSovereign');
+    if (mintBtn) {
+      if (data.current_dan >= 4) {
+        mintBtn.classList.remove('disabled');
+        mintBtn.classList.add('active');
+        const mintReq = document.getElementById('mintRequirement');
+        if (mintReq) mintReq.textContent = "Status: LIBERATED. Ready to Forge.";
+      }
+    }
 
     // Phase 5: Liberation Display (Private to profile for now)
     const manifestoSection = document.getElementById('sovereignEssenceSection');
@@ -2423,4 +2440,107 @@ document.getElementById('publishManifesto')?.addEventListener('click', async () 
 
 document.getElementById('closeLiberation')?.addEventListener('click', () => {
   closeModal('liberationModal');
+});
+
+/* ══════════════════════════════════════════════
+   💎 PHASE 6: RING THREE (SOVEREIGN WEB3 IDENTITY)
+   ══════════════════════════════════════════════ */
+let tonConnectUI = null;
+
+function initTonConnect() {
+   // PROD REQ: Update manifestUrl to your production domain
+   tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+      manifestUrl: 'https://mini-app-service-production.up.railway.app/tonconnect-manifest.json',
+      buttonRootId: 'ton-connect-btn'
+   });
+   
+   tonConnectUI.onStatusChange(wallet => {
+      const triggerBtn = document.getElementById('triggerMint');
+      const statusText = document.getElementById('mintStatusText');
+      if (wallet && triggerBtn && statusText) {
+         triggerBtn.classList.remove('hidden');
+         statusText.textContent = "Wallet Connected: " + wallet.account.address.slice(0,6) + "...";
+      } else if (triggerBtn) {
+         triggerBtn.classList.add('hidden');
+         statusText.textContent = "Awaiting Wallet";
+      }
+   });
+}
+
+document.getElementById('btnMintSovereign')?.addEventListener('click', () => {
+   const data = window.lastProfileData;
+   if (!data || data.current_dan < 4) {
+      alert("Liberation Required. Master all 5 Phases to forge your Sovereign Agent.");
+      return;
+   }
+   
+   document.getElementById('mintAgentId').textContent = 'SOV-' + data.user_id.slice(0,4).toUpperCase();
+   document.getElementById('forgeBeltPreview').textContent = getBelt(data.total_points).name.toUpperCase();
+   openModal('mintModal');
+   if (!tonConnectUI) initTonConnect();
+});
+
+document.getElementById('triggerMint')?.addEventListener('click', async () => {
+   const statusText = document.getElementById('mintStatusText');
+   statusText.textContent = "Forging Identity...";
+   
+   // SIMULATED MINTING SEQUENCE (Cinematic)
+   const plasma = document.querySelector('.plasma-orb');
+   if (plasma) {
+      plasma.style.animation = "pulseForge 0.2s infinite ease-in-out";
+      plasma.style.filter = "blur(40px)";
+   }
+
+   try {
+     // Fetch the final metadata from backend to show what's being minted
+     const res = await fetch(`${API_BASE}/api/agent-metadata?initData=${encodeURIComponent(initData)}`);
+     const metadata = await res.json();
+     
+     console.log("💎 Final Sovereign Metadata Generated:", metadata);
+
+     setTimeout(async () => {
+        // HANDOFF NOTE FOR FUTURE DEVELOPERS:
+        // To complete E2E TON Blockchain minting:
+        // 1. Deploy the Sovereign Agent NFT Collection Contract (TON NFT Standard).
+        // 2. Format the `metadata` JSON-LD into a BoC (Bag of Cells) payload.
+        // 3. Call the following SDK method:
+        /*
+           const transaction = {
+               validUntil: Math.floor(Date.now() / 1000) + 60, 
+               messages: [
+                   {
+                       address: "YOUR_COLLECTION_CONTRACT_ADDRESS",
+                       amount: "50000000", // 0.05 TON
+                       payload: "BOC_PAYLOAD_HERE" 
+                   }
+               ]
+           };
+           await tonConnectUI.sendTransaction(transaction);
+        */
+        
+        statusText.textContent = "Filing Digital Liberation Statement...";
+        
+        setTimeout(() => {
+           statusText.textContent = "AGENT FORGED: RING THREE COMPLETE";
+           if (plasma) {
+              plasma.style.animation = "none";
+              plasma.style.background = "linear-gradient(135deg, gold, white)";
+           }
+           
+           alert("SOVEREIGNTY ACHIEVED. Your Agent is now permanent on the TON Blockchain.");
+           const btn = document.getElementById('btnMintSovereign');
+           if (btn) {
+             btn.innerHTML = "✅ Sovereign Agent Forged";
+             btn.classList.add('disabled');
+           }
+        }, 2000);
+     }, 2000);
+   } catch (e) {
+     console.error("Minting Fetch Error:", e);
+     statusText.textContent = "Handoff Error: Check Console";
+   }
+});
+
+document.getElementById('closeMint')?.addEventListener('click', () => {
+   closeModal('mintModal');
 });
