@@ -444,6 +444,44 @@ const gurus = [
     btnGradient: 'linear-gradient(135deg, #1c3252, #2e86ab)',
     welcomeMsg: "Welcome 🧠 I'm Ryu, your stress management specialist. Stress and mental fog are just patterns — and patterns can change. What's weighing on your mind lately?",
   },
+  {
+    id: 'max',
+    name: 'Max Lowenstein',
+    handle: '@healingmotions',
+    emoji: '🧘',
+    gradient: 'linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%)',
+    tagBg: '#00d2ff',
+    tagColor: '#ffffff',
+    followers: '218K',
+    bio: 'Registered Dietitian, breathwork facilitator & yoga teacher. Science-backed wellness with a warm, grounded approach.',
+    tags: ['🌬️ Breathwork', '🧘 Yoga', '🥗 Nutrition', '🧠 Meditation'],
+    specialties: ['yoga', 'breathwork', 'nutrition', 'meditation'],
+    ctaText: 'Chat with Max',
+    btnGradient: 'linear-gradient(135deg, #00d2ff, #3a7bd5)',
+    chatUrl: 'https://gaia-twins-production.up.railway.app/chat',
+    voiceEnabled: true,
+    twinId: 'max',
+    welcomeMsg: "Hey! I'm Max. I'm here to help you move, breathe, and nourish your body with science-backed wellness. What's on your mind today?",
+  },
+  {
+    id: 'melini',
+    name: 'Melini Jesudason',
+    handle: '@meliniseri',
+    emoji: '🧘',
+    gradient: 'linear-gradient(135deg, #8e2de2 0%, #4a00e0 100%)',
+    tagBg: '#8e2de2',
+    tagColor: '#ffffff',
+    followers: '400K',
+    bio: 'World-renowned yoga instructor, Reiki Master & spiritual medium. Dynamic practice meets deep spiritual wisdom.',
+    tags: ['🤸 Inversions', '✨ Energy Healing', '🔥 Ashtanga', '🔮 Spirituality'],
+    specialties: ['yoga', 'spiritual'],
+    ctaText: 'Chat with Melini',
+    btnGradient: 'linear-gradient(135deg, #8e2de2, #4a00e0)',
+    chatUrl: 'https://gaia-twins-production.up.railway.app/chat',
+    voiceEnabled: true,
+    twinId: 'melini',
+    welcomeMsg: "Namaste. I am Melini. Together, we will explore the intersection of dynamic physical practice and deep spiritual wisdom. How can I guide you today?",
+  },
 ];
 
 
@@ -465,6 +503,15 @@ function renderGurus(filter = 'all') {
     card.className = 'guru-card';
     card.style.animationDelay = `${i * 60}ms`;
     card.style.setProperty('--guru-accent', g.gradient);
+    const actionsHtml = g.voiceEnabled
+      ? `<div class="guru-actions">
+           <button class="guru-btn chat" style="background:${g.btnGradient};" id="chatBtn_${g.id}">${g.ctaText} →</button>
+           <button class="guru-btn talk" id="talkBtn_${g.id}">Talk with ${g.name.split(' ')[0]} 🎙️</button>
+         </div>`
+      : `<button class="guru-btn" style="background:${g.btnGradient};" id="guruBtn_${g.id}" data-id="${g.id}">
+           ${g.ctaText} →
+         </button>`;
+
     card.innerHTML = `
       <div class="guru-head">
         <div class="guru-avatar-wrap">
@@ -481,15 +528,16 @@ function renderGurus(filter = 'all') {
       <div class="guru-tags">
         ${g.tags.map(t => `<span class="guru-tag" style="background:rgba(${hexToRgb(g.tagBg)},0.15);color:${g.tagColor};border-color:rgba(${hexToRgb(g.tagBg)},0.3);">${t}</span>`).join('')}
       </div>
-      <button class="guru-btn" style="background:${g.btnGradient};" id="guruBtn_${g.id}" data-id="${g.id}">
-        ${g.ctaText} →
-      </button>
+      ${actionsHtml}
     `;
     guruListEl.appendChild(card);
 
-    card.querySelector(`#guruBtn_${g.id}`).addEventListener('click', () => {
-      openChat(g);
-    });
+    if (g.voiceEnabled) {
+      card.querySelector(`#chatBtn_${g.id}`).addEventListener('click', () => openChat(g));
+      card.querySelector(`#talkBtn_${g.id}`).addEventListener('click', () => openVoiceChat(g));
+    } else {
+      card.querySelector(`#guruBtn_${g.id}`).addEventListener('click', () => openChat(g));
+    }
   });
 }
 
@@ -974,12 +1022,16 @@ async function sendMessage() {
     let reply;
 
     if (guru.chatUrl) {
-      // ── Simple backend: POST { message } → { reply } ──
-      // Used by gurus that have their own dedicated AI endpoint (e.g. Arjun → Railway).
+      // ── Gaia Twins Integration ──
+      const isGaia = guru.chatUrl.includes('gaia-twins');
+      const payload = isGaia
+        ? { text: text, twin: guru.twinId }
+        : { message: text };
+
       const resp = await fetch(guru.chatUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text }),
+        body: JSON.stringify(payload),
       });
 
       hideTyping();
@@ -987,7 +1039,8 @@ async function sendMessage() {
       if (!resp.ok) throw new Error(`Server error ${resp.status}`);
 
       const data = await resp.json();
-      reply = data.reply ?? data.message ?? null;
+      // Gaia might return textual reply in 'reply' or 'text'
+      reply = data.reply ?? data.message ?? data.text ?? null;
       if (!reply) throw new Error('Empty reply from server.');
 
     } else {
@@ -2543,4 +2596,180 @@ document.getElementById('triggerMint')?.addEventListener('click', async () => {
 
 document.getElementById('closeMint')?.addEventListener('click', () => {
    closeModal('mintModal');
+});
+/* ══════════════════════════════════════════════
+   🎙️ VOICE CHAT (GAIA TWINS)
+   ══════════════════════════════════════════════ */
+const voiceScreen     = document.getElementById('voiceScreen');
+const voiceClose      = document.getElementById('voiceClose');
+const voiceAvatar     = document.getElementById('voiceAvatar');
+const voiceAvatarRing = document.getElementById('voiceAvatarRing');
+const voiceGuruName   = document.getElementById('voiceGuruName');
+const voiceStatusText = document.getElementById('voiceStatusText');
+const voiceStatusIcon = document.getElementById('voiceStatusIcon');
+const voiceVisualizer = document.getElementById('voiceVisualizer');
+const voiceResponseBubble = document.getElementById('voiceResponseBubble');
+const voiceResponseText = document.getElementById('voiceResponseText');
+const voiceTimer      = document.getElementById('voiceTimer');
+const voiceRecordBtn  = document.getElementById('voiceRecordBtn');
+
+let mediaRecorder = null;
+let audioChunks = [];
+let voiceTimerInterval = null;
+let voiceStartTime = null;
+let isRecording = false;
+
+function openVoiceChat(guru) {
+  activeGuru = guru;
+  voiceGuruName.textContent = guru.name;
+  voiceAvatar.textContent = guru.emoji;
+  voiceAvatar.style.background = guru.gradient;
+  voiceStatusText.textContent = `Ready to talk with ${guru.name.split(' ')[0]}`;
+  voiceStatusIcon.textContent = guru.emoji;
+  
+  voiceResponseBubble.classList.add('hidden');
+  voiceVisualizer.classList.add('hidden');
+  voiceTimer.textContent = '00:00';
+  
+  voiceScreen.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+
+  if (tg?.BackButton) {
+    tg.BackButton.show();
+    tg.BackButton.onClick(() => closeVoiceChat());
+  }
+}
+
+function closeVoiceChat() {
+  if (isRecording) stopRecording();
+  voiceScreen.classList.add('hidden');
+  document.body.style.overflow = '';
+  if (tg?.BackButton) tg.BackButton.hide();
+  
+  // Stop any playing TTS
+  if (window.currentTTS) {
+    window.currentTTS.pause();
+    window.currentTTS = null;
+  }
+}
+
+voiceClose.addEventListener('click', closeVoiceChat);
+
+async function startRecording() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRecorder = new MediaRecorder(stream);
+    audioChunks = [];
+
+    mediaRecorder.ondataavailable = (event) => {
+      audioChunks.push(event.data);
+    };
+
+    mediaRecorder.onstop = async () => {
+      const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+      const reader = new FileReader();
+      reader.readAsDataURL(audioBlob);
+      reader.onloadend = () => {
+        const base64Audio = reader.result.split(',')[1];
+        sendVoiceToGaia(base64Audio);
+      };
+      
+      // Stop all tracks to release mic
+      stream.getTracks().forEach(track => track.stop());
+    };
+
+    mediaRecorder.start();
+    isRecording = true;
+    voiceRecordBtn.classList.add('recording');
+    voiceAvatarRing.classList.add('pulsing');
+    voiceVisualizer.classList.remove('hidden');
+    voiceStatusText.textContent = 'Listening...';
+    
+    voiceStartTime = Date.now();
+    voiceTimerInterval = setInterval(updateVoiceTimer, 1000);
+    
+    if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+
+  } catch (err) {
+    console.error('Mic access denied:', err);
+    alert('Please allow microphone access to talk with your guru.');
+  }
+}
+
+function stopRecording() {
+  if (mediaRecorder && isRecording) {
+    mediaRecorder.stop();
+    isRecording = false;
+    voiceRecordBtn.classList.remove('recording');
+    voiceAvatarRing.classList.remove('pulsing');
+    voiceStatusText.textContent = 'Processing...';
+    clearInterval(voiceTimerInterval);
+  }
+}
+
+function updateVoiceTimer() {
+  const elapsed = Math.floor((Date.now() - voiceStartTime) / 1000);
+  const mins = Math.floor(elapsed / 60).toString().padStart(2, '0');
+  const secs = (elapsed % 60).toString().padStart(2, '0');
+  voiceTimer.textContent = `${mins}:${secs}`;
+}
+
+async function sendVoiceToGaia(base64Audio) {
+  if (!activeGuru) return;
+  
+  try {
+    const resp = await fetch('https://gaia-twins-production.up.railway.app/voice', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        audioBase64: base64Audio,
+        mimeType: 'audio/webm',
+        twin: activeGuru.twinId
+      })
+    });
+
+    if (!resp.ok) throw new Error(`Server error ${resp.status}`);
+
+    const data = await resp.json();
+    
+    // Response has { text, ttsAudioBase64 }
+    if (data.text) {
+      voiceResponseText.textContent = `"${data.text}"`;
+      voiceResponseBubble.classList.remove('hidden');
+      voiceStatusText.textContent = 'Speaking...';
+    }
+
+    if (data.ttsAudioBase64) {
+      playTTS(data.ttsAudioBase64);
+    } else {
+      voiceStatusText.textContent = 'Ready';
+    }
+
+  } catch (err) {
+    console.error('Voice API error:', err);
+    voiceStatusText.textContent = 'Error sending voice';
+  }
+}
+
+function playTTS(base64) {
+  if (window.currentTTS) {
+    window.currentTTS.pause();
+  }
+  
+  const audio = new Audio(`data:audio/mp3;base64,${base64}`);
+  window.currentTTS = audio;
+  audio.play();
+  
+  audio.onended = () => {
+    voiceStatusText.textContent = 'Ready';
+    window.currentTTS = null;
+  };
+}
+
+voiceRecordBtn.addEventListener('click', () => {
+  if (isRecording) {
+    stopRecording();
+  } else {
+    startRecording();
+  }
 });

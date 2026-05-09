@@ -2893,3 +2893,224 @@ body {
     pointer-events: auto;
     box-shadow: 0 0 20px rgba(0, 229, 204, 0.4);
 }
+/* 🎙️ VOICE CHAT SCREEN styles */
+.voice-screen {
+  position: fixed;
+  inset: 0;
+  background: #0d0d15;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  color: #fff;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.voice-screen.hidden {
+  transform: translateY(100%);
+  display: none !important;
+}
+
+.voice-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.voice-close {
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.voice-header-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.voice-header-title {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.voice-header-subtitle {
+  font-size: 11px;
+  color: var(--text2);
+  text-transform: lowercase;
+}
+
+.voice-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  gap: 24px;
+  text-align: center;
+}
+
+.voice-avatar-wrap {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.voice-avatar-ring {
+  position: absolute;
+  inset: 0;
+  border: 2px solid var(--teal);
+  border-radius: 50%;
+  opacity: 0.3;
+}
+
+.voice-avatar-ring.pulsing {
+  animation: voice-avatar-pulse 2s infinite;
+}
+
+@keyframes voice-avatar-pulse {
+  0% { transform: scale(1); opacity: 0.5; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+
+.voice-avatar {
+  width: 110px;
+  height: 110px;
+  background: var(--bg2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 50px;
+  border: 4px solid var(--bg3);
+  z-index: 2;
+}
+
+.voice-guru-name {
+  font-size: 24px;
+  font-weight: 800;
+  margin: 0;
+}
+
+.voice-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.voice-status-icon {
+  font-size: 14px;
+}
+
+.voice-visualizer {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 40px;
+}
+
+.viz-bar {
+  width: 4px;
+  height: 10px;
+  background: var(--teal);
+  border-radius: 2px;
+  transition: height 0.1s ease;
+  animation: viz-idle 1s infinite ease-in-out;
+}
+
+@keyframes viz-idle {
+  0%, 100% { height: 8px; }
+  50% { height: 16px; }
+}
+
+.voice-response-bubble {
+  max-width: 85%;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text);
+  margin-top: 10px;
+  animation: fadeIn 0.4s ease;
+}
+
+.voice-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 20px env(safe-area-inset-bottom, 40px);
+  gap: 20px;
+}
+
+.voice-timer {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.voice-record-btn {
+  width: 72px;
+  height: 72px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 4px solid #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.record-icon-inner {
+  width: 56px;
+  height: 56px;
+  background: #ff4b4b;
+  border-radius: 50%;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.voice-record-btn.recording {
+  border-color: #ff4b4b;
+  transform: scale(1.1);
+  box-shadow: 0 0 30px rgba(255, 75, 75, 0.4);
+}
+
+.voice-record-btn.recording .record-icon-inner {
+  border-radius: 12px;
+  transform: scale(0.5);
+}
+
+/* 👥 Guru Card Actions Update */
+.guru-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.guru-btn.talk {
+  background: transparent;
+  border: 1px solid var(--border2);
+  color: var(--text2);
+}
+
+.guru-btn.talk:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  border-color: var(--teal);
+}

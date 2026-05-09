@@ -918,6 +918,60 @@
     </div>
     <!-- END CHAT SCREEN -->
 
+    <!-- ═══ VOICE SCREEN ═══ -->
+    <div id="voiceScreen" class="voice-screen hidden" aria-label="Voice Chat with AI Guru">
+      <div class="voice-header">
+        <button class="voice-close" id="voiceClose" aria-label="Close">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+        <div class="voice-header-info">
+          <span class="voice-header-title">Maloka AI Twins</span>
+          <span class="voice-header-subtitle">mini app</span>
+        </div>
+        <div class="voice-header-more">
+           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+        </div>
+      </div>
+
+      <div class="voice-content">
+        <div class="voice-avatar-wrap">
+          <div class="voice-avatar-ring" id="voiceAvatarRing"></div>
+          <div class="voice-avatar" id="voiceAvatar">🧘</div>
+        </div>
+        <h2 class="voice-guru-name" id="voiceGuruName">AI Twin</h2>
+        <div class="voice-status">
+           <span class="voice-status-icon" id="voiceStatusIcon">🧘</span>
+           <span class="voice-status-text" id="voiceStatusText">Ready to talk</span>
+        </div>
+
+        <div class="voice-visualizer hidden" id="voiceVisualizer">
+           <div class="viz-bar"></div>
+           <div class="viz-bar"></div>
+           <div class="viz-bar"></div>
+           <div class="viz-bar"></div>
+           <div class="viz-bar"></div>
+           <div class="viz-bar"></div>
+           <div class="viz-bar"></div>
+           <div class="viz-bar"></div>
+           <div class="viz-bar"></div>
+           <div class="viz-bar"></div>
+        </div>
+
+        <div class="voice-response-bubble hidden" id="voiceResponseBubble">
+           <p id="voiceResponseText"></p>
+        </div>
+      </div>
+
+      <div class="voice-footer">
+        <div class="voice-timer" id="voiceTimer">00:00</div>
+        <button class="voice-record-btn" id="voiceRecordBtn">
+          <div class="record-icon-inner" id="recordIconInner"></div>
+        </button>
+      </div>
+    </div>
+    <!-- END VOICE SCREEN -->
+
+
     <script type="module" src="./app.js"></script>
   </body>
 </html>
