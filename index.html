@@ -103,7 +103,20 @@
         <h2 class="dojo-title">The Dojo Den</h2>
         <p class="dojo-subtitle">Eight octants · the practice of stopping</p>
       </div>
-      
+
+      <!-- ═══ FLOWER UI (primary navigation) ═══ -->
+      <div class="flower" id="flowerUI">
+        <div class="flower-petals" id="flowerPetals"><!-- petals injected by renderFlower() --></div>
+        <button class="flower-center" id="flowerCenter" aria-label="Thumb Lama — your harmony">
+          <span class="flower-center-lama">☸️</span>
+          <span class="flower-harmony-val" id="flowerHarmony">0</span>
+          <span class="flower-harmony-lab">Harmony</span>
+        </button>
+      </div>
+      <p class="flower-hint">Tap a petal to practice · tap the centre for the Thumb Lama</p>
+
+      <div class="octant-section-label">All octants</div>
+
       <div class="octant-grid">
         <!-- Octant 01: Stillness -->
         <button class="octant-card o-violet" id="octStillness" data-octant="01">

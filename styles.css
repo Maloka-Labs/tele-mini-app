@@ -1533,6 +1533,92 @@ body {
   color: var(--text2);
 }
 
+/* ═══ Flower UI ═══ */
+.flower {
+  position: relative;
+  width: 280px;
+  height: 280px;
+  margin: 14px auto 6px;
+}
+.flower-petals {
+  position: absolute;
+  inset: 0;
+}
+.flower-petal {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--card2, rgba(255,255,255,0.05));
+  border: 2px solid var(--petal-color, #00e5cc);
+  box-shadow: 0 0 16px -6px var(--petal-color, #00e5cc);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  color: var(--text, #fff);
+  cursor: pointer;
+  transition: box-shadow 0.2s, filter 0.15s;
+}
+.flower-petal:active { filter: brightness(1.25); }
+.petal-icon { font-size: 22px; line-height: 1; }
+.petal-belt {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: var(--petal-color, #00e5cc);
+}
+.flower-center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,229,204,0.20), rgba(168,85,247,0.12));
+  border: 1px solid var(--border2, rgba(255,255,255,0.12));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  cursor: pointer;
+  z-index: 2;
+  color: var(--text, #fff);
+}
+.flower-center:active { filter: brightness(1.2); }
+.flower-center-lama { font-size: 24px; line-height: 1; }
+.flower-harmony-val {
+  font-size: 19px;
+  font-weight: 800;
+  color: var(--teal, #00e5cc);
+  line-height: 1.1;
+}
+.flower-harmony-lab {
+  font-size: 8px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+.flower-hint {
+  text-align: center;
+  font-size: 11px;
+  color: var(--text2);
+  margin: 0 0 18px;
+}
+.octant-section-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text2);
+  margin: 4px 0 10px;
+  opacity: 0.8;
+}
+
 .octant-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

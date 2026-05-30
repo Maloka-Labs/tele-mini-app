@@ -55,6 +55,13 @@ function getBelt(points) {
 }
 
 /* ─── Thumbagotchi SVG Controller ─── */
+// True if the user has completed at least one practice session today — drives the glow state
+// so the companion reacts to today's practice, not just multi-day login streaks.
+function practicedToday() {
+  try { return localStorage.getItem('hv_last_activity_date') === new Date().toISOString().slice(0, 10); }
+  catch (e) { return false; }
+}
+
 function updateThumbagotchiUI(pts, streak, hibernating) {
     const svg = document.getElementById('thumbagotchiSVG');
     const body = document.getElementById('tgBody');
@@ -80,7 +87,9 @@ function updateThumbagotchiUI(pts, streak, hibernating) {
     // Set variables or direct attributes
     body.style.fill = bodyColor;
     if (aura) {
-        aura.style.opacity = 0.2 + (streak * 0.05); // More streak = more glow
+        // Streak drives the base glow; practising today lights it up immediately.
+        const base = 0.2 + (streak * 0.05);
+        aura.style.opacity = Math.min(1, practicedToday() ? Math.max(base, 0.6) : base);
         document.documentElement.style.setProperty('--tg-aura-color', bodyColor + '66');
     }
 
@@ -104,9 +113,9 @@ function reactToSuccess() {
 function getScaledDuration(pts) {
   const belt = getBelt(pts);
   const beltIdx = BELTS.indexOf(belt);
-  // Doxa Principle: scaling from 5 to 12 minutes
-  // White (0) -> 5m, Black (7) -> 12m
-  return 5 + beltIdx;
+  // Canon (dojoden_octent.txt): 3 min (White) → 10 min (Black), 1-min increments.
+  // White (idx 0) -> 3m, Black (idx 7) -> 10m
+  return 3 + beltIdx;
 }
 
 /* ─── Audio Controller ─── */
@@ -257,6 +266,10 @@ async function claimActivityReward(activity) {
       body: JSON.stringify({ initData, activity }),
     });
     const data = await res.json();
+    if (data.ok) {
+      // Record that the user practised today (drives the companion glow state)
+      try { localStorage.setItem('hv_last_activity_date', new Date().toISOString().slice(0, 10)); } catch (e) {}
+    }
     if (data.ok && !data.already_claimed && data.points_earned > 0) {
       const info = ACTIVITY_LABELS[activity];
       showRewardToast(data.points_earned, info.label, window.nodeData?.multiplier || 1.0);
@@ -264,8 +277,11 @@ async function claimActivityReward(activity) {
       // Phase 3: Trigger visual reaction
       reactToSuccess();
 
-      // Mark badge as claimed
-      const actMap   = { breathing: 'octMovement', meditation: 'octStillness', affirmation: 'octWisdom', mood_check: 'octEmotion' };
+      // Mark badge as claimed (all 8 octants, so every card reflects today's completion)
+      const actMap   = {
+        breathing: 'octMovement', meditation: 'octStillness', affirmation: 'octWisdom', mood_check: 'octEmotion',
+        creation: 'octCreation', sonic: 'octSonic', bridge: 'octBridge', nourish: 'octNourish',
+      };
       document.getElementById(actMap[activity])?.classList.add('claimed');
     }
 
@@ -1720,6 +1736,59 @@ document.getElementById('octBridge')?.addEventListener('click', () => startPhygi
 document.getElementById('octMovement')?.addEventListener('click', () => startPhygitalSession('MOVEMENT'));
 document.getElementById('octNourish')?.addEventListener('click', () => startPhygitalSession('SPIRIT'));
 
+/* ═══ Flower UI (primary Dojo navigation) ═══ */
+const FLOWER = [
+  { id: 'stillness', key: 'STILLNESS', icon: '🧘', color: '#a855f7', name: 'Mind Meadow' },
+  { id: 'creation',  key: 'CREATION',  icon: '🎨', color: '#ff7f50', name: 'Inner Garden' },
+  { id: 'sonic',     key: 'SONIC',     icon: '🌙', color: '#22c55e', name: 'Sleep Sanctuary' },
+  { id: 'wisdom',    key: 'WISDOM',    icon: '🍎', color: '#06b6d4', name: 'Fuel Stop' },
+  { id: 'emotion',   key: 'EMOTION',   icon: '💆', color: '#f97316', name: 'Pamper Palace' },
+  { id: 'bridge',    key: 'BRIDGE',    icon: '🤝', color: '#f43f5e', name: 'Kindred Spirits' },
+  { id: 'movement',  key: 'MOVEMENT',  icon: '🤸', color: '#16a34a', name: 'Shape Studio' },
+  { id: 'nourish',   key: 'SPIRIT',    icon: '🛕', color: '#7c3aed', name: 'Wisdom Temple' },
+];
+
+// Harmony Index (0–100): blends depth (avg belt) with balance (penalises an uneven flower)
+function computeHarmony(scores) {
+  const levels = FLOWER.map(o => BELTS.indexOf(getBelt(scores[o.id] || 0))); // 0–7 each
+  const avg = levels.reduce((a, b) => a + b, 0) / levels.length;
+  const range = Math.max(...levels) - Math.min(...levels);
+  const balance = 1 - (range / 7) * 0.5; // up to 50% penalty for an uneven flower
+  return Math.round((avg / 7) * 100 * balance);
+}
+
+function renderFlower() {
+  const petalsEl = document.getElementById('flowerPetals');
+  if (!petalsEl) return;
+  const scores = window.currentOctantScores || {};
+  const R = 100; // petal distance from centre (px)
+  petalsEl.innerHTML = '';
+  FLOWER.forEach((o, i) => {
+    const belt = getBelt(scores[o.id] || 0);
+    const lvl = BELTS.indexOf(belt) + 1;
+    const angle = i * 45;
+    const petal = document.createElement('button');
+    petal.className = 'flower-petal';
+    petal.style.setProperty('--petal-color', o.color);
+    petal.style.transform = `translate(-50%, -50%) rotate(${angle}deg) translateY(-${R}px) rotate(${-angle}deg)`;
+    petal.title = `${o.name} · ${belt.name} Belt (Lvl ${lvl})`;
+    petal.setAttribute('aria-label', petal.title);
+    petal.innerHTML = `<span class="petal-icon">${o.icon}</span><span class="petal-belt">L${lvl}</span>`;
+    petal.addEventListener('click', () => startPhygitalSession(o.key));
+    petalsEl.appendChild(petal);
+  });
+  const hEl = document.getElementById('flowerHarmony');
+  if (hEl) hEl.textContent = computeHarmony(scores);
+}
+
+// Centre of the flower = the Thumb Lama (practice teacher)
+document.getElementById('flowerCenter')?.addEventListener('click', () => {
+  const lama = gurus.find(g => g.id === 'lama');
+  if (lama) openChat(lama);
+});
+
+renderFlower(); // initial paint (defaults to all-White until the profile loads)
+
 /* ══════════════════════════════════════════════
    ✨ AFFIRMATIONS
    ══════════════════════════════════════════════ */
@@ -2109,9 +2178,12 @@ async function loadProfile() {
         if (hibBadge) hibBadge.classList.add('hidden');
         if (hibDesc)  hibDesc.classList.add('hidden');
         
-        if (data.streak >= 3) {
+        const glowFromPractice = practicedToday();
+        if (data.streak >= 3 || glowFromPractice) {
           vibeTitle.textContent = 'Glow State';
-          vibeDesc.textContent  = "You're radiating positive energy today!";
+          vibeDesc.textContent  = glowFromPractice
+            ? "You practised today — your Thumbagotchi is glowing. ✨"
+            : "You're radiating positive energy today!";
         } else if (data.streak > 0) {
           vibeTitle.textContent = 'Active Vybe';
           vibeDesc.textContent  = "Keep it up! Your Thumbagotchi is feeling great.";
@@ -2155,6 +2227,8 @@ async function loadProfile() {
         pb.style.width = `${pct}%`;
       }
     });
+
+    renderFlower(); // reflect current belts + harmony in the flower
 
     feedEl.innerHTML = '';
     data.events.forEach((ev, i) => {
