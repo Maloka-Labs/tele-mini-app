@@ -277,6 +277,15 @@ async function claimActivityReward(activity) {
       // Phase 3: Trigger visual reaction
       reactToSuccess();
 
+      // Belt ceremony: did this reward cross a belt threshold for its octant?
+      const ceremonyOct = ACTIVITY_OCTANT[activity];
+      if (ceremonyOct) {
+        const oldScore = (window.currentOctantScores && window.currentOctantScores[ceremonyOct]) || 0;
+        const oldBelt = BELTS.indexOf(getBelt(oldScore));
+        const newBelt = BELTS.indexOf(getBelt(oldScore + data.points_earned));
+        if (newBelt > oldBelt) showBeltCeremony(ceremonyOct, BELTS[newBelt]);
+      }
+
       // Mark badge as claimed (all 8 octants, so every card reflects today's completion)
       const actMap   = {
         breathing: 'octMovement', meditation: 'octStillness', affirmation: 'octWisdom', mood_check: 'octEmotion',
@@ -679,12 +688,8 @@ function updateLamaNudge(data) {
   };
 
   nudgeText.textContent = nudges[suggestedOctant];
-  window.lastLamaSuggestion = suggestedOctant; // Track for auto-open
   nudgeEl.classList.remove('hidden');
-
-  if (!window.intakeCompleted) {
-    setTimeout(initiateThumbLamaIntake, 2000);
-  }
+  // No auto-intake ambush — the intake only runs if the user chooses to open the Lama chat.
 }
 
 function handleLamaIntervention(text) {
@@ -714,6 +719,70 @@ function handleLamaIntervention(text) {
 function openThumbLamaChat() {
   const lama = gurus.find(g => g.id === 'lama');
   if (lama) openChat(lama);
+}
+
+/* ═══ Thumb Lama · Practice Teacher (S01 canon) ═══
+   The master guide of the Dojo Den — track intros before each session and belt
+   ceremonies on advancement. He guides the practice; he does NOT route the user
+   around (the triage-router is retired). Absence is agency. */
+const OCTANT_NAMES = {
+  stillness: 'Mind Meadow', creation: 'Inner Garden', sonic: 'Sleep Sanctuary', wisdom: 'Fuel Stop',
+  emotion: 'Pamper Palace', bridge: 'Kindred Spirits', movement: 'Shape Studio', nourish: 'Wisdom Temple',
+};
+const ACTIVITY_OCTANT = {
+  breathing: 'movement', meditation: 'stillness', affirmation: 'wisdom', mood_check: 'emotion',
+  creation: 'creation', sonic: 'sonic', bridge: 'bridge', nourish: 'nourish',
+};
+const LAMA_TRACK_INTROS = {
+  stillness: 'Let the world wait. Rest your thumb, and let your attention find its way home.',
+  creation:  'Nothing here needs to be perfect. There is only something to tend.',
+  sonic:     'Breathe with me, Rebel. We are only slowing down.',
+  wisdom:    'Before you fuel the body, honour the pause.',
+  emotion:   'Your own hands know how to care for you. Let me show you where.',
+  bridge:    'You practise alone, yet you are not alone. Let us find your people.',
+  movement:  'The body remembers what stillness forgets. Move gently.',
+  nourish:   'Sit with me. What was handed down is older than us both.',
+};
+
+// Track introduction — a short, warm Lama line as the session opens (S01-007)
+function showLamaTrackIntro(octantId) {
+  const line = LAMA_TRACK_INTROS[octantId];
+  const content = document.querySelector('#phygitalModal .modal-content');
+  if (!line || !content) return;
+  let banner = document.getElementById('lamaTrackIntro');
+  if (!banner) {
+    banner = document.createElement('div');
+    banner.id = 'lamaTrackIntro';
+    banner.className = 'lama-track-intro';
+    content.appendChild(banner);
+  }
+  banner.innerHTML = `<span class="lama-orb">☸️</span><span>${line}</span>`;
+  banner.classList.add('show');
+  clearTimeout(window._lamaIntroT);
+  window._lamaIntroT = setTimeout(() => banner.classList.remove('show'), 6500);
+}
+
+// Belt ceremony — the Lama acknowledges an advancement (S01-008)
+function showBeltCeremony(octId, belt) {
+  let el = document.getElementById('beltCeremony');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'beltCeremony';
+    el.className = 'belt-ceremony';
+    document.body.appendChild(el);
+  }
+  el.innerHTML = `
+    <div class="belt-ceremony-card">
+      <div class="belt-ceremony-orb">☸️</div>
+      <div class="belt-ceremony-title">A belt is earned</div>
+      <div class="belt-ceremony-belt">${belt.name} Belt</div>
+      <div class="belt-ceremony-oct">${OCTANT_NAMES[octId] || octId}</div>
+      <div class="belt-ceremony-line">"The Lama bows. Your practice deepens."</div>
+    </div>`;
+  el.classList.add('show');
+  if (tg?.HapticFeedback?.notificationOccurred) tg.HapticFeedback.notificationOccurred('success');
+  clearTimeout(window._ceremonyT);
+  window._ceremonyT = setTimeout(() => el.classList.remove('show'), 4200);
 }
 
 /* ─── Phase 5: Multi-Step Intake Logic ─── */
@@ -1033,11 +1102,8 @@ async function sendMessage() {
     return;
   }
 
-  // ─── Phase 5: Smart Navigation (Automation) ───
-  if (activeGuru.id === 'lama' && window.intakeCompleted) {
-    const intercepted = handleLamaIntervention(text);
-    if (intercepted) return;
-  }
+  // Thumb Lama is the practice teacher, not a router (S01 canon): no auto-routing to octants.
+  // He answers as a teacher via his model; the user chooses where and when to practise.
 
   try {
     let reply;
@@ -1283,7 +1349,7 @@ const PHYGITAL_TYPES = {
   EMOTION:  { id: 'emotion',  name: 'Pamper Palace',    desc: 'Octant 05 · Stop to Receive Care',            instruction: 'Lift Your Thumb — Press the Point, Hold', activityId: 'mood_check', offScreen: true },
   BRIDGE:   { id: 'bridge',   name: 'Kindred Spirits',  desc: 'Octant 06 · Stop to Find Your People',        instruction: 'Who Showed Up For You Today?',        activityId: 'bridge', offScreen: true },
   MOVEMENT: { id: 'movement', name: 'Shape Studio',     desc: 'Octant 07 · Stop to Shape the Body',          instruction: 'Hold the Form — Thumb Keeps Time',    activityId: 'breathing', offScreen: true },
-  SPIRIT:   { id: 'nourish',  name: 'Wisdom Temple',    desc: 'Octant 08 · Stop to Study Ancient Knowledge', instruction: 'Trace the Sacred Path',               activityId: 'nourish' }
+  SPIRIT:   { id: 'nourish',  name: 'Wisdom Temple',    desc: 'Octant 08 · Stop to Study Ancient Knowledge', instruction: 'Trace the Sacred Path',               activityId: 'nourish', offScreen: true }
 };
 
 let currentDanLevel = 0;
@@ -1363,6 +1429,7 @@ function startPhygitalSession(typeKey) {
   
   phygitalAudioInfo.classList.add('hidden');
   phygitalStatusEl.textContent = meta.offScreen ? 'Off-Screen Practice' : 'Awaiting Signal';
+  showLamaTrackIntro(meta.id); // the Lama frames the practice as it opens
 }
 
 function renderPhygitalSurface(octantId) {
@@ -1373,7 +1440,7 @@ function renderPhygitalSurface(octantId) {
   if (octantId === 'stillness') {
     renderAttentionAnchor();
   } else if (octantId === 'creation') {
-    renderCreationForge();
+    renderCreationGarden();
   } else if (octantId === 'sonic') {
     renderSleepSanctuarySurface();
   } else if (octantId === 'wisdom') {
@@ -1385,7 +1452,7 @@ function renderPhygitalSurface(octantId) {
   } else if (octantId === 'movement') {
     renderShapeStudioSurface();
   } else if (octantId === 'nourish') {
-    renderSpiritTemple();
+    renderWisdomTempleSurface();
   } else {
     phygitalSurface.innerHTML = `<div style="padding:40px; text-align:center; color:var(--text3); font-size:12px;">S01 Physical component for ${octantId} coming soon. <br><br> (Phygital logic ready)</div>`;
   }
@@ -2059,6 +2126,171 @@ function kindredComplete() {
   setTimeout(() => closeModal('phygitalModal'), 2600);
 }
 
+/* ═══ Inner Garden · Paint or Write ═══
+   Two ways in: Thumb Painting (the existing canvas, on-screen contact) or Thumb Journaling
+   (a private belt-scaled writing prompt). The user chooses a mode at session start. */
+const CREATION_WRITE_PROMPTS = [
+  { title: 'One Thing',          cue: 'One thing you are grateful for, right now.' },                                            // White
+  { title: 'Gratitude & Noticing', cue: 'One thing you are grateful for — and one thing you noticed today.' },                  // Yellow
+  { title: 'Three Lines',        cue: 'Write a small haiku — just three lines. Don\'t count syllables; let it land.' },         // Orange
+  { title: 'The Free Stream',    cue: 'Morning-pages style — write freely for a moment. No prompt, no judgement.' },            // Green
+  { title: 'In Dialogue',        cue: 'If today had a colour, what would it be — and why?' },                                   // Blue
+  { title: 'Dream Re-entry',     cue: 'Write whatever you remember of a recent dream.' },                                       // Purple
+  { title: 'A Letter',           cue: 'Write a letter to someone. It will never be sent — released when you finish.' },         // Brown
+  { title: 'The Tended Garden',  cue: 'Your own ritual — write whatever wants to be written.' },                                // Black
+];
+
+function renderCreationGarden() {
+  window.creationWriteMode = false;
+  touchPrompt.classList.add('hidden');
+  phygitalSurface.innerHTML = `
+    <div class="acu-card">
+      <div class="acu-badge">🌱 Inner Garden</div>
+      <div class="acu-name">Tend something today</div>
+      <div class="acu-cue">Make a mark, or write a few words. Choose your way in.</div>
+      <div class="fuel-choices">
+        <button class="fuel-choice" id="gardenPaint" type="button">🎨 Paint</button>
+        <button class="fuel-choice" id="gardenWriteBtn" type="button">✍️ Write</button>
+      </div>
+      <div class="acu-step">Step into the garden</div>
+    </div>`;
+  document.getElementById('gardenPaint')?.addEventListener('click', () => {
+    phygitalSurface.innerHTML = '';
+    touchPrompt.classList.remove('hidden');
+    document.getElementById('touchPromptText').textContent = 'Touch to Tend Your Garden';
+    phygitalStatusEl.textContent = 'Awaiting Signal';
+    renderCreationForge(); // existing pressure-sensitive canvas (on-screen contact model)
+  });
+  document.getElementById('gardenWriteBtn')?.addEventListener('click', renderCreationWrite);
+}
+
+function renderCreationWrite() {
+  window.creationWriteMode = true; // journaling — surface should not capture the contact timer
+  const pts = window.currentOctantScores?.creation || 0;
+  const beltIdx = BELTS.indexOf(getBelt(pts));
+  const p = CREATION_WRITE_PROMPTS[beltIdx] || CREATION_WRITE_PROMPTS[0];
+  phygitalStatusEl.textContent = 'Journaling';
+  phygitalSurface.innerHTML = `
+    <div class="acu-card">
+      <div class="acu-badge">✍️ Thumb Journaling</div>
+      <div class="acu-name">${p.title}</div>
+      <div class="acu-cue">${p.cue}</div>
+      <textarea id="gardenWrite" class="kin-reflect" rows="5" placeholder="Let it flow…"></textarea>
+      <button class="acu-begin" id="gardenKeep" type="button">Keep 🌱</button>
+      <div class="acu-hint">Private — held only for you, not stored.</div>
+    </div>`;
+  document.getElementById('gardenKeep')?.addEventListener('click', creationWriteComplete);
+}
+
+function creationWriteComplete() {
+  phygitalStatusEl.textContent = 'Tended';
+  phygitalSurface.innerHTML = `
+    <div class="acu-card">
+      <div class="acu-emoji">🌱</div>
+      <div class="acu-name">Tended.</div>
+      <div class="acu-cue">What you grew here is yours. Let it settle.</div>
+    </div>`;
+  claimActivityReward('creation');
+  setTimeout(() => { window.creationWriteMode = false; closeModal('phygitalModal'); }, 2400);
+}
+
+/* ═══ Wisdom Temple · Study Ancient Knowledge (off-screen contemplation) ═══
+   Teacherly throughout: a fragment of traditional wisdom — a lineage figure, a plant, a
+   sacred character, a mandala — studied slowly. Hold to sit with each before moving on. */
+const WISDOM_ITEMS = {
+  labyrinth:   { emoji: '🌀', kind: 'The First Path',    name: 'The Lineage Labyrinth', teaching: 'A single winding path inward. At its centre waits the first healer. Walk it slowly — the path itself is the teaching.' },
+  hippocrates: { emoji: '⚕️', kind: 'Lineage',          name: 'Hippocrates',           teaching: '"Let food be thy medicine." The Greek physician (~400 BCE) who first sought natural causes of illness over superstition.' },
+  huatuo:      { emoji: '🌿', kind: 'Lineage',          name: 'Hua Tuo',               teaching: 'Master of early Chinese medicine and the "Frolics of the Five Animals" — movement itself as medicine, 2nd century CE.' },
+  chamomile:   { emoji: '🌼', kind: 'Plant Wisdom',     name: 'Chamomile',             teaching: 'Brewed for sleep and unease across many cultures — calming, gently anti-inflammatory. Educational only; consult a practitioner.' },
+  ginger:      { emoji: '🫚', kind: 'Plant Wisdom',     name: 'Ginger',                teaching: 'A warming root that eased nausea and aided digestion from China to India for thousands of years.' },
+  character:   { emoji: '☯️', kind: 'Sacred Text',      name: '道 — The Way',           teaching: 'Trace it slowly in your mind. "Dao": the way, the path — that which cannot be named, yet underlies all things.' },
+  mandala:     { emoji: '🕉️', kind: 'Sacred Geometry',  name: 'The Mandala',           teaching: 'A map of the cosmos and the self. Rest your gaze at its centre and let the pattern hold you.' },
+};
+const WISDOM_SEQUENCE = [
+  ['labyrinth'],                                          // White — the first path
+  ['character'],                                          // Yellow — one character
+  ['chamomile'],                                          // Orange — one plant
+  ['hippocrates', 'huatuo'],                              // Green — the lineage path
+  ['character'],                                          // Blue — a passage
+  ['chamomile', 'ginger'],                                // Purple — the herbal garden
+  ['mandala'],                                            // Brown — the mandala
+  ['hippocrates', 'character', 'chamomile', 'mandala'],   // Black — the open temple
+];
+let wisQueue = [], wisStep = 0, wisAux = null;
+
+function renderWisdomTempleSurface() {
+  const pts = window.currentOctantScores?.nourish || 0;
+  const beltIdx = BELTS.indexOf(getBelt(pts));
+  wisQueue = WISDOM_SEQUENCE[beltIdx] || WISDOM_SEQUENCE[0];
+  wisStep = 0;
+  touchPrompt.classList.add('hidden');
+  phygitalSurface.innerHTML = `
+    <div class="acu-card">
+      <div class="acu-badge">🛕 Wisdom Temple</div>
+      <div class="acu-name">Sit with what's been handed down</div>
+      <div class="acu-cue">Study a fragment of traditional knowledge — slowly, with respect.</div>
+      <button class="acu-begin" id="wisBegin" type="button">Enter ▶</button>
+      <div class="acu-hint">Educational only — never a substitute for a practitioner's care.</div>
+    </div>`;
+  document.getElementById('wisBegin')?.addEventListener('click', drawWisdomStep);
+}
+
+function drawWisdomStep() {
+  if (wisStep >= wisQueue.length) { wisdomComplete(); return; }
+  const item = WISDOM_ITEMS[wisQueue[wisStep]];
+  phygitalStatusEl.textContent = item.kind;
+  phygitalSurface.innerHTML = `
+    <div class="acu-card">
+      <div class="acu-emoji">${item.emoji}</div>
+      <div class="acu-badge">${item.kind}</div>
+      <div class="acu-name">${item.name}</div>
+      <div class="acu-cue">${item.teaching}</div>
+      <div class="fuel-trace" id="wisPad"><div class="fuel-trace-fill" id="wisPadFill"></div><span>📿</span></div>
+      <div class="acu-hint">Hold to sit with this — then release.</div>
+      <div class="acu-step">Study ${wisStep + 1} of ${wisQueue.length}</div>
+    </div>`;
+  setupWisdomHold();
+}
+
+function setupWisdomHold() {
+  const pad = document.getElementById('wisPad');
+  const fill = document.getElementById('wisPadFill');
+  if (!pad) return;
+  let held = 0;
+  const start = () => {
+    if (wisAux) return;
+    wisAux = setInterval(() => {
+      held++;
+      if (fill) fill.style.transform = `scale(${Math.min(1, held / 50)})`;
+      if (held >= 50) { clearInterval(wisAux); wisAux = null; wisdomAdvance(); } // ~5s contemplation
+    }, 100);
+  };
+  const stop = () => { if (wisAux) { clearInterval(wisAux); wisAux = null; } };
+  pad.addEventListener('pointerdown', start);
+  pad.addEventListener('pointerup', stop);
+  pad.addEventListener('pointerleave', stop);
+}
+
+function wisdomAdvance() {
+  if (wisAux) { clearInterval(wisAux); wisAux = null; }
+  wisStep++;
+  if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+  drawWisdomStep();
+}
+
+function wisdomComplete() {
+  if (wisAux) { clearInterval(wisAux); wisAux = null; }
+  phygitalStatusEl.textContent = 'Honoured';
+  phygitalSurface.innerHTML = `
+    <div class="acu-card">
+      <div class="acu-emoji">🛕</div>
+      <div class="acu-name">The temple closes.</div>
+      <div class="acu-cue">You sat with knowledge carried across centuries. Take a little of it forward.</div>
+    </div>`;
+  claimActivityReward('nourish');
+  setTimeout(() => closeModal('phygitalModal'), 2600);
+}
+
 /* ─ Octant 05: Pamper Palace (id: emotion) · pressure biofeedback + acupressure ─ */
 function renderEmotionCommand() {
   const wrap = document.createElement('div');
@@ -2269,7 +2501,7 @@ function renderReflectionDojo() {
 }
 
 function conductPhygitalSession() {
-  if (activePhygitalSession?.offScreen) return; // off-screen octants run their own guided timer
+  if (activePhygitalSession?.offScreen || window.creationWriteMode) return; // off-screen / journaling: own flow
   if (phygitalTimer) return;
   
   phygitalStatusEl.textContent = 'Sync Active';
@@ -2350,7 +2582,7 @@ function completePhygitalSession() {
 }
 
 phygitalSurface.addEventListener('touchstart', (e) => {
-  if (activePhygitalSession?.offScreen) return; // off-screen octant: don't capture taps (let its buttons work)
+  if (activePhygitalSession?.offScreen || window.creationWriteMode) return; // off-screen / journaling: don't capture taps
   e.preventDefault();
   phygitalIsContact = true;
   contactWarning.classList.add('hidden');
@@ -2365,7 +2597,7 @@ phygitalSurface.addEventListener('touchmove', (e) => {
 });
 
 phygitalSurface.addEventListener('mousedown', (e) => {
-  if (activePhygitalSession?.offScreen) return; // off-screen octant: let its buttons handle clicks
+  if (activePhygitalSession?.offScreen || window.creationWriteMode) return; // off-screen / journaling: let buttons handle clicks
   phygitalIsContact = true;
   contactWarning.classList.add('hidden');
   conductPhygitalSession();
@@ -2390,6 +2622,8 @@ function exitPhygitalSession() {
   if (ssTimer) { clearInterval(ssTimer); ssTimer = null; }
   if (fuelTimer) { clearInterval(fuelTimer); fuelTimer = null; }
   if (fuelAux) { clearInterval(fuelAux); fuelAux = null; }
+  if (wisAux) { clearInterval(wisAux); wisAux = null; }
+  window.creationWriteMode = false;
   phygitalIsContact = false;
   stopAmbient();
   closeModal('phygitalModal');
@@ -2673,8 +2907,24 @@ function updateSovereignUI(data) {
     }
   }
 
-  // Unlock Campfire (Nidan) if ready
+  // Unlock Shodan (Dan 1) grid card — mirrors the "Initiate Shodan" button in the Sovereign Portal
   const currentDan = data.current_dan || 0;
+  const shodanCard = document.getElementById('btnShodanCard');
+  if (shodanCard) {
+    const btS = document.getElementById('bt-shodan');
+    if (currentDan >= 1) {
+      shodanCard.classList.remove('locked');
+      if (btS) btS.textContent = 'Shodan Active · Level 1';
+    } else if (canStartDan) {
+      shodanCard.classList.remove('locked');
+      if (btS) btS.textContent = 'Ready · Tap to Initiate';
+    } else {
+      shodanCard.classList.add('locked');
+      if (btS) btS.textContent = `Locked · ${data.total_points || 0}/500 pts`;
+    }
+  }
+
+  // Unlock Campfire (Nidan) if ready
   const campfireCard = document.getElementById('btnCampfire');
   if (campfireCard) {
     if (currentDan >= 2) {
@@ -2718,6 +2968,28 @@ function updateSovereignUI(data) {
 }
 
 document.getElementById('btnStartShodan')?.addEventListener('click', startDanSession);
+document.getElementById('btnShodanCard')?.addEventListener('click', (e) => {
+  if (e.currentTarget.classList.contains('locked')) return; // not yet earned
+  startDanSession();
+});
+
+// Shadow-ledger activation — gentle, no freemium pressure. Activation lives in the
+// Good Vybes app (Facet 02), which isn't shipped yet, so we reassure rather than gate.
+document.getElementById('btnActivate')?.addEventListener('click', () => {
+  const bal = document.getElementById('ctaGvrp')?.textContent || '0';
+  const cta = document.getElementById('activationCta');
+  if (cta) {
+    cta.innerHTML = `
+      <div class="activation-cta-head">
+        <span class="activation-cta-orb">🌱</span>
+        <div>
+          <div class="activation-cta-title">Safely waiting</div>
+          <div class="activation-cta-sub">Nothing to do yet</div>
+        </div>
+      </div>
+      <p class="activation-cta-body">The Good Vybes app is coming soon. Your <strong>${bal}</strong> GVRP are credited and safe — you'll claim them the moment activation opens. Keep practising; they keep growing. 🌱</p>`;
+  }
+});
 
 document.getElementById('btnConnectWallet')?.addEventListener('click', () => {
     if (!tonConnectUI) initTonConnect();
@@ -2822,6 +3094,8 @@ async function loadProfile() {
     if (dashStreak) dashStreak.textContent = data.streak + 'd';
     if (dashPoints) dashPoints.textContent = data.total_points;
     if (dashBelt) dashBelt.textContent = currentBelt.name;
+    const ctaG = document.getElementById('ctaGvrp');
+    if (ctaG) ctaG.textContent = data.total_points; // shadow-ledger balance
     // (SVG Thumbagotchi updated below in vibeTitle block)
 
     // Vybes Progress (0 to 100% of next belt tier)

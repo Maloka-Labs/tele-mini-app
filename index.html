@@ -221,6 +221,18 @@
             <span class="octant-belt-tag" id="bt-nourish">White Belt · Lvl 1</span>
           </div>
         </button>
+        <!-- Phase 2: Shodan (Dan 1) — The Inward Turn -->
+        <button class="octant-card locked" id="btnShodanCard" data-dan="1" style="background: linear-gradient(135deg, rgba(99,102,241,0.18) 0%, rgba(79,70,229,0.05) 100%); border-left: 4px solid #6366f1;">
+          <div class="octant-icon">🪷</div>
+          <div class="octant-info">
+            <span class="octant-name">Shodan · Inward Turn</span>
+            <span class="octant-desc-sub text-xs opacity-70">1st Dan · Directed Wisdom</span>
+            <div class="octant-progress-wrap">
+              <div class="octant-progress-bar" id="pb-shodan" style="width: 0%"></div>
+            </div>
+            <span class="octant-belt-tag" id="bt-shodan">Locked · Reach 500 pts</span>
+          </div>
+        </button>
         <!-- Phase 3: Campfire Circle (Nidan+) -->
         <button class="octant-card o-fire locked" id="btnCampfire" data-dan="2" style="background: linear-gradient(135deg, rgba(255, 69, 0, 0.15) 0%, rgba(255, 140, 0, 0.05) 100%);">
           <div class="octant-icon">🔥</div>
@@ -316,6 +328,19 @@
           <span class="stat-val-s" id="dashBelt">White</span>
           <span class="stat-lab-s">BELT</span>
         </div>
+      </div>
+
+      <!-- Shadow-ledger activation CTA (Gateway · Section 03) -->
+      <div class="activation-cta" id="activationCta">
+        <div class="activation-cta-head">
+          <span class="activation-cta-orb">🌱</span>
+          <div>
+            <div class="activation-cta-title">Your GVRP are credited</div>
+            <div class="activation-cta-sub">Earned &amp; waiting · pending activation</div>
+          </div>
+        </div>
+        <p class="activation-cta-body">You've earned <strong id="ctaGvrp">0</strong> GVRP, held safely in your shadow ledger. When the Good Vybes app arrives, activate to <em>claim</em> them — and begin earning for real.</p>
+        <button class="activation-cta-btn" id="btnActivate">Activate to claim →</button>
       </div>
     </div>
 
