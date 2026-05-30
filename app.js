@@ -234,7 +234,7 @@ async function claimDailyLogin() {
   }
 }
 
-claimDailyLogin();
+claimDailyLogin().then(() => loadProfile());
 
 /* ─── Activity Reward ─── */
 const ACTIVITY_LABELS = {
@@ -268,6 +268,9 @@ async function claimActivityReward(activity) {
       const actMap   = { breathing: 'octMovement', meditation: 'octStillness', affirmation: 'octWisdom', mood_check: 'octEmotion' };
       document.getElementById(actMap[activity])?.classList.add('claimed');
     }
+
+    // Refresh dashboard glow + Dojo belt progress so earned GVRP shows immediately
+    loadProfile();
   } catch (e) {
     console.warn('[activity-reward]', e);
   }
@@ -546,7 +549,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     panel.style.animation = '';
 
     // Refresh data if switching to Profile or Dashboard
-    if (panelId === 'panelProfile' || panelId === 'panelDashboard') {
+    if (panelId === 'panelProfile' || panelId === 'panelDashboard' || panelId === 'panelActivities') {
       loadProfile();
     }
   });
@@ -1110,29 +1113,8 @@ const breathRing     = document.getElementById('breathingRing');
 const startBreathBtn = document.getElementById('startBreathing');
 const closeBreathBtn = document.getElementById('closeBreathing');
 
-document.getElementById('octStillness')?.addEventListener('click', () => {
-  const pts = window.currentOctantScores?.stillness || 0;
-  selectedMins = getScaledDuration(pts);
-  meditationSecs = selectedMins * 60;
-  meditationTimeEl.textContent = formatTime(meditationSecs);
-  durBtns.forEach(b => {
-    b.classList.toggle('active', +b.dataset.mins === selectedMins);
-    b.style.display = (+b.dataset.mins === selectedMins) ? 'inline-block' : 'none'; // Lock to scaled duration
-  });
-  fetchAndShowWisdom('stillness', 'wisdom-stillness');
-  openModal('meditationModal');
-});
-
-document.getElementById('octMovement')?.addEventListener('click', () => {
-  const pts = window.currentOctantScores?.movement || 0;
-  const mins = getScaledDuration(pts);
-  // Rule: each 4-cycle takes ~16s. 1 min ≈ 4 cycles.
-  // We'll set cycle goal = mins * 1.5 (approx 6-18 cycles)
-  window.breathCycleGoal = Math.max(3, Math.floor(mins * 1.5));
-  breathCyclesEl.innerHTML = `Goal: <strong>${window.breathCycleGoal} cycles</strong>`;
-  fetchAndShowWisdom('movement', 'wisdom-breathing');
-  openModal('breathingModal');
-});
+// Octant cards open the canonical phygital session (bindings further below).
+// Legacy meditation/breathing/mood modal openers were removed here so modals no longer stack.
 
 closeBreathBtn.addEventListener('click', () => { closeModal('breathingModal'); stopBreathing(); });
 
@@ -1198,7 +1180,6 @@ const durBtns           = document.querySelectorAll('.dur-btn');
 
 let meditationTimer = null, meditationActive = false, meditationSecs = 300, selectedMins = 5;
 
-document.getElementById('octStillness')?.addEventListener('click', () => openModal('meditationModal'));
 closeMeditateBtn.addEventListener('click', () => { closeModal('meditationModal'); stopMeditation(); });
 
 durBtns.forEach(btn => {
@@ -1791,7 +1772,6 @@ const moodResponses = {
   anxious: { msg: '💛 You\'re safe right now.',       tip: 'Try the box breathing exercise — it signals your nervous system to calm down.' },
 };
 
-document.getElementById('octEmotion')?.addEventListener('click', () => openModal('moodModal'));
 document.getElementById('closeMood').addEventListener('click', () => closeModal('moodModal'));
 
 document.querySelectorAll('.mood-btn').forEach(btn => {
@@ -2248,6 +2228,7 @@ function dismissOnboarding() {
 
 // Show onboarding if not done before
 window.addEventListener('DOMContentLoaded', () => {
+  loadProfile(); // populate dashboard glow + Dojo belts on first paint
   if (!localStorage.getItem('hv_onboarding_done')) {
     setTimeout(() => {
       openModal('onboardingModal');
