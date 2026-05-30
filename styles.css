@@ -1620,18 +1620,35 @@ body {
 }
 
 /* ═══ Pamper Palace · Off-Screen Acupressure card ═══ */
+/* The footer only holds non-interactive text — make sure it never swallows taps
+   meant for the acupressure card / Begin button sitting in the surface. */
+.phygital-footer { pointer-events: none; }
+
 .acu-card {
+  position: relative;
+  z-index: 20;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  gap: 10px;
-  padding: 16px 24px;
-  max-width: 320px;
+  gap: 7px;
+  padding: 12px 22px;
+  max-width: 330px;
+}
+.acu-badge {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #fb923c;
+  background: rgba(249, 115, 22, 0.12);
+  border: 1px solid rgba(249, 115, 22, 0.3);
+  border-radius: 999px;
+  padding: 4px 12px;
 }
 .acu-emoji {
-  font-size: 64px;
+  font-size: 52px;
   line-height: 1;
   filter: drop-shadow(0 0 24px rgba(249, 115, 22, 0.5));
 }
@@ -1644,22 +1661,24 @@ body {
   text-transform: uppercase;
   color: var(--text2);
   opacity: 0.7;
-  margin-top: 2px;
 }
-.acu-count { font-size: 40px; font-weight: 800; color: #f97316; margin-top: 6px; }
-.acu-rest { font-size: 11px; color: var(--text2); }
+.acu-count { font-size: 44px; font-weight: 800; color: #f97316; margin-top: 4px; }
+.acu-rest { font-size: 12px; color: var(--text2); line-height: 1.4; }
 .acu-begin {
-  margin-top: 12px;
-  padding: 12px 32px;
+  pointer-events: auto;
+  margin-top: 8px;
+  padding: 14px 40px;
   border: none;
-  border-radius: 24px;
+  border-radius: 26px;
   background: linear-gradient(135deg, #f97316, #fb923c);
   color: #fff;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
   cursor: pointer;
+  box-shadow: 0 6px 20px -6px rgba(249, 115, 22, 0.7);
 }
-.acu-begin:active { filter: brightness(1.15); }
+.acu-begin:active { filter: brightness(1.15); transform: scale(0.97); }
+.acu-hint { font-size: 11px; color: var(--text2); line-height: 1.4; max-width: 260px; }
 
 .octant-grid {
   display: grid;

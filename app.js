@@ -1429,20 +1429,28 @@ function renderAcupressureSurface() {
 
 function drawAcuStep(running) {
   const p = ACU_LIBRARY[acuQueue[acuStep]];
+  if (running) {
+    phygitalSurface.innerHTML = `
+      <div class="acu-card">
+        <div class="acu-emoji">${p.emoji}</div>
+        <div class="acu-name">${p.name}</div>
+        <div class="acu-count" id="acuCount">${acuSecsLeft}s</div>
+        <div class="acu-rest">Keep pressing the point — the screen can rest. 🌸</div>
+      </div>`;
+    return;
+  }
   phygitalSurface.innerHTML = `
     <div class="acu-card">
+      <div class="acu-badge">📵 Off-screen practice</div>
       <div class="acu-emoji">${p.emoji}</div>
       <div class="acu-name">${p.name}</div>
       <div class="acu-where">Find ${p.where}.</div>
       <div class="acu-cue">${p.cue}</div>
       <div class="acu-step">Point ${acuStep + 1} of ${acuQueue.length}</div>
-      ${running
-        ? `<div class="acu-count" id="acuCount">${acuSecsLeft}s</div><div class="acu-rest">Keep pressing — the screen can rest.</div>`
-        : `<button class="acu-begin" id="acuBegin" type="button">${acuStep === 0 ? 'Begin' : 'Continue'} ▶</button>`}
+      <button class="acu-begin" id="acuBegin" type="button">${acuStep === 0 ? 'Begin' : 'Continue'} ▶</button>
+      <div class="acu-hint">Tap Begin, then take your thumb <strong>off the screen</strong> and press the point.</div>
     </div>`;
-  if (!running) {
-    document.getElementById('acuBegin')?.addEventListener('click', acuBegin);
-  }
+  document.getElementById('acuBegin')?.addEventListener('click', acuBegin);
 }
 
 function acuBegin() {
