@@ -1619,6 +1619,48 @@ body {
   opacity: 0.8;
 }
 
+/* ═══ Pamper Palace · Off-Screen Acupressure card ═══ */
+.acu-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 10px;
+  padding: 16px 24px;
+  max-width: 320px;
+}
+.acu-emoji {
+  font-size: 64px;
+  line-height: 1;
+  filter: drop-shadow(0 0 24px rgba(249, 115, 22, 0.5));
+}
+.acu-name { font-size: 18px; font-weight: 700; color: var(--text, #fff); }
+.acu-where { font-size: 14px; color: var(--text2); line-height: 1.4; }
+.acu-cue { font-size: 13px; color: var(--text2); line-height: 1.5; font-style: italic; opacity: 0.9; }
+.acu-step {
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text2);
+  opacity: 0.7;
+  margin-top: 2px;
+}
+.acu-count { font-size: 40px; font-weight: 800; color: #f97316; margin-top: 6px; }
+.acu-rest { font-size: 11px; color: var(--text2); }
+.acu-begin {
+  margin-top: 12px;
+  padding: 12px 32px;
+  border: none;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #f97316, #fb923c);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.acu-begin:active { filter: brightness(1.15); }
+
 .octant-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

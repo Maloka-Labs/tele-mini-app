@@ -1280,7 +1280,7 @@ const PHYGITAL_TYPES = {
   CREATION: { id: 'creation', name: 'Inner Garden',     desc: 'Octant 02 · Stop to Cultivate Creation',      instruction: 'Touch to Tend Your Garden',           activityId: 'creation' },
   SONIC:    { id: 'sonic',    name: 'Sleep Sanctuary',  desc: 'Octant 03 · Stop to Restore',                 instruction: 'Breathe the Long Exhale',             activityId: 'sonic' },
   WISDOM:   { id: 'wisdom',   name: 'Fuel Stop',        desc: 'Octant 04 · Stop to Fuel',                    instruction: 'Three Breaths Before You Eat',        activityId: 'affirmation' },
-  EMOTION:  { id: 'emotion',  name: 'Pamper Palace',    desc: 'Octant 05 · Stop to Receive Care',            instruction: 'Lift Your Thumb — Press the Point, Hold', activityId: 'mood_check' },
+  EMOTION:  { id: 'emotion',  name: 'Pamper Palace',    desc: 'Octant 05 · Stop to Receive Care',            instruction: 'Lift Your Thumb — Press the Point, Hold', activityId: 'mood_check', offScreen: true },
   BRIDGE:   { id: 'bridge',   name: 'Kindred Spirits',  desc: 'Octant 06 · Stop to Find Your People',        instruction: 'Who Showed Up For You Today?',        activityId: 'bridge' },
   MOVEMENT: { id: 'movement', name: 'Shape Studio',     desc: 'Octant 07 · Stop to Shape the Body',          instruction: 'Hold the Form — Thumb Keeps Time',    activityId: 'breathing' },
   SPIRIT:   { id: 'nourish',  name: 'Wisdom Temple',    desc: 'Octant 08 · Stop to Study Ancient Knowledge', instruction: 'Trace the Sacred Path',               activityId: 'nourish' }
@@ -1362,7 +1362,7 @@ function startPhygitalSession(typeKey) {
   renderPhygitalSurface(meta.id);
   
   phygitalAudioInfo.classList.add('hidden');
-  phygitalStatusEl.textContent = 'Awaiting Signal';
+  phygitalStatusEl.textContent = meta.offScreen ? 'Off-Screen Practice' : 'Awaiting Signal';
 }
 
 function renderPhygitalSurface(octantId) {
@@ -1379,7 +1379,7 @@ function renderPhygitalSurface(octantId) {
   } else if (octantId === 'wisdom') {
     renderWisdomChamber();
   } else if (octantId === 'emotion') {
-    renderEmotionCommand();
+    renderAcupressureSurface();
   } else if (octantId === 'bridge') {
     renderConnectionHub();
   } else if (octantId === 'movement') {
@@ -1389,6 +1389,97 @@ function renderPhygitalSurface(octantId) {
   } else {
     phygitalSurface.innerHTML = `<div style="padding:40px; text-align:center; color:var(--text3); font-size:12px;">S01 Physical component for ${octantId} coming soon. <br><br> (Phygital logic ready)</div>`;
   }
+}
+
+/* ═══ Pamper Palace · Off-Screen Acupressure (constitutional showpiece) ═══
+   The thumb LEAVES the screen and works the user's own body. No contact timer —
+   the screen teaches the point, then a guided hold runs hands-free. Trust the practice. */
+const ACU_LIBRARY = {
+  li4:     { emoji: '🤚', name: 'Union Valley · LI4',  where: 'the webbing between your thumb and index finger', cue: 'Press with the opposite thumb — firm and steady. Breathe slowly.' },
+  temples: { emoji: '😌', name: 'The Temples',         where: 'the soft hollows at the sides of your forehead',  cue: 'Slow, small circles with both thumbs.' },
+  brow:    { emoji: '🧘', name: 'Third Eye · Yintang', where: 'the point between your eyebrows',                  cue: 'Gentle, steady pressure with one thumb.' },
+  scalp:   { emoji: '💆', name: 'The Crown',           where: 'the top of your scalp',                           cue: 'Small circular motions, working slowly outward.' },
+  hand:    { emoji: '🤲', name: 'Palm Reflex',         where: 'the centre of your opposite palm',                cue: 'Press and knead with your thumb.' },
+  foot:    { emoji: '🦶', name: 'Sole Reflex',         where: 'the arch of your foot',                           cue: 'Firm, grounding pressure — slow and deliberate.' },
+  neck:    { emoji: '🌿', name: 'Drainage Line',       where: 'the sides of your neck toward the collarbone',    cue: 'Light downward strokes — soft and unhurried.' },
+};
+// One sequence per belt (White → Black): more points, deeper ritual.
+const ACU_SEQUENCE = [
+  ['li4'],                                        // White
+  ['temples', 'brow'],                            // Yellow
+  ['scalp'],                                      // Orange
+  ['hand'],                                       // Green
+  ['foot'],                                       // Blue
+  ['neck'],                                       // Purple
+  ['temples', 'scalp', 'hand', 'foot'],           // Brown — the full circuit
+  ['li4', 'temples', 'scalp', 'hand', 'foot'],    // Black — self-directed circuit
+];
+let acuTimer = null, acuQueue = [], acuStep = 0, acuSecsLeft = 0, acuHold = 35;
+
+function renderAcupressureSurface() {
+  const pts = window.currentOctantScores?.emotion || 0;
+  const beltIdx = BELTS.indexOf(getBelt(pts));
+  acuQueue = ACU_SEQUENCE[beltIdx] || ACU_SEQUENCE[0];
+  acuStep = 0;
+  acuHold = 35 + beltIdx * 3; // seconds held per point, scaling with belt
+  touchPrompt.classList.add('hidden');
+  phygitalTimeEl.textContent = formatTime(acuHold);
+  drawAcuStep(false);
+}
+
+function drawAcuStep(running) {
+  const p = ACU_LIBRARY[acuQueue[acuStep]];
+  phygitalSurface.innerHTML = `
+    <div class="acu-card">
+      <div class="acu-emoji">${p.emoji}</div>
+      <div class="acu-name">${p.name}</div>
+      <div class="acu-where">Find ${p.where}.</div>
+      <div class="acu-cue">${p.cue}</div>
+      <div class="acu-step">Point ${acuStep + 1} of ${acuQueue.length}</div>
+      ${running
+        ? `<div class="acu-count" id="acuCount">${acuSecsLeft}s</div><div class="acu-rest">Keep pressing — the screen can rest.</div>`
+        : `<button class="acu-begin" id="acuBegin" type="button">${acuStep === 0 ? 'Begin' : 'Continue'} ▶</button>`}
+    </div>`;
+  if (!running) {
+    document.getElementById('acuBegin')?.addEventListener('click', acuBegin);
+  }
+}
+
+function acuBegin() {
+  acuSecsLeft = acuHold;
+  phygitalStatusEl.textContent = 'Pressing';
+  if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+  drawAcuStep(true);
+  acuTimer = setInterval(() => {
+    acuSecsLeft--;
+    const c = document.getElementById('acuCount');
+    if (c) c.textContent = acuSecsLeft + 's';
+    phygitalTimeEl.textContent = formatTime(Math.max(0, acuSecsLeft));
+    if (acuSecsLeft <= 0) {
+      clearInterval(acuTimer); acuTimer = null;
+      acuStep++;
+      if (acuStep >= acuQueue.length) {
+        acuComplete();
+      } else {
+        phygitalStatusEl.textContent = 'Release · next point';
+        if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+        drawAcuStep(false);
+      }
+    }
+  }, 1000);
+}
+
+function acuComplete() {
+  if (acuTimer) { clearInterval(acuTimer); acuTimer = null; }
+  phygitalStatusEl.textContent = 'Care Received';
+  phygitalSurface.innerHTML = `
+    <div class="acu-card">
+      <div class="acu-emoji">🌸</div>
+      <div class="acu-name">Care received.</div>
+      <div class="acu-cue">Let the warmth settle for a moment. Well done.</div>
+    </div>`;
+  claimActivityReward('mood_check');
+  setTimeout(() => closeModal('phygitalModal'), 2400);
 }
 
 /* ─ Octant 05: Pamper Palace (id: emotion) · pressure biofeedback + acupressure ─ */
@@ -1601,6 +1692,7 @@ function renderReflectionDojo() {
 }
 
 function conductPhygitalSession() {
+  if (activePhygitalSession?.offScreen) return; // off-screen octants run their own guided timer
   if (phygitalTimer) return;
   
   phygitalStatusEl.textContent = 'Sync Active';
@@ -1679,6 +1771,7 @@ function completePhygitalSession() {
 }
 
 phygitalSurface.addEventListener('touchstart', (e) => {
+  if (activePhygitalSession?.offScreen) return; // off-screen octant: don't capture taps (let its buttons work)
   e.preventDefault();
   phygitalIsContact = true;
   contactWarning.classList.add('hidden');
@@ -1693,6 +1786,7 @@ phygitalSurface.addEventListener('touchmove', (e) => {
 });
 
 phygitalSurface.addEventListener('mousedown', (e) => {
+  if (activePhygitalSession?.offScreen) return; // off-screen octant: let its buttons handle clicks
   phygitalIsContact = true;
   contactWarning.classList.add('hidden');
   conductPhygitalSession();
@@ -1712,6 +1806,7 @@ phygitalSurface.addEventListener('mouseleave', () => { phygitalIsContact = false
 function exitPhygitalSession() {
   clearInterval(phygitalTimer);
   phygitalTimer = null;
+  if (acuTimer) { clearInterval(acuTimer); acuTimer = null; }
   phygitalIsContact = false;
   stopAmbient();
   closeModal('phygitalModal');
