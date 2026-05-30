@@ -1704,15 +1704,11 @@ function exitPhygitalSession() {
 }
 
 document.getElementById('closePhygital')?.addEventListener('click', () => {
-  // BUG-02: graceful exit — confirm before abandoning an in-progress session (LOVEval user agency)
-  const sessionActive = phygitalTimer !== null;
-  if (!sessionActive) { exitPhygitalSession(); return; }
-  const msg = "Leave this session? You won't earn belt progress or GVRP for a partial practice.";
-  if (tg?.showConfirm) {
-    tg.showConfirm(msg, (ok) => { if (ok) exitPhygitalSession(); });
-  } else if (window.confirm(msg)) {
-    exitPhygitalSession();
-  }
+  // BUG-02: the ✕ must ALWAYS close the session reliably. A blocking confirm
+  // (tg.showConfirm / window.confirm) can silently fail inside the Telegram WebView
+  // and trap the user, so we close immediately. No GVRP is awarded for a partial
+  // session anyway (rewards only fire on full completion), so nothing is lost.
+  exitPhygitalSession();
 });
 
 document.getElementById('octStillness')?.addEventListener('click', () => startPhygitalSession('STILLNESS'));

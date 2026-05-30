@@ -603,6 +603,7 @@ body {
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   transition: background 0.2s;
+  z-index: 50; /* must sit above .phygital-surface (z-index:5) so the ✕ is always tappable */
 }
 .modal-close:hover { background: rgba(255,255,255,0.15); color: var(--text); }
 
