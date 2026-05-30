@@ -75,21 +75,40 @@
     <!-- ═══ PANEL: GURUS ═══ -->
     <div class="tab-panel" id="panelGurus">
 
-      <!-- Filter Dropdown -->
-      <div class="filter-wrap">
-        <div class="select-wrapper">
-          <select id="guruFilter" class="guru-filter">
-            <option value="all">✦ All Gurus</option>
-            <option value="yoga">🧘 Yoga</option>
-            <option value="meditation">🌙 Meditation</option>
-            <option value="nutrition">🥗 Nutrition</option>
-            <option value="breathwork">🌬️ Breathwork</option>
-            <option value="fitness">💪 Fitness</option>
-            <option value="sleep">😴 Sleep & Recovery</option>
-            <option value="spiritual">🔮 Spiritual</option>
-            <option value="stress">🧠 Stress Management</option>
-          </select>
-          <span class="select-arrow">▾</span>
+      <!-- GVG Directory · filter cascade (Section 08) -->
+      <div class="gvg-head">
+        <p class="gvg-privacy">🔒 We never ask where you are — you tell us where you'd like to look.</p>
+        <div class="gvg-filters">
+          <div class="select-wrapper">
+            <select id="filterVertical" class="guru-filter"><option value="all">✦ All verticals</option></select>
+            <span class="select-arrow">▾</span>
+          </div>
+          <div class="select-wrapper">
+            <select id="filterCity" class="guru-filter"><option value="all">🌍 Any city</option></select>
+            <span class="select-arrow">▾</span>
+          </div>
+          <div class="select-wrapper">
+            <select id="filterHood" class="guru-filter" disabled><option value="all">Any neighbourhood</option></select>
+            <span class="select-arrow">▾</span>
+          </div>
+          <div class="select-wrapper">
+            <select id="filterPref" class="guru-filter">
+              <option value="all">Any practitioner</option>
+              <option value="female">♀ Female</option>
+              <option value="male">♂ Male</option>
+            </select>
+            <span class="select-arrow">▾</span>
+          </div>
+          <div class="select-wrapper">
+            <select id="filterSort" class="guru-filter">
+              <option value="alpha">↕ A–Z</option>
+              <option value="popularity">↕ Popularity</option>
+              <option value="proximity">↕ Proximity</option>
+              <option value="gvrp">↕ GVRP-earning</option>
+              <option value="random">↕ Surprise me</option>
+            </select>
+            <span class="select-arrow">▾</span>
+          </div>
         </div>
       </div>
 

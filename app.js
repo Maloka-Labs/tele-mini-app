@@ -486,60 +486,155 @@ const gurus = [
 ];
 
 
-/* ── Render Gurus ── */
-function renderGurus(filter = 'all') {
-  const filtered = filter === 'all'
-    ? gurus
-    : gurus.filter(g => g.specialties.includes(filter));
+/* ═══ GVG Directory · filter cascade + sort (Section 08) ═══
+   Thumb Lama is the Dojo Den host (pinned, exempt from filters). The rest are GVGs —
+   AI twins of real WIPs (Max, Melini) and illustrative seed personas. */
+const GVG_META = {
+  max:    { vertical: 'nutrition',  verticals: ['nutrition', 'breathwork', 'yoga'], city: 'London',      hood: 'Shoreditch',   gender: 'male',   realWIP: true },
+  melini: { vertical: 'yoga',       verticals: ['yoga', 'creative'],                city: 'New York',    hood: 'Brooklyn',     gender: 'female', realWIP: true },
+  arjun:  { vertical: 'yoga',       verticals: ['yoga'],                            city: 'London',      hood: 'Camden',       gender: 'male' },
+  priya:  { vertical: 'breathwork', verticals: ['breathwork'],                      city: 'Mumbai',      hood: 'Bandra',       gender: 'female' },
+  maya:   { vertical: 'meditation', verticals: ['meditation'],                      city: 'Los Angeles', hood: 'Venice',       gender: 'female' },
+  kai:    { vertical: 'nutrition',  verticals: ['nutrition'],                       city: 'Sydney',      hood: 'Bondi',        gender: 'male' },
+  zara:   { vertical: 'fitness',    verticals: ['fitness'],                         city: 'New York',    hood: 'Manhattan',    gender: 'female' },
+  luna:   { vertical: 'sleep',      verticals: ['sleep'],                           city: 'London',      hood: 'Notting Hill', gender: 'female' },
+};
+const GVG_VERTICALS = [
+  ['yoga', '🧘 Yoga'], ['fitness', '💪 Fitness / PT'], ['meditation', '🌙 Meditation'],
+  ['nutrition', '🥗 Nutrition'], ['breathwork', '🌬️ Breathwork'], ['pilates', '🤸 Pilates & Somatic'],
+  ['massage', '💆 Massage & Acupressure'], ['herbal', '🌿 Herbal'], ['creative', '🎨 Creative Therapy'],
+  ['sleep', '😴 Sleep & Recovery'],
+];
+const GVG_CITIES = {
+  'London': ['Shoreditch', 'Camden', 'Notting Hill'],
+  'New York': ['Brooklyn', 'Manhattan'],
+  'Los Angeles': ['Venice', 'Silver Lake'],
+  'Sydney': ['Bondi'],
+  'Mumbai': ['Bandra'],
+};
+
+function populateGvgFilters() {
+  const vEl = document.getElementById('filterVertical');
+  if (vEl && vEl.options.length <= 1) GVG_VERTICALS.forEach(([val, label]) => vEl.add(new Option(label, val)));
+  const cEl = document.getElementById('filterCity');
+  if (cEl && cEl.options.length <= 1) Object.keys(GVG_CITIES).forEach(city => cEl.add(new Option('📍 ' + city, city)));
+}
+
+function refreshHoodOptions() {
+  const city = document.getElementById('filterCity')?.value || 'all';
+  const hEl = document.getElementById('filterHood');
+  if (!hEl) return;
+  hEl.innerHTML = '<option value="all">Any neighbourhood</option>';
+  if (city !== 'all' && GVG_CITIES[city]) {
+    GVG_CITIES[city].forEach(h => hEl.add(new Option(h, h)));
+    hEl.disabled = false;
+  } else {
+    hEl.disabled = true;
+  }
+}
+
+function gvgFollowers(s) {
+  const n = parseFloat(s) || 0;
+  return s.includes('M') ? n * 1e6 : (s.includes('K') ? n * 1e3 : n);
+}
+
+function sortGvgs(list, sort) {
+  const arr = [...list];
+  if (sort === 'alpha') arr.sort((a, b) => a.name.localeCompare(b.name));
+  else if (sort === 'popularity') arr.sort((a, b) => gvgFollowers(b.followers) - gvgFollowers(a.followers));
+  else if (sort === 'gvrp') arr.sort((a, b) => (GVG_META[b.id]?.realWIP ? 1 : 0) - (GVG_META[a.id]?.realWIP ? 1 : 0));
+  else if (sort === 'random') arr.sort(() => Math.random() - 0.5);
+  // 'proximity' — no real geo data in the mini-app; keep filtered order
+  return arr;
+}
+
+function renderGuruCard(g, i, isHost) {
+  const m = GVG_META[g.id];
+  const card = document.createElement('div');
+  card.className = 'guru-card' + (isHost ? ' guru-host' : '');
+  card.style.animationDelay = `${Math.max(0, i) * 60}ms`;
+  card.style.setProperty('--guru-accent', g.gradient);
+
+  const actionsHtml = g.voiceEnabled
+    ? `<div class="guru-actions">
+         <button class="guru-btn chat" style="background:${g.btnGradient};" id="chatBtn_${g.id}">${g.ctaText} →</button>
+         <button class="guru-btn talk" id="talkBtn_${g.id}">Talk with ${g.name.split(' ')[0]} 🎙️</button>
+       </div>`
+    : `<button class="guru-btn" style="background:${g.illustrative ? 'rgba(255,255,255,0.08)' : g.btnGradient};${g.illustrative ? 'color:var(--text2);font-weight:600;' : ''}" id="guruBtn_${g.id}" data-id="${g.id}">
+         ${g.illustrative ? 'View profile' : `${g.ctaText} →`}
+       </button>`;
+
+  let badge = '';
+  if (isHost) badge = ' <span class="guru-badge host">☸️ Host</span>';
+  else if (m?.realWIP) badge = ' <span class="guru-badge wip">✓ Real WIP · beta</span>';
+  else if (g.illustrative) badge = ' <span class="guru-badge illus">✨ Illustrative</span>';
+
+  const metaLine = (!isHost && m)
+    ? `<div class="guru-loc">📍 ${m.hood}, ${m.city}</div>`
+    : `<div class="guru-followers">🏆 ${g.followers} followers</div>`;
+  const capsLine = (!isHost && g.voiceEnabled)
+    ? `<div class="guru-caps">🎙️ 1 hr voice/day · 💬 ~1 hr chat/day · resets at midnight</div>` : '';
+
+  card.innerHTML = `
+    <div class="guru-head">
+      <div class="guru-avatar-wrap">
+        <div class="guru-avatar" style="background:${g.gradient};">${g.emoji}</div>
+        <span class="guru-online-dot"></span>
+      </div>
+      <div class="guru-meta">
+        <div class="guru-name">${g.name}${badge}</div>
+        <div class="guru-handle">${g.handle}</div>
+        ${metaLine}
+      </div>
+    </div>
+    <p class="guru-bio">${g.bio}</p>
+    <div class="guru-tags">
+      ${g.tags.map(t => `<span class="guru-tag" style="background:rgba(${hexToRgb(g.tagBg)},0.15);color:${g.tagColor};border-color:rgba(${hexToRgb(g.tagBg)},0.3);">${t}</span>`).join('')}
+    </div>
+    ${capsLine}
+    ${actionsHtml}
+  `;
+
+  if (g.voiceEnabled) {
+    card.querySelector(`#chatBtn_${g.id}`)?.addEventListener('click', () => openChat(g));
+    card.querySelector(`#talkBtn_${g.id}`)?.addEventListener('click', () => openVoiceChat(g));
+  } else {
+    card.querySelector(`#guruBtn_${g.id}`)?.addEventListener('click', () => openChat(g));
+  }
+  return card;
+}
+
+function renderGurus() {
+  if (!guruListEl) return;
+  const f = {
+    vertical: document.getElementById('filterVertical')?.value || 'all',
+    city: document.getElementById('filterCity')?.value || 'all',
+    hood: document.getElementById('filterHood')?.value || 'all',
+    pref: document.getElementById('filterPref')?.value || 'all',
+    sort: document.getElementById('filterSort')?.value || 'alpha',
+  };
+  const lama = gurus.find(g => g.id === 'lama');
+  let list = gurus.filter(g => g.id !== 'lama').filter(g => {
+    const m = GVG_META[g.id];
+    if (!m) return false;
+    if (f.vertical !== 'all' && !(m.verticals || [m.vertical]).includes(f.vertical)) return false;
+    if (f.city !== 'all' && m.city !== f.city) return false;
+    if (f.hood !== 'all' && m.hood !== f.hood) return false;
+    if (f.pref !== 'all' && m.gender !== f.pref) return false;
+    return true;
+  });
+  list = sortGvgs(list, f.sort);
 
   guruListEl.innerHTML = '';
-
-  if (filtered.length === 0) {
-    guruListEl.innerHTML = `<p style="color:var(--text2);text-align:center;padding:24px 0;">No gurus found for this specialty.</p>`;
+  if (lama) guruListEl.appendChild(renderGuruCard(lama, -1, true)); // host pinned, exempt from filters
+  if (list.length === 0) {
+    const empty = document.createElement('p');
+    empty.className = 'gvg-empty';
+    empty.innerHTML = `No Gurus match here yet — more practitioners are joining every week. 🌱<br><span style="opacity:0.7;font-size:12px;">Try widening your filters.</span>`;
+    guruListEl.appendChild(empty);
     return;
   }
-
-  filtered.forEach((g, i) => {
-    const card = document.createElement('div');
-    card.className = 'guru-card';
-    card.style.animationDelay = `${i * 60}ms`;
-    card.style.setProperty('--guru-accent', g.gradient);
-    const actionsHtml = g.voiceEnabled
-      ? `<div class="guru-actions">
-           <button class="guru-btn chat" style="background:${g.btnGradient};" id="chatBtn_${g.id}">${g.ctaText} →</button>
-           <button class="guru-btn talk" id="talkBtn_${g.id}">Talk with ${g.name.split(' ')[0]} 🎙️</button>
-         </div>`
-      : `<button class="guru-btn" style="background:${g.illustrative ? 'rgba(255,255,255,0.08)' : g.btnGradient};${g.illustrative ? 'color:var(--text2);font-weight:600;' : ''}" id="guruBtn_${g.id}" data-id="${g.id}">
-           ${g.illustrative ? 'View profile' : `${g.ctaText} →`}
-         </button>`;
-
-    card.innerHTML = `
-      <div class="guru-head">
-        <div class="guru-avatar-wrap">
-          <div class="guru-avatar" style="background:${g.gradient};">${g.emoji}</div>
-          <span class="guru-online-dot"></span>
-        </div>
-        <div class="guru-meta">
-          <div class="guru-name">${g.name}${g.illustrative ? ' <span style="font-size:10px;font-weight:600;color:var(--text2);background:rgba(255,255,255,0.08);border-radius:6px;padding:2px 6px;vertical-align:middle;white-space:nowrap;">✨ Illustrative</span>' : ''}</div>
-          <div class="guru-handle">${g.handle}</div>
-          <div class="guru-followers">🏆 ${g.followers} followers</div>
-        </div>
-      </div>
-      <p class="guru-bio">${g.bio}</p>
-      <div class="guru-tags">
-        ${g.tags.map(t => `<span class="guru-tag" style="background:rgba(${hexToRgb(g.tagBg)},0.15);color:${g.tagColor};border-color:rgba(${hexToRgb(g.tagBg)},0.3);">${t}</span>`).join('')}
-      </div>
-      ${actionsHtml}
-    `;
-    guruListEl.appendChild(card);
-
-    if (g.voiceEnabled) {
-      card.querySelector(`#chatBtn_${g.id}`).addEventListener('click', () => openChat(g));
-      card.querySelector(`#talkBtn_${g.id}`).addEventListener('click', () => openVoiceChat(g));
-    } else {
-      card.querySelector(`#guruBtn_${g.id}`).addEventListener('click', () => openChat(g));
-    }
-  });
+  list.forEach((g, i) => guruListEl.appendChild(renderGuruCard(g, i, false)));
 }
 
 function hexToRgb(hex) {
@@ -549,9 +644,19 @@ function hexToRgb(hex) {
   return `${r},${g},${b}`;
 }
 
-/* ── Filter ── */
-guruFilter.addEventListener('change', () => renderGurus(guruFilter.value));
-renderGurus(); // initial render
+/* ── GVG Directory init ── */
+function initGvgDirectory() {
+  populateGvgFilters();
+  refreshHoodOptions();
+  ['filterVertical', 'filterCity', 'filterHood', 'filterPref', 'filterSort'].forEach(id => {
+    document.getElementById(id)?.addEventListener('change', () => {
+      if (id === 'filterCity') refreshHoodOptions();
+      renderGurus();
+    });
+  });
+  renderGurus();
+}
+initGvgDirectory();
 
 /* ══════════════════════════════════════════════
    TABS
