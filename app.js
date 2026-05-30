@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════
-   GOOD VIBES — App Logic
+   GOOD VYBES — App Logic
    Telegram Mini App | Maloka
    ═══════════════════════════════════════════════ */
 
@@ -35,7 +35,7 @@ function initSocket() {
   socket.on('error', (msg) => alert('Sync Error: ' + msg));
 }
 
-/* ─── Thumb Fu & Vibe Config ─── */
+/* ─── Thumb Fu & Vybes Config ─── */
 const BELTS = [
   { name: 'White',  pts: 0,    color: 'belt-white',  char: '🦖' },
   { name: 'Yellow', pts: 50,   color: 'belt-yellow', char: '🦕' },
@@ -201,7 +201,7 @@ function showRewardToast(points, label, multiplier = 1.0) {
     multEl.classList.add('hidden');
   }
 
-  rewardToastPts.textContent   = `+${points} pts`;
+  rewardToastPts.textContent   = `+${points} GVRP`;
   rewardToastLabel.textContent = label;
   rewardToast.classList.remove('hidden', 'hide');
   rewardToast.classList.add('show');
@@ -213,7 +213,7 @@ function showRewardToast(points, label, multiplier = 1.0) {
       rewardToast.classList.add('hidden');
       rewardToast.classList.remove('hide');
     }, 350);
-  }, 3000);
+  }, 4500); // BUG-04: hold long enough to read (was 3000)
 }
 
 /* ─── Daily Login Reward (called on app start) ─── */
@@ -242,10 +242,10 @@ const ACTIVITY_LABELS = {
   meditation:  { label: 'Meditation Complete!',    pts: 20 },
   affirmation: { label: 'Daily Affirmation!',      pts: 5  },
   mood_check:  { label: 'Mood Check Done!',         pts: 5  },
-  creation:    { label: 'Creative Spark Ignited!',  pts: 10 },
-  nourish:     { label: 'Mindful Nourishment!',     pts: 10 },
-  bridge:      { label: 'Connection Bridge Built!', pts: 10 },
-  sonic:       { label: 'Sonic Haven Reached!',    pts: 15 },
+  creation:    { label: 'Inner Garden Tended!',       pts: 10 },
+  nourish:     { label: 'Wisdom Temple Honoured!',    pts: 10 },
+  bridge:      { label: 'Kindred Spirits Connected!', pts: 10 },
+  sonic:       { label: 'Sleep Sanctuary Restored!',  pts: 15 },
 };
 
 async function claimActivityReward(activity) {
@@ -367,8 +367,8 @@ const gurus = [
     ctaText: 'Chat with Arjun',
     btnGradient: 'linear-gradient(135deg, #0d7377, #14a085)',
     welcomeMsg: "Namaste 🙏 I'm Arjun, your dedicated yoga guide. Whether you're stepping onto the mat for the first time or deepening an existing practice — I'm here. What brings you today?",
-    // ── Live AI backend for this guru ──
-    chatUrl: 'https://nemoclawtelegrambackend-production.up.railway.app/chat',
+    // Seed persona — illustrative only, chat disabled per canon (not a real WIP in the pipeline)
+    illustrative: true,
   },
   {
     id: 'priya',
@@ -385,6 +385,7 @@ const gurus = [
     ctaText: 'Chat with Priya',
     btnGradient: 'linear-gradient(135deg, #0e6655, #1abc9c)',
     welcomeMsg: "Take a deep breath 🌬️ I'm Priya, your breathwork specialist. Your breath is your most accessible superpower. Are you dealing with stress, anxiety, or just want to feel more centred?",
+    illustrative: true,
   },
   {
     id: 'maya',
@@ -401,6 +402,7 @@ const gurus = [
     ctaText: 'Chat with Maya',
     btnGradient: 'linear-gradient(135deg, #7b2d8b, #c044e0)',
     welcomeMsg: "Hello beautiful soul ✨ I'm Maya, your meditation guide. Even five minutes of stillness can change your entire day. What's on your mind — or heart — today?",
+    illustrative: true,
   },
   {
     id: 'kai',
@@ -417,6 +419,7 @@ const gurus = [
     ctaText: 'Chat with Kai',
     btnGradient: 'linear-gradient(135deg, #1a6336, #2dce89)',
     welcomeMsg: "Hey! 🥗 I'm Kai, your nutrition expert. Food is your most powerful medicine — and I'm here to make eating well simple and enjoyable. Tell me about your health goals!",
+    illustrative: true,
   },
   {
     id: 'zara',
@@ -433,6 +436,7 @@ const gurus = [
     ctaText: 'Chat with Zara',
     btnGradient: 'linear-gradient(135deg, #b03a2e, #e74c3c)',
     welcomeMsg: "Let's get after it 💪 I'm Zara, your fitness coach. Whether you want strength, endurance, or just to move better — I'll build a plan around your life. What are your goals?",
+    illustrative: true,
   },
   {
     id: 'luna',
@@ -449,6 +453,7 @@ const gurus = [
     ctaText: 'Chat with Luna',
     btnGradient: 'linear-gradient(135deg, #1e3a6e, #4a90d9)',
     welcomeMsg: "Hi 🌙 I'm Luna, your sleep & recovery specialist. Great sleep isn't a luxury — it's the foundation of everything. How has your sleep been lately?",
+    illustrative: true,
   },
 ];
 
@@ -476,8 +481,8 @@ function renderGurus(filter = 'all') {
            <button class="guru-btn chat" style="background:${g.btnGradient};" id="chatBtn_${g.id}">${g.ctaText} →</button>
            <button class="guru-btn talk" id="talkBtn_${g.id}">Talk with ${g.name.split(' ')[0]} 🎙️</button>
          </div>`
-      : `<button class="guru-btn" style="background:${g.btnGradient};" id="guruBtn_${g.id}" data-id="${g.id}">
-           ${g.ctaText} →
+      : `<button class="guru-btn" style="background:${g.illustrative ? 'rgba(255,255,255,0.08)' : g.btnGradient};${g.illustrative ? 'color:var(--text2);font-weight:600;' : ''}" id="guruBtn_${g.id}" data-id="${g.id}">
+           ${g.illustrative ? 'View profile' : `${g.ctaText} →`}
          </button>`;
 
     card.innerHTML = `
@@ -487,7 +492,7 @@ function renderGurus(filter = 'all') {
           <span class="guru-online-dot"></span>
         </div>
         <div class="guru-meta">
-          <div class="guru-name">${g.name}</div>
+          <div class="guru-name">${g.name}${g.illustrative ? ' <span style="font-size:10px;font-weight:600;color:var(--text2);background:rgba(255,255,255,0.08);border-radius:6px;padding:2px 6px;vertical-align:middle;white-space:nowrap;">✨ Illustrative</span>' : ''}</div>
           <div class="guru-handle">${g.handle}</div>
           <div class="guru-followers">🏆 ${g.followers} followers</div>
         </div>
@@ -644,14 +649,14 @@ function updateLamaNudge(data) {
   }
 
   const nudges = {
-    stillness: "Your mind is racing, Rebel. Five minutes of Stillness?",
-    creation:  "The spark is low. Shall we create something today?",
-    sonic:     "The world is noisy. Retreat into a Sonic Haven.",
-    wisdom:    "A moment of Wisdom dissolves a day of confusion.",
-    emotion:   "Check your vibe. High-frequency emotions only.",
-    bridge:    "Service is wellness. Connect with a fellow Rebel.",
-    movement:  "Stagnant energy is the enemy. Move your body.",
-    nourish:   "Nourish your temple. What did you feed your soul?"
+    stillness: "Your mind is racing, Rebel. Tend your attention in the Mind Meadow?",
+    creation:  "The spark is low. Shall we tend the Inner Garden today?",
+    sonic:     "The world is loud. Let the Sleep Sanctuary bring you to baseline.",
+    wisdom:    "Before you reach for fuel — pause. Three breaths at the Fuel Stop.",
+    emotion:   "Be gentle with yourself. Receive care at the Pamper Palace.",
+    bridge:    "You are not alone. Find your Kindred Spirits.",
+    movement:  "Stagnant energy is the enemy. Shape the body in the Studio.",
+    nourish:   "Sit with what's been handed down. Study at the Wisdom Temple."
   };
 
   nudgeText.textContent = nudges[suggestedOctant];
@@ -702,7 +707,7 @@ const LAMA_INTAKE_STEPS = [
   {
     step: 1,
     question: "Excellent. Which domain of wellness feels most 'blocked' or in need of mastery right now?",
-    options: ["🧘 Stillness", "✍️ Creation", "🎵 Sonic", "🧠 Wisdom", "🌪️ Movement"]
+    options: ["🧘 Mind Meadow", "🎨 Inner Garden", "🌙 Sleep Sanctuary", "🍎 Fuel Stop", "🤸 Shape Studio"]
   },
   {
     step: 2,
@@ -787,6 +792,19 @@ function openChat(guru) {
   typingAvatar.textContent = guru.emoji;
   typingAvatar.style.background = guru.gradient;
 
+  // Illustrative (seed persona): read-only, chat disabled per canon (not a real WIP)
+  const chatHeaderStatusEl = document.getElementById('chatHeaderStatus');
+  if (guru.illustrative) {
+    chatInput.disabled = true;
+    chatSend.disabled = true;
+    chatInput.placeholder = 'Illustrative profile — live chat coming soon';
+    if (chatHeaderStatusEl) chatHeaderStatusEl.innerHTML = '<span class="chat-status-dot" style="background:#8a8a8a;"></span> Illustrative profile';
+  } else {
+    chatInput.disabled = false;
+    chatInput.placeholder = 'Ask your guru anything…';
+    if (chatHeaderStatusEl) chatHeaderStatusEl.innerHTML = '<span class="chat-status-dot"></span> AI · Online';
+  }
+
   // Init conversation if first time
   if (!conversations[guru.id]) conversations[guru.id] = [];
 
@@ -864,6 +882,21 @@ function renderMessages(guru) {
 
   const history = conversations[guru.id];
 
+  // Illustrative seed personas: show a clear notice instead of a fake live chat
+  if (guru.illustrative) {
+    const notice = document.createElement('div');
+    notice.className = 'msg-row guru';
+    notice.innerHTML = `
+      <div class="msg-avatar" style="background:${guru.gradient};">${guru.emoji}</div>
+      <div class="msg-bubble" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);">
+        ✨ This is an <strong>illustrative</strong> Guru profile — a preview of the kind of practitioner you'll meet in the Good Vybes Guru directory. Live conversation isn't available here yet.<br><br>
+        To chat now, try <strong>Max</strong> or <strong>Melini</strong> — our two live Gurus. 🌿
+      </div>`;
+    chatMessages.appendChild(notice);
+    scrollToBottom();
+    return;
+  }
+
   // If no history, show welcome message from guru
   if (history.length === 0) {
     appendMessage('guru', guru.welcomeMsg, guru);
@@ -938,6 +971,7 @@ function hideTyping() {
 async function sendMessage() {
   const text = chatInput.value.trim();
   if (!text || !activeGuru) return;
+  if (activeGuru.illustrative) return; // chat disabled for illustrative seed personas (no backend)
 
   const guru = activeGuru;
 
@@ -1230,21 +1264,29 @@ let phygitalTimer = null;
 let phygitalSecs = 0;
 let phygitalIsContact = false;
 
+// ⚠️ The internal `id` keys (stillness/creation/sonic/wisdom/emotion/bridge/movement/nourish) are
+// persisted in the backend `octant_scores` JSONB and MUST NOT change — only display copy is renamed
+// to the canonical octant identities (dojoden_octent.txt v0.2, "the practice of stopping").
+// The two content migrations are reflected in the copy/instructions below:
+//   • Off-screen acupressure → Pamper Palace (emotion id)
+//   • Sacred-text tracing    → Wisdom Temple (nourish id)
+// The interactive phygital-mechanic rebuilds (Replace-verdict octants) are tracked in the
+// phygital-layer workstream, not this renaming pass.
 const PHYGITAL_TYPES = {
-  STILLNESS: { 
-    id: 'stillness', 
-    name: 'Reflection Dojo', 
-    desc: 'Octant 01 · Stillness Sanctuary', 
-    instruction: 'Hold Thumb to Anchor Breath',
+  STILLNESS: {
+    id: 'stillness',
+    name: 'Mind Meadow',
+    desc: 'Octant 01 · Stop to Tend Attention',
+    instruction: 'Rest Your Thumb on the Anchor',
     activityId: 'meditation'
   },
-  CREATION: { id: 'creation', name: 'Creation Forge', desc: 'Octant 02 · Creative Expression', instruction: 'Touch to Ignite the Forge', activityId: 'creation' },
-  SONIC: { id: 'sonic', name: 'Sonic Sanctuary', desc: 'Octant 03 · Sound Healing', instruction: 'Tap to Resonate', activityId: 'sonic' },
-  WISDOM: { id: 'wisdom', name: 'Wisdom Chamber', desc: 'Octant 04 · Learning & Philosophy', instruction: 'Trace with Intent', activityId: 'affirmation' },
-  EMOTION: { id: 'emotion', name: 'Emotion Command', desc: 'Octant 05 · Emotional Transmutation', instruction: 'Press to Calibrate', activityId: 'mood_check' },
-  BRIDGE: { id: 'bridge', name: 'Connection Hub', desc: 'Octant 06 · Social Connection', instruction: 'Drag to Connect', activityId: 'bridge' },
-  MOVEMENT: { id: 'movement', name: 'Movement Arena', desc: 'Octant 07 · Yoga & Movement', instruction: 'Follow the Flow', activityId: 'breathing' },
-  SPIRIT: { id: 'nourish', name: 'Spirit Temple', desc: 'Octant 08 · Labyrinth Path', instruction: 'Enter the Labyrinth', activityId: 'nourish' }
+  CREATION: { id: 'creation', name: 'Inner Garden',     desc: 'Octant 02 · Stop to Cultivate Creation',      instruction: 'Touch to Tend Your Garden',           activityId: 'creation' },
+  SONIC:    { id: 'sonic',    name: 'Sleep Sanctuary',  desc: 'Octant 03 · Stop to Restore',                 instruction: 'Breathe the Long Exhale',             activityId: 'sonic' },
+  WISDOM:   { id: 'wisdom',   name: 'Fuel Stop',        desc: 'Octant 04 · Stop to Fuel',                    instruction: 'Three Breaths Before You Eat',        activityId: 'affirmation' },
+  EMOTION:  { id: 'emotion',  name: 'Pamper Palace',    desc: 'Octant 05 · Stop to Receive Care',            instruction: 'Lift Your Thumb — Press the Point, Hold', activityId: 'mood_check' },
+  BRIDGE:   { id: 'bridge',   name: 'Kindred Spirits',  desc: 'Octant 06 · Stop to Find Your People',        instruction: 'Who Showed Up For You Today?',        activityId: 'bridge' },
+  MOVEMENT: { id: 'movement', name: 'Shape Studio',     desc: 'Octant 07 · Stop to Shape the Body',          instruction: 'Hold the Form — Thumb Keeps Time',    activityId: 'breathing' },
+  SPIRIT:   { id: 'nourish',  name: 'Wisdom Temple',    desc: 'Octant 08 · Stop to Study Ancient Knowledge', instruction: 'Trace the Sacred Path',               activityId: 'nourish' }
 };
 
 let currentDanLevel = 0;
@@ -1352,7 +1394,7 @@ function renderPhygitalSurface(octantId) {
   }
 }
 
-/* ─ Octant 05: Emotion Command ─ */
+/* ─ Octant 05: Pamper Palace (id: emotion) · pressure biofeedback + acupressure ─ */
 function renderEmotionCommand() {
   const wrap = document.createElement('div');
   wrap.style.width = '100dvw';
@@ -1360,7 +1402,7 @@ function renderEmotionCommand() {
   wrap.style.background = 'radial-gradient(circle, var(--purple-dim) 0%, transparent 70%)';
   wrap.innerHTML = `
     <div id="bioString" style="width:2px; height:60%; background:var(--purple); box-shadow: 0 0 20px var(--purple); transition: transform 0.1s linear, background 0.4s;"></div>
-    <div style="position:absolute; bottom:20px; font-size:10px; color:var(--text2);">MODULATE FREQUENCY BY TOUCH</div>
+    <div style="position:absolute; bottom:20px; font-size:10px; color:var(--text2);">PRESS &amp; HOLD · LET TOUCH RESTORE</div>
   `;
   wrap.style.display = 'flex';
   wrap.style.alignItems = 'center';
@@ -1376,7 +1418,7 @@ function updateEmotionCommand(e) {
   string.style.transform = `translateX(${shake}px) scaleX(${1 + Math.random()})`;
 }
 
-/* ─ Octant 06: Connection Hub ─ */
+/* ─ Octant 06: Kindred Spirits (id: bridge) ─ */
 function renderConnectionHub() {
   const wrap = document.createElement('div');
   wrap.style.display = 'flex';
@@ -1389,12 +1431,12 @@ function renderConnectionHub() {
   phygitalSurface.appendChild(wrap);
 }
 
-/* ─ Octant 07: Movement Arena ─ */
+/* ─ Octant 07: Shape Studio (id: movement) ─ */
 function renderMovementArena() {
   const wrap = document.createElement('div');
   wrap.innerHTML = `
     <div style="font-size:80px; filter: drop-shadow(0 0 20px var(--teal-glow));">🧘</div>
-    <div style="margin-top:20px; font-size:11px; text-align:center; color:var(--text2); font-weight:700;">ACUPRESSURE POINT: TEMPLE<br><span style="color:var(--teal)">HOLD SECURELY</span></div>
+    <div style="margin-top:20px; font-size:11px; text-align:center; color:var(--text2); font-weight:700;">HOLD THE FORM<br><span style="color:var(--teal)">THUMB KEEPS TIME</span></div>
   `;
   wrap.style.display = 'flex';
   wrap.style.flexDirection = 'column';
@@ -1402,7 +1444,7 @@ function renderMovementArena() {
   phygitalSurface.appendChild(wrap);
 }
 
-/* ─ Octant 08: Spirit Temple ─ */
+/* ─ Octant 08: Wisdom Temple (id: nourish) · labyrinth + sacred-text tracing ─ */
 function renderSpiritTemple() {
   phygitalSurface.innerHTML = `
     <svg viewBox="0 0 200 200" style="width:100%; height:80%;">
@@ -1422,7 +1464,7 @@ function updateSpiritTemple() {
   dot.setAttribute('cy', 100 + 80 * Math.sin(rad));
 }
 
-/* ─ Octant 03: Sonic Sanctuary ─ */
+/* ─ Octant 03: Sleep Sanctuary (id: sonic) ─ */
 function renderSonicSanctuary() {
   const wrap = document.createElement('div');
   wrap.style.display = 'grid';
@@ -1451,7 +1493,7 @@ function renderSonicSanctuary() {
   });
 }
 
-/* ─ Octant 04: Wisdom Chamber ─ */
+/* ─ Octant 04: Fuel Stop (id: wisdom) ─ */
 function renderWisdomChamber() {
   const wrap = document.createElement('div');
   wrap.className = 'wisdom-svg-wrap';
@@ -1465,7 +1507,7 @@ function renderWisdomChamber() {
       <path d="M50 150 L100 50 L150 150 Z" stroke="rgba(255,255,255,0.1)" stroke-width="12" fill="none" stroke-linecap="round" />
       <path id="tracePath" d="M50 150 L100 50 L150 150 Z" stroke="var(--teal)" stroke-width="12" fill="none" stroke-linecap="round" stroke-dasharray="400" stroke-dashoffset="400" />
     </svg>
-    <div style="position:absolute; bottom:20px; font-size:11px; color:var(--text3); font-weight:700;">TRACE THE GEOMETRY</div>
+    <div style="position:absolute; bottom:20px; font-size:11px; color:var(--text3); font-weight:700;">PAUSE · THREE BREATHS BEFORE YOU FUEL</div>
   `;
   phygitalSurface.appendChild(wrap);
 }
@@ -1480,7 +1522,7 @@ function updateWisdomTrace(e) {
   path.style.strokeDashoffset = progress;
 }
 
-/* ─ Octant 02: Creation Forge ─ */
+/* ─ Octant 02: Inner Garden (id: creation) ─ */
 let forgeCanvas = null, forgeCtx = null;
 function renderCreationForge() {
   forgeCanvas = document.createElement('canvas');
@@ -1670,7 +1712,7 @@ phygitalSurface.addEventListener('touchend', () => { phygitalIsContact = false; 
 phygitalSurface.addEventListener('mouseup', () => { phygitalIsContact = false; });
 phygitalSurface.addEventListener('mouseleave', () => { phygitalIsContact = false; });
 
-document.getElementById('closePhygital')?.addEventListener('click', () => {
+function exitPhygitalSession() {
   clearInterval(phygitalTimer);
   phygitalTimer = null;
   phygitalIsContact = false;
@@ -1678,6 +1720,18 @@ document.getElementById('closePhygital')?.addEventListener('click', () => {
   closeModal('phygitalModal');
   const overlay = document.getElementById('wisdom-phygital');
   if (overlay) overlay.classList.add('hidden');
+}
+
+document.getElementById('closePhygital')?.addEventListener('click', () => {
+  // BUG-02: graceful exit — confirm before abandoning an in-progress session (LOVEval user agency)
+  const sessionActive = phygitalTimer !== null;
+  if (!sessionActive) { exitPhygitalSession(); return; }
+  const msg = "Leave this session? You won't earn belt progress or GVRP for a partial practice.";
+  if (tg?.showConfirm) {
+    tg.showConfirm(msg, (ok) => { if (ok) exitPhygitalSession(); });
+  } else if (window.confirm(msg)) {
+    exitPhygitalSession();
+  }
 });
 
 document.getElementById('octStillness')?.addEventListener('click', () => startPhygitalSession('STILLNESS'));
@@ -2022,7 +2076,7 @@ async function loadProfile() {
     }
 
     if (data.events.length === 0) {
-      feedEl.innerHTML = '<div class="feed-empty">No activity yet — complete a session to earn points!</div>';
+      feedEl.innerHTML = '<div class="feed-empty">No activity yet — complete a session to earn GVRP!</div>';
       return;
     }
 
@@ -2047,7 +2101,7 @@ async function loadProfile() {
     if (dashBelt) dashBelt.textContent = currentBelt.name;
     // (SVG Thumbagotchi updated below in vibeTitle block)
 
-    // Vibe Progress (0 to 100% of next belt tier)
+    // Vybes Progress (0 to 100% of next belt tier)
     const nextBelt = BELTS[BELTS.indexOf(currentBelt) + 1];
     let percent = 100;
     if (nextBelt) {
@@ -2083,7 +2137,7 @@ async function loadProfile() {
           vibeTitle.textContent = 'Glow State';
           vibeDesc.textContent  = "You're radiating positive energy today!";
         } else if (data.streak > 0) {
-          vibeTitle.textContent = 'Active Vibe';
+          vibeTitle.textContent = 'Active Vybe';
           vibeDesc.textContent  = "Keep it up! Your Thumbagotchi is feeling great.";
         } else {
           vibeTitle.textContent = 'Chill Mode';
