@@ -1278,11 +1278,11 @@ const PHYGITAL_TYPES = {
     activityId: 'meditation'
   },
   CREATION: { id: 'creation', name: 'Inner Garden',     desc: 'Octant 02 · Stop to Cultivate Creation',      instruction: 'Touch to Tend Your Garden',           activityId: 'creation' },
-  SONIC:    { id: 'sonic',    name: 'Sleep Sanctuary',  desc: 'Octant 03 · Stop to Restore',                 instruction: 'Breathe the Long Exhale',             activityId: 'sonic' },
-  WISDOM:   { id: 'wisdom',   name: 'Fuel Stop',        desc: 'Octant 04 · Stop to Fuel',                    instruction: 'Three Breaths Before You Eat',        activityId: 'affirmation' },
+  SONIC:    { id: 'sonic',    name: 'Sleep Sanctuary',  desc: 'Octant 03 · Stop to Restore',                 instruction: 'Breathe the Long Exhale',             activityId: 'sonic', offScreen: true },
+  WISDOM:   { id: 'wisdom',   name: 'Fuel Stop',        desc: 'Octant 04 · Stop to Fuel',                    instruction: 'Three Breaths Before You Eat',        activityId: 'affirmation', offScreen: true },
   EMOTION:  { id: 'emotion',  name: 'Pamper Palace',    desc: 'Octant 05 · Stop to Receive Care',            instruction: 'Lift Your Thumb — Press the Point, Hold', activityId: 'mood_check', offScreen: true },
-  BRIDGE:   { id: 'bridge',   name: 'Kindred Spirits',  desc: 'Octant 06 · Stop to Find Your People',        instruction: 'Who Showed Up For You Today?',        activityId: 'bridge' },
-  MOVEMENT: { id: 'movement', name: 'Shape Studio',     desc: 'Octant 07 · Stop to Shape the Body',          instruction: 'Hold the Form — Thumb Keeps Time',    activityId: 'breathing' },
+  BRIDGE:   { id: 'bridge',   name: 'Kindred Spirits',  desc: 'Octant 06 · Stop to Find Your People',        instruction: 'Who Showed Up For You Today?',        activityId: 'bridge', offScreen: true },
+  MOVEMENT: { id: 'movement', name: 'Shape Studio',     desc: 'Octant 07 · Stop to Shape the Body',          instruction: 'Hold the Form — Thumb Keeps Time',    activityId: 'breathing', offScreen: true },
   SPIRIT:   { id: 'nourish',  name: 'Wisdom Temple',    desc: 'Octant 08 · Stop to Study Ancient Knowledge', instruction: 'Trace the Sacred Path',               activityId: 'nourish' }
 };
 
@@ -1371,19 +1371,19 @@ function renderPhygitalSurface(octantId) {
   contactWarning.classList.add('hidden');
   
   if (octantId === 'stillness') {
-    renderReflectionDojo();
+    renderAttentionAnchor();
   } else if (octantId === 'creation') {
     renderCreationForge();
   } else if (octantId === 'sonic') {
-    renderSonicSanctuary();
+    renderSleepSanctuarySurface();
   } else if (octantId === 'wisdom') {
-    renderWisdomChamber();
+    renderFuelStopSurface();
   } else if (octantId === 'emotion') {
     renderAcupressureSurface();
   } else if (octantId === 'bridge') {
-    renderConnectionHub();
+    renderKindredSurface();
   } else if (octantId === 'movement') {
-    renderMovementArena();
+    renderShapeStudioSurface();
   } else if (octantId === 'nourish') {
     renderSpiritTemple();
   } else {
@@ -1488,6 +1488,575 @@ function acuComplete() {
     </div>`;
   claimActivityReward('mood_check');
   setTimeout(() => closeModal('phygitalModal'), 2400);
+}
+
+/* ═══ Shape Studio · Off-Screen Form Practice ═══
+   The body moves; the thumb only witnesses — timing holds and counting reps.
+   Two modes: 'hold' (hands-free countdown) and 'reps' (tap once per rep). */
+const SHAPE_LIBRARY = {
+  mountain: { emoji: '🧍', name: 'Mountain Pose',     type: 'hold', dur: 30, cue: 'Stand tall, feet grounded, crown lifting. Slow, even breath.' },
+  fold:     { emoji: '🙇', name: 'Forward Fold',      type: 'hold', dur: 30, cue: 'Hinge from the hips, let your head hang heavy.' },
+  warrior:  { emoji: '🧗', name: 'Warrior Hold',      type: 'hold', dur: 30, cue: 'Front knee bent, back leg strong, arms reaching wide.' },
+  plank:    { emoji: '🤸', name: 'Plank Hold',        type: 'hold', dur: 30, cue: 'One straight line, crown to heels. Brace the core.' },
+  mobility: { emoji: '🌀', name: 'Open & Mobilise',   type: 'hold', dur: 40, cue: 'Slow circles through the joints — unhurried, exploring range.' },
+  pulse:    { emoji: '🔁', name: 'Controlled Pulses', type: 'reps', reps: 12, cue: 'Small, precise pulses. Tap once per pulse.' },
+  squat:    { emoji: '🏋️', name: 'Squat Set',         type: 'reps', reps: 10, cue: 'Slow squats, full range. Tap each time you rise.' },
+};
+const SHAPE_SEQUENCE = [
+  ['mountain'],                                      // White — the single shape
+  ['mountain', 'fold'],                              // Yellow — two shapes, one breath
+  ['pulse'],                                         // Orange — the controlled pulse
+  ['mountain', 'fold', 'warrior'],                   // Green — three-pose flow
+  ['plank', 'squat'],                                // Blue — building strength
+  ['mobility'],                                      // Purple — mobility & opening
+  ['warrior', 'pulse', 'plank'],                     // Brown — integrated practice
+  ['mountain', 'fold', 'warrior', 'pulse', 'squat'], // Black — your own practice
+];
+let shapeTimer = null, shapeQueue = [], shapeStep = 0, shapeLeft = 0, shapeReps = 0;
+
+function renderShapeStudioSurface() {
+  const pts = window.currentOctantScores?.movement || 0;
+  const beltIdx = BELTS.indexOf(getBelt(pts));
+  shapeQueue = SHAPE_SEQUENCE[beltIdx] || SHAPE_SEQUENCE[0];
+  shapeStep = 0;
+  touchPrompt.classList.add('hidden');
+  drawShapeStep('intro');
+}
+
+function drawShapeStep(state) {
+  const s = SHAPE_LIBRARY[shapeQueue[shapeStep]];
+  if (state === 'intro') {
+    phygitalSurface.innerHTML = `
+      <div class="acu-card">
+        <div class="acu-badge">🤸 Move with your body</div>
+        <div class="acu-emoji">${s.emoji}</div>
+        <div class="acu-name">${s.name}</div>
+        <div class="acu-cue">${s.cue}</div>
+        <div class="acu-step">${s.type === 'hold' ? `Hold · ${s.dur}s` : `${s.reps} reps`} · ${shapeStep + 1} of ${shapeQueue.length}</div>
+        <button class="acu-begin" id="shapeBegin" type="button">${shapeStep === 0 ? 'Begin' : 'Continue'} ▶</button>
+        <div class="acu-hint">The thumb only keeps time — ${s.type === 'hold' ? 'hold the shape with your body.' : 'tap once per rep as you move.'}</div>
+      </div>`;
+    document.getElementById('shapeBegin')?.addEventListener('click', shapeBegin);
+    return;
+  }
+  if (s.type === 'hold') {
+    phygitalSurface.innerHTML = `
+      <div class="acu-card">
+        <div class="acu-emoji">${s.emoji}</div>
+        <div class="acu-name">${s.name}</div>
+        <div class="acu-count" id="shapeCount">${shapeLeft}s</div>
+        <div class="acu-rest">Hold steady — breathe.</div>
+      </div>`;
+  } else {
+    phygitalSurface.innerHTML = `
+      <div class="acu-card">
+        <div class="acu-emoji">${s.emoji}</div>
+        <div class="acu-name">${s.name}</div>
+        <div class="acu-count" id="shapeReps">${shapeReps} / ${s.reps}</div>
+        <button class="acu-begin" id="shapeTap" type="button">Tap ✓</button>
+        <div class="acu-rest">Tap once per rep.</div>
+      </div>`;
+    document.getElementById('shapeTap')?.addEventListener('pointerdown', shapeTapRep);
+  }
+}
+
+function shapeBegin() {
+  const s = SHAPE_LIBRARY[shapeQueue[shapeStep]];
+  if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+  if (s.type === 'hold') {
+    shapeLeft = s.dur;
+    phygitalStatusEl.textContent = 'Holding';
+    drawShapeStep('run');
+    shapeTimer = setInterval(() => {
+      shapeLeft--;
+      const c = document.getElementById('shapeCount');
+      if (c) c.textContent = shapeLeft + 's';
+      phygitalTimeEl.textContent = formatTime(Math.max(0, shapeLeft));
+      if (shapeLeft <= 0) { clearInterval(shapeTimer); shapeTimer = null; shapeAdvance(); }
+    }, 1000);
+  } else {
+    shapeReps = 0;
+    phygitalStatusEl.textContent = 'Counting';
+    drawShapeStep('run');
+  }
+}
+
+function shapeTapRep() {
+  const s = SHAPE_LIBRARY[shapeQueue[shapeStep]];
+  shapeReps++;
+  if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+  const c = document.getElementById('shapeReps');
+  if (c) c.textContent = `${shapeReps} / ${s.reps}`;
+  if (shapeReps >= s.reps) shapeAdvance();
+}
+
+function shapeAdvance() {
+  shapeStep++;
+  if (shapeStep >= shapeQueue.length) {
+    shapeComplete();
+  } else {
+    phygitalStatusEl.textContent = 'Next shape';
+    if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+    drawShapeStep('intro');
+  }
+}
+
+function shapeComplete() {
+  if (shapeTimer) { clearInterval(shapeTimer); shapeTimer = null; }
+  phygitalStatusEl.textContent = 'Practice Complete';
+  phygitalSurface.innerHTML = `
+    <div class="acu-card">
+      <div class="acu-emoji">🤸</div>
+      <div class="acu-name">Well moved.</div>
+      <div class="acu-cue">Your body shaped, your breath steady. Rest a moment.</div>
+    </div>`;
+  claimActivityReward('breathing'); // Shape Studio (movement) octant's activityId
+  setTimeout(() => closeModal('phygitalModal'), 2400);
+}
+
+/* ═══ Mind Meadow · Attention Anchor (on-screen) ═══
+   The thumb rests on a still point; the point is bright while attention is present
+   and dims when it wanders. The practice is the return. Belt scales the challenge:
+   pulse (Yellow+), the point drifts (Orange+), sensory prompts to notice-not-engage (Green+). */
+const ANCHOR_PROMPTS = ['a sound', 'a passing thought', 'warmth', 'the colour blue', 'a faint sensation', 'the quiet'];
+
+function renderAttentionAnchor() {
+  const pts = window.currentOctantScores?.stillness || 0;
+  const beltIdx = BELTS.indexOf(getBelt(pts));
+  window.anchorBelt = beltIdx;
+  phygitalSurface.innerHTML = `
+    <div class="anchor-wrap">
+      <div id="anchorIntro" class="anchor-intro">Rest your thumb on the point.<br>When it dims, your attention wandered — gently return.</div>
+      <div id="anchorPoint" class="anchor-point${beltIdx >= 1 ? ' pulsing' : ''}"></div>
+      <div id="anchorPrompt" class="anchor-prompt"></div>
+    </div>`;
+}
+
+function updateAttentionAnchor() {
+  const ap = document.getElementById('anchorPoint');
+  if (!ap) return;
+  ap.classList.add('present'); // attention is here — the point is bright
+  document.getElementById('anchorIntro')?.classList.add('gone'); // fade the how-to once they begin
+  const belt = window.anchorBelt || 0;
+  // Orange+: the anchor wanders slowly; sustained attention on a moving point
+  if (belt >= 2) {
+    const t = Date.now() / 4500;
+    ap.style.left = (50 + Math.sin(t) * 26) + '%';
+    ap.style.top  = (50 + Math.cos(t * 0.7) * 26) + '%';
+  }
+  // Green+: brief sensory prompts — notice that something arose, do not engage
+  if (belt >= 3 && phygitalSecs > 3 && phygitalSecs % 18 === 0) showAnchorPrompt();
+}
+
+function showAnchorPrompt() {
+  const el = document.getElementById('anchorPrompt');
+  if (!el) return;
+  const word = ANCHOR_PROMPTS[Math.floor(Math.random() * ANCHOR_PROMPTS.length)];
+  el.textContent = `Notice ${word} — then return.`;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3500);
+}
+
+/* ═══ Sleep Sanctuary · Guided Breathwork (hands-free) ═══
+   A breathing circle paces the breath: grows on the inhale, shrinks on the exhale.
+   Belt scales the pattern from a simple long exhale to receptive sound-bath / drift. */
+const BREATH_PATTERNS = [
+  { name: 'The Long Exhale',         phases: [['Breathe In', 4], ['Breathe Out', 6]],                          cycles: 6, note: 'Exhale longer than the inhale — the body settles.' },        // White
+  { name: 'Four Corners (Box)',      phases: [['Breathe In', 4], ['Hold', 4], ['Breathe Out', 4], ['Hold', 4]], cycles: 5, note: 'Equal sides. Find stillness in the holds.' },                 // Yellow
+  { name: 'The Sleep Breath · 4-7-8', phases: [['Breathe In', 4], ['Hold', 7], ['Breathe Out', 8]],            cycles: 4, note: 'The classic sleep-induction rhythm.' },                       // Orange
+  { name: 'Descending Calm',         phases: [['Breathe In', 4], ['Breathe Out', 8]],                          cycles: 7, note: 'Let each exhale carry you a little lower.' },                 // Green
+  { name: 'The Humming Breath',      phases: [['Breathe In', 4], ['Hum the Exhale', 8]],                       cycles: 6, note: 'Exhale with a soft low hum — feel the vibration.' },           // Blue
+  { name: 'The Sound Bath',          phases: [['Receive', 10]],                                                cycles: 6, note: 'Nothing to do. Let the rhythm wash over you.' },               // Purple
+  { name: 'The Threshold',           phases: [['Breathe In', 4], ['Breathe Out', 10]],                         cycles: 6, note: 'Slower, softer — the edge of sleep.' },                       // Brown
+  { name: 'Drift',                   phases: [['Rest', 12]],                                                   cycles: 5, note: 'No effort. Simply rest. Let the screen fade if it will.' },    // Black
+];
+let ssTimer = null, ssPattern = null, ssCycle = 0, ssPhaseIdx = 0, ssPhaseLeft = 0;
+
+function renderSleepSanctuarySurface() {
+  const pts = window.currentOctantScores?.sonic || 0;
+  const beltIdx = BELTS.indexOf(getBelt(pts));
+  ssPattern = BREATH_PATTERNS[beltIdx] || BREATH_PATTERNS[0];
+  touchPrompt.classList.add('hidden');
+  phygitalSurface.innerHTML = `
+    <div class="acu-card">
+      <div class="acu-badge">🌙 Guided breathwork</div>
+      <div class="acu-name">${ssPattern.name}</div>
+      <div class="acu-cue">${ssPattern.note}</div>
+      <div class="acu-step">${ssPattern.cycles} cycles · follow the circle</div>
+      <button class="acu-begin" id="ssBegin" type="button">Begin ▶</button>
+      <div class="acu-hint">Set the phone down if you like — just breathe with the circle. <strong>In</strong> as it grows, <strong>out</strong> as it shrinks.</div>
+    </div>`;
+  document.getElementById('ssBegin')?.addEventListener('click', ssBegin);
+}
+
+function ssBegin() {
+  ssCycle = 0;
+  ssPhaseIdx = 0;
+  phygitalStatusEl.textContent = 'Breathing';
+  phygitalSurface.innerHTML = `
+    <div class="ss-wrap">
+      <div id="ssCircle" class="ss-circle"></div>
+      <div id="ssPhase" class="ss-phase"></div>
+      <div id="ssCount" class="ss-count"></div>
+    </div>`;
+  ssNextPhase();
+}
+
+function ssNextPhase() {
+  const phases = ssPattern.phases;
+  if (ssPhaseIdx >= phases.length) {
+    ssPhaseIdx = 0;
+    ssCycle++;
+    if (ssCycle >= ssPattern.cycles) { ssComplete(); return; }
+  }
+  const [label, secs] = phases[ssPhaseIdx];
+  ssPhaseLeft = secs;
+  const circle = document.getElementById('ssCircle');
+  const phaseEl = document.getElementById('ssPhase');
+  if (phaseEl) phaseEl.textContent = label;
+  if (circle) {
+    const l = label.toLowerCase();
+    circle.style.transitionDuration = secs + 's';
+    if (l.includes('in')) circle.style.transform = 'scale(1.5)';            // inhale → grow
+    else if (l.includes('hold')) { /* hold position */ }
+    else circle.style.transform = 'scale(0.7)';                            // exhale / hum / receive / rest → shrink
+  }
+  if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('soft');
+  phygitalTimeEl.textContent = `${ssCycle + 1}/${ssPattern.cycles}`;
+  ssTimer = setInterval(() => {
+    ssPhaseLeft--;
+    const c = document.getElementById('ssCount');
+    if (c) c.textContent = ssPhaseLeft > 0 ? ssPhaseLeft : '';
+    if (ssPhaseLeft <= 0) {
+      clearInterval(ssTimer); ssTimer = null;
+      ssPhaseIdx++;
+      ssNextPhase();
+    }
+  }, 1000);
+}
+
+function ssComplete() {
+  if (ssTimer) { clearInterval(ssTimer); ssTimer = null; }
+  phygitalStatusEl.textContent = 'Rested';
+  phygitalSurface.innerHTML = `
+    <div class="acu-card">
+      <div class="acu-emoji">🌙</div>
+      <div class="acu-name">Rested.</div>
+      <div class="acu-cue">Your system has found its baseline. Carry the calm with you.</div>
+    </div>`;
+  claimActivityReward('sonic');
+  setTimeout(() => closeModal('phygitalModal'), 2400);
+}
+
+/* ═══ Fuel Stop · Sub-60s Pre-Meal Punctuation ═══
+   Not a long session — a quick ritual right before eating. Belt adds steps and raises
+   the daily-frequency goal. Mixed micro-interactions keep it distinct from every other octant. */
+const FUEL_STEPS = {
+  breath:    { emoji: '🌬️', title: 'Three Breaths',    cue: 'Before you eat — three slow breaths. In… and out.',       type: 'breath' },
+  water:     { emoji: '💧', title: 'Water Check',      cue: 'Have you had some water? Take a sip now.',                 type: 'confirm', btn: 'I have 💧' },
+  gratitude: { emoji: '🙏', title: 'Gratitude Trace',  cue: 'Hold and trace a slow circle to honour this meal.',       type: 'trace' },
+  bites:     { emoji: '🥢', title: 'Slow First Bites', cue: 'Tap as you take each of your first three bites — slowly.', type: 'count', target: 3 },
+  name:      { emoji: '✨', title: 'Name the Fuel',    cue: 'What is this fuel for?',                                   type: 'choice', options: ['Energy', 'Comfort', 'Celebration', 'Repair'] },
+};
+const FUEL_SEQUENCE = [
+  ['breath'],                                          // White
+  ['breath', 'water'],                                 // Yellow
+  ['breath', 'gratitude'],                             // Orange
+  ['breath', 'bites'],                                 // Green
+  ['breath', 'water', 'gratitude', 'bites'],           // Blue — the full pause
+  ['breath', 'name'],                                  // Purple
+  ['breath', 'water', 'gratitude', 'name'],            // Brown
+  ['breath', 'water', 'gratitude', 'bites', 'name'],   // Black
+];
+const FUEL_FREQ = ['3', '4', '5', '6', '6', '6', '6', 'your own'];
+let fuelTimer = null, fuelAux = null, fuelQueue = [], fuelStep = 0, fuelLeft = 0, fuelCount = 0;
+
+function renderFuelStopSurface() {
+  const pts = window.currentOctantScores?.wisdom || 0;
+  const beltIdx = BELTS.indexOf(getBelt(pts));
+  fuelQueue = FUEL_SEQUENCE[beltIdx] || FUEL_SEQUENCE[0];
+  fuelStep = 0;
+  touchPrompt.classList.add('hidden');
+  const ritual = fuelQueue.map(k => FUEL_STEPS[k].title).join(' · ');
+  phygitalSurface.innerHTML = `
+    <div class="acu-card">
+      <div class="acu-badge">🍎 Fuel Stop · ~30s</div>
+      <div class="acu-name">The Pause Before You Eat</div>
+      <div class="acu-cue">${ritual}</div>
+      <div class="acu-step">Goal: pause before ${FUEL_FREQ[beltIdx]} meals a day</div>
+      <button class="acu-begin" id="fuelBegin" type="button">Begin ▶</button>
+      <div class="acu-hint">A quick ritual — best done right before your next meal.</div>
+    </div>`;
+  document.getElementById('fuelBegin')?.addEventListener('click', drawFuelStep);
+}
+
+function fuelClearTimers() {
+  if (fuelTimer) { clearInterval(fuelTimer); fuelTimer = null; }
+  if (fuelAux) { clearInterval(fuelAux); fuelAux = null; }
+}
+
+function drawFuelStep() {
+  if (fuelStep >= fuelQueue.length) { fuelComplete(); return; }
+  const s = FUEL_STEPS[fuelQueue[fuelStep]];
+  phygitalStatusEl.textContent = s.title;
+  const stepLabel = `Step ${fuelStep + 1} of ${fuelQueue.length}`;
+
+  if (s.type === 'breath') {
+    fuelLeft = 12;
+    phygitalSurface.innerHTML = `
+      <div class="acu-card">
+        <div class="ss-circle" id="fuelBreath" style="transform:scale(0.8)"></div>
+        <div class="acu-name" style="margin-top:22px;">${s.title}</div>
+        <div class="acu-cue">${s.cue}</div>
+        <div class="acu-count" id="fuelNum">${fuelLeft}s</div>
+        <div class="acu-step">${stepLabel}</div>
+      </div>`;
+    const circle = document.getElementById('fuelBreath');
+    let grow = true;
+    const breathe = () => { if (circle) { circle.style.transitionDuration = '2s'; circle.style.transform = grow ? 'scale(1.3)' : 'scale(0.8)'; grow = !grow; } };
+    breathe();
+    fuelAux = setInterval(breathe, 2000);
+    fuelTimer = setInterval(() => {
+      fuelLeft--;
+      const c = document.getElementById('fuelNum'); if (c) c.textContent = fuelLeft + 's';
+      if (fuelLeft <= 0) { fuelClearTimers(); fuelAdvance(); }
+    }, 1000);
+
+  } else if (s.type === 'confirm') {
+    phygitalSurface.innerHTML = `
+      <div class="acu-card">
+        <div class="acu-emoji">${s.emoji}</div>
+        <div class="acu-name">${s.title}</div>
+        <div class="acu-cue">${s.cue}</div>
+        <button class="acu-begin" id="fuelConfirm" type="button">${s.btn}</button>
+        <div class="acu-step">${stepLabel}</div>
+      </div>`;
+    document.getElementById('fuelConfirm')?.addEventListener('click', fuelAdvance);
+
+  } else if (s.type === 'count') {
+    fuelCount = 0;
+    phygitalSurface.innerHTML = `
+      <div class="acu-card">
+        <div class="acu-emoji">${s.emoji}</div>
+        <div class="acu-name">${s.title}</div>
+        <div class="acu-cue">${s.cue}</div>
+        <div class="acu-count" id="fuelReps">0 / ${s.target}</div>
+        <button class="acu-begin" id="fuelTap" type="button">Bite ✓</button>
+        <div class="acu-step">${stepLabel}</div>
+      </div>`;
+    document.getElementById('fuelTap')?.addEventListener('pointerdown', () => {
+      fuelCount++;
+      if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+      const c = document.getElementById('fuelReps'); if (c) c.textContent = `${fuelCount} / ${s.target}`;
+      if (fuelCount >= s.target) fuelAdvance();
+    });
+
+  } else if (s.type === 'choice') {
+    phygitalSurface.innerHTML = `
+      <div class="acu-card">
+        <div class="acu-emoji">${s.emoji}</div>
+        <div class="acu-name">${s.title}</div>
+        <div class="acu-cue">${s.cue}</div>
+        <div class="fuel-choices">${s.options.map(o => `<button class="fuel-choice" type="button">${o}</button>`).join('')}</div>
+        <div class="acu-step">${stepLabel}</div>
+      </div>`;
+    phygitalSurface.querySelectorAll('.fuel-choice').forEach(b => b.addEventListener('click', fuelAdvance));
+
+  } else if (s.type === 'trace') {
+    phygitalSurface.innerHTML = `
+      <div class="acu-card">
+        <div class="acu-name">${s.title}</div>
+        <div class="acu-cue">${s.cue}</div>
+        <div class="fuel-trace" id="fuelTrace"><div class="fuel-trace-fill" id="fuelTraceFill"></div><span>🙏</span></div>
+        <div class="acu-step">${stepLabel}</div>
+      </div>`;
+    setupFuelTrace();
+  }
+}
+
+function setupFuelTrace() {
+  const pad = document.getElementById('fuelTrace');
+  const fill = document.getElementById('fuelTraceFill');
+  if (!pad) return;
+  let held = 0;
+  const start = () => {
+    if (fuelAux) return;
+    fuelAux = setInterval(() => {
+      held++;
+      if (fill) fill.style.transform = `scale(${Math.min(1, held / 30)})`;
+      if (held >= 30) { fuelClearTimers(); fuelAdvance(); }
+    }, 100); // ~3s of tracing
+  };
+  const stop = () => { if (fuelAux) { clearInterval(fuelAux); fuelAux = null; } };
+  pad.addEventListener('pointerdown', start);
+  pad.addEventListener('pointerup', stop);
+  pad.addEventListener('pointerleave', stop);
+}
+
+function fuelAdvance() {
+  fuelClearTimers();
+  fuelStep++;
+  if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+  drawFuelStep();
+}
+
+function fuelComplete() {
+  fuelClearTimers();
+  phygitalStatusEl.textContent = 'Fuelled with Intention';
+  phygitalSurface.innerHTML = `
+    <div class="acu-card">
+      <div class="acu-emoji">🍎</div>
+      <div class="acu-name">Enjoy your meal.</div>
+      <div class="acu-cue">You stopped before you ate. That's the whole practice.</div>
+    </div>`;
+  claimActivityReward('affirmation'); // Fuel Stop (wisdom) octant's activityId
+  setTimeout(() => closeModal('phygitalModal'), 2400);
+}
+
+/* ═══ Kindred Spirits · Recognition (the social octant) ═══
+   Not collaboration — recognition. Presence (anonymous), a private belonging reflection,
+   an anonymous story, and a one-way wave. Wylde Hippies + Campfire Circles arrive in Phase 2. */
+const KINDRED_PROMPTS = [
+  'Who showed up for you today?',
+  'When did you feel most like yourself this week?',
+  'What small kindness landed on you recently?',
+  'Who would you quietly like to thank right now?',
+];
+const KINDRED_STORIES = [
+  '"I stopped scrolling and called my mum. Ten minutes. Best part of my day."',
+  '"Three breaths before lunch — such a small thing. I felt human again."',
+  '"I waved at a stranger here yesterday. Didn\'t need a reply. It was enough."',
+  '"Some days the bravest thing is to simply stop. Today I stopped."',
+];
+const KINDRED_SEQUENCE = [
+  ['reflect'],                            // White — a single question
+  ['pulse', 'reflect'],                   // Yellow — you are not alone
+  ['pulse', 'story', 'reflect'],          // Orange — someone else's words
+  ['pulse', 'story', 'wave', 'reflect'],  // Green — the wave across
+  ['pulse', 'story', 'wave', 'reflect'],  // Blue
+  ['pulse', 'story', 'wave', 'reflect'],  // Purple
+  ['pulse', 'story', 'wave', 'reflect'],  // Brown
+  ['pulse', 'story', 'wave', 'reflect'],  // Black
+];
+let kinQueue = [], kinStep = 0;
+
+function renderKindredSurface() {
+  const pts = window.currentOctantScores?.bridge || 0;
+  const beltIdx = BELTS.indexOf(getBelt(pts));
+  kinQueue = KINDRED_SEQUENCE[beltIdx] || KINDRED_SEQUENCE[0];
+  kinStep = 0;
+  touchPrompt.classList.add('hidden');
+  phygitalSurface.innerHTML = `
+    <div class="acu-card">
+      <div class="acu-badge">🫂 Kindred Spirits</div>
+      <div class="acu-name">You're not practising alone</div>
+      <div class="acu-cue">A moment to recognise the others stopping for the same reasons.</div>
+      <button class="acu-begin" id="kinBegin" type="button">Begin ▶</button>
+      <div class="acu-hint">Anonymous and gentle — nothing here is shared about you.</div>
+    </div>`;
+  document.getElementById('kinBegin')?.addEventListener('click', drawKindredStep);
+}
+
+function drawKindredStep() {
+  if (kinStep >= kinQueue.length) { kindredComplete(); return; }
+  const type = kinQueue[kinStep];
+  const stepLabel = `Step ${kinStep + 1} of ${kinQueue.length}`;
+
+  if (type === 'pulse') {
+    phygitalStatusEl.textContent = 'Kindred Pulse';
+    phygitalSurface.innerHTML = `
+      <div class="acu-card">
+        <div class="acu-emoji">🫂</div>
+        <div class="acu-name" id="kinPulseLine">Sensing who's here…</div>
+        <div class="acu-cue">Anonymous and aggregated — never who, only how many.</div>
+        <button class="acu-begin" id="kinNext" type="button">Continue ▶</button>
+        <div class="acu-step">${stepLabel}</div>
+      </div>`;
+    document.getElementById('kinNext')?.addEventListener('click', kindredAdvance);
+    loadKindredPulse();
+
+  } else if (type === 'reflect') {
+    const prompt = KINDRED_PROMPTS[Math.floor(Math.random() * KINDRED_PROMPTS.length)];
+    phygitalStatusEl.textContent = 'Belonging Reflection';
+    phygitalSurface.innerHTML = `
+      <div class="acu-card">
+        <div class="acu-name">${prompt}</div>
+        <textarea id="kinReflect" class="kin-reflect" rows="3" placeholder="Just for you — a few words…"></textarea>
+        <button class="acu-begin" id="kinKeep" type="button">Keep 🤍</button>
+        <div class="acu-hint">Private — not stored, not shared. Held only in this moment.</div>
+        <div class="acu-step">${stepLabel}</div>
+      </div>`;
+    document.getElementById('kinKeep')?.addEventListener('click', kindredAdvance);
+
+  } else if (type === 'story') {
+    const story = KINDRED_STORIES[Math.floor(Math.random() * KINDRED_STORIES.length)];
+    phygitalStatusEl.textContent = "Someone Else's Words";
+    phygitalSurface.innerHTML = `
+      <div class="acu-card">
+        <div class="acu-emoji">📜</div>
+        <div class="acu-cue" style="font-size:15px;">${story}</div>
+        <div class="acu-step" style="opacity:0.6;">— a kindred spirit</div>
+        <button class="acu-begin" id="kinNext" type="button">Receive ▶</button>
+        <div class="acu-step">${stepLabel}</div>
+      </div>`;
+    document.getElementById('kinNext')?.addEventListener('click', kindredAdvance);
+
+  } else if (type === 'wave') {
+    phygitalStatusEl.textContent = 'Wave Across';
+    phygitalSurface.innerHTML = `
+      <div class="acu-card">
+        <div class="acu-emoji" id="kinWaveEmoji">👋</div>
+        <div class="acu-name">Send a wave</div>
+        <div class="acu-cue">To another practitioner, somewhere. No reply expected — a gift, not an exchange.</div>
+        <button class="acu-begin" id="kinWave" type="button">Send the wave 👋</button>
+        <div class="acu-step">${stepLabel}</div>
+      </div>`;
+    document.getElementById('kinWave')?.addEventListener('click', () => {
+      if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+      const card = phygitalSurface.querySelector('.acu-card');
+      if (card) card.innerHTML = `<div class="acu-emoji">🤍</div><div class="acu-name">Your wave is on its way.</div><div class="acu-cue">Somewhere, someone will feel a little less alone.</div>`;
+      setTimeout(kindredAdvance, 1600);
+    });
+  }
+}
+
+async function loadKindredPulse() {
+  let count = null;
+  try {
+    const res = await fetch(`${API_BASE}/api/kindred-pulse`);
+    if (res.ok) { const d = await res.json(); if (d.ok && typeof d.count === 'number') count = d.count; }
+  } catch (e) { /* endpoint not deployed yet — fall back gracefully */ }
+  const line = document.getElementById('kinPulseLine');
+  if (!line) return;
+  if (count && count > 0) {
+    line.textContent = `${count} kindred ${count === 1 ? 'spirit is' : 'spirits are'} stopping right now`;
+  } else if (count === 0) {
+    line.textContent = "You're among the first to stop today — others will follow 🌱";
+  } else {
+    line.textContent = 'Around the world, others are stopping too 🌍';
+  }
+}
+
+function kindredAdvance() {
+  kinStep++;
+  if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+  drawKindredStep();
+}
+
+function kindredComplete() {
+  phygitalStatusEl.textContent = 'Recognised';
+  const pts = window.currentOctantScores?.bridge || 0;
+  const beltIdx = BELTS.indexOf(getBelt(pts));
+  const phase2 = beltIdx >= 5 ? `<div class="acu-hint">The Wylde Hippies and Campfire Circles await in Phase 2. 🔥</div>` : '';
+  phygitalSurface.innerHTML = `
+    <div class="acu-card">
+      <div class="acu-emoji">🫂</div>
+      <div class="acu-name">You belong here.</div>
+      <div class="acu-cue">You stopped alongside others, quietly, today.</div>
+      ${phase2}
+    </div>`;
+  claimActivityReward('bridge'); // Kindred Spirits octant's activityId
+  setTimeout(() => closeModal('phygitalModal'), 2600);
 }
 
 /* ─ Octant 05: Pamper Palace (id: emotion) · pressure biofeedback + acupressure ─ */
@@ -1722,7 +2291,7 @@ function conductPhygitalSession() {
     
     // Animate Session Surface
     if (activePhygitalSession.id === 'stillness') {
-      updateReflectionDojo();
+      updateAttentionAnchor();
     } else if (activePhygitalSession.id === 'wisdom') {
       updateWisdomTrace();
     } else if (activePhygitalSession.id === 'nourish') {
@@ -1749,8 +2318,10 @@ function handlePhygitalDisconnect() {
   stopAmbient();
   clearInterval(phygitalTimer);
   phygitalTimer = null;
-  phygitalStatusEl.textContent = 'Signal Lost';
+  phygitalStatusEl.textContent = activePhygitalSession?.id === 'stillness' ? 'Attention Wandered' : 'Signal Lost';
   phygitalStatusEl.classList.remove('active');
+  const _anchor = document.getElementById('anchorPoint');
+  if (_anchor) _anchor.classList.remove('present'); // anchor dims when attention drifts
   contactWarning.classList.remove('hidden');
   setTimeout(() => {
     if (!phygitalIsContact) {
@@ -1815,6 +2386,10 @@ function exitPhygitalSession() {
   clearInterval(phygitalTimer);
   phygitalTimer = null;
   if (acuTimer) { clearInterval(acuTimer); acuTimer = null; }
+  if (shapeTimer) { clearInterval(shapeTimer); shapeTimer = null; }
+  if (ssTimer) { clearInterval(ssTimer); ssTimer = null; }
+  if (fuelTimer) { clearInterval(fuelTimer); fuelTimer = null; }
+  if (fuelAux) { clearInterval(fuelAux); fuelAux = null; }
   phygitalIsContact = false;
   stopAmbient();
   closeModal('phygitalModal');
