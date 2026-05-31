@@ -827,6 +827,103 @@ const LAMA_TRACK_INTROS = {
   nourish:   'Sit with me. What was handed down is older than us both.',
 };
 
+/* ═══ The 64-cell Belt Ladder (dojoden_octent.txt v0.2) ═══
+   Each octant × 8 belts (White→Black) carries a canonical exercise NAME and a
+   one-line framing. This surfaces the authored cell for the user's current belt
+   at session start, turning "one mechanic, duration-scaled" into the named,
+   framed practice the substance doc specifies. Deeper per-belt MECHANIC
+   differences (e.g. Bhramari mic-hum, mandala canvas) remain partial — see the
+   STATUS.md content-authoring requirement for which need new engines/content. */
+const OCTANT_LADDER = {
+  stillness: [
+    { name: 'The First Anchor',       desc: 'Thumb rests on one still point; when attention drifts it dims, your return restores it.' },
+    { name: 'Breath-Light Anchor',    desc: 'The point pulses slowly; attention rides the rhythm without controlling it.' },
+    { name: 'The Wandering Path',     desc: 'The anchor drifts across the screen; your thumb tracks it — sustained attention on a moving object.' },
+    { name: 'Noticing Without Naming',desc: 'Brief sensory prompts arise; stay on the anchor — notice that something came, do not engage.' },
+    { name: 'The Open Field',         desc: 'No single anchor; the whole screen is a soft field. Open awareness, thumb may rest anywhere.' },
+    { name: 'Returning Home',         desc: 'Prompts grow more tempting; the practice is the patient, repeated return. Distraction is the curriculum.' },
+    { name: 'The Witness Seat',       desc: 'Watch your own attention as if from outside. Meta-awareness; the Lama speaks rarely.' },
+    { name: 'Just Sitting',           desc: 'No anchor, no prompts, no instruction. Shikantaza — just sitting. The practice is entirely yours.' },
+  ],
+  creation: [
+    { name: 'First Marks',        desc: 'Paint: one colour, free movement. Write: one prompt — "one thing".' },
+    { name: 'Colour & Gratitude', desc: 'Paint: two colours blend with pressure. Write: gratitude, then noticing.' },
+    { name: 'Finding Form',       desc: 'Paint: symmetry assist mirrors your gesture. Write: a three-line haiku.' },
+    { name: 'The Free Stream',    desc: 'Paint: three colours, the canvas softens over time. Write: a Morning-Pages stream.' },
+    { name: 'In Dialogue',        desc: 'Paint: the canvas gains grain and texture. Write: the Lama asks one question, you answer.' },
+    { name: 'Sacred Pattern',     desc: 'Paint: a mandala canvas, trace sacred geometry. Write: re-trace what you remember of a dream.' },
+    { name: 'What the Hand Knows',desc: 'Paint: cross-modal, paint to a slow audio passage. Write: an unsent letter — released at the end, never stored.' },
+    { name: 'The Tended Garden',  desc: 'Paint: open canvas, no structure. Write: a self-authored ritual; the Lama only holds the space.' },
+  ],
+  sonic: [
+    { name: 'The Long Exhale',     desc: '4-in / 6-out breathing — the exhale always longer than the inhale.' },
+    { name: 'Four Corners',        desc: 'Box breathing, 4-4-4-4. The hold becomes a place of stillness.' },
+    { name: 'The Sleep Breath',    desc: '4-7-8 breathing — the classic sleep-induction pattern.' },
+    { name: 'Descending the Body', desc: 'A body-scan glide, attention travelling downward, synced to the breath.' },
+    { name: 'The Humming Bee',     desc: 'Bhramari — a low hum, the visual responding to the vibration. (mic-based · see roadmap)' },
+    { name: 'The Sound Bath',      desc: 'Passive reception — thumb confirms presence, a binaural composition does the rest.' },
+    { name: 'The Threshold',       desc: 'Hypnagogic descent — breath slows, the visual dims, the voice fades toward sleep.' },
+    { name: 'Drift',               desc: 'Self-directed restoration; if you are falling asleep, the screen darkens itself.' },
+  ],
+  wisdom: [ // Fuel Stop — sub-60s punctuation; "belt" reads as daily-stop frequency
+    { name: 'Three Breaths Before', desc: 'Before eating, a thumb-held three-breath pause. The bare habit. (×3/day)' },
+    { name: 'The Water Check',      desc: 'A hydration cue, thumb-confirmed. Food and drink. (×4/day)' },
+    { name: 'The Gratitude Trace',  desc: 'A small traced gesture acknowledging the meal before the first bite. (×5/day)' },
+    { name: 'The Slow First Bites', desc: 'Thumb-paced timing of the first three bites. (×6/day)' },
+    { name: 'The Full Pause',       desc: 'Breath, hydration, gratitude, slow bites — one fluid sub-60s ritual. (×6/day)' },
+    { name: 'Naming the Fuel',      desc: 'A brief tap-reflection: what is this fuel for — energy, comfort, repair? (×6/day)' },
+    { name: 'The Fasting Companion',desc: 'A gentle hourly check-in for an eating window. Presence, not pressure. (×6/day)' },
+    { name: 'Your Own Table',       desc: 'The habit is yours; set your own stop rhythm and ritual depth. (self-set)' },
+  ],
+  emotion: [ // Pamper Palace — already drives ACU_SEQUENCE; names align to it
+    { name: 'The First Point',        desc: 'A single point — LI4, the web of the thumb. Thumb leaves the screen and presses.' },
+    { name: 'Temple & Brow',          desc: 'Two facial points — the temples and the third-eye brow. Gentle circles.' },
+    { name: 'The Scalp Garden',       desc: 'Circular thumb motions across the crown — tension release through the scalp.' },
+    { name: 'Hands That Hold Hands',  desc: 'Hand reflexology — the thumb works the opposite palm, then switches.' },
+    { name: 'The Feet Beneath You',   desc: 'Foot reflexology — grounding pressure across the sole.' },
+    { name: 'The Flowing Tide',       desc: 'Lymphatic drainage — soft, slow, following the body’s own paths.' },
+    { name: 'The Full Circuit',       desc: 'Face, scalp, hands, feet — chained into one flowing self-care ritual.' },
+    { name: 'Your Own Hands',         desc: 'Self-directed bodywork — you sequence your own ritual. You are your own practitioner.' },
+  ],
+  bridge: [
+    { name: 'A Single Question',        desc: '"Who showed up for you today?" A brief, relational reflection. Connection begins with noticing.' },
+    { name: 'You Are Not Alone',        desc: 'Kindred Pulse — how many practitioners are here right now. Anonymous, aggregated.' },
+    { name: "Someone Else's Words",     desc: 'Story Trace — receive a brief, anonymous reflection from another practitioner.' },
+    { name: 'The Wave Across',          desc: 'A one-way thumb-tap sent to another practitioner. A gift, not an exchange.' },
+    { name: 'What We Share',            desc: 'Belonging reflection deepened — shared practice, common struggle, the third-eye way.' },
+    { name: 'Meeting the Wylde Hippies',desc: 'Meet Dewey, Gale & Lola — the spirits who tend the wider ecosystem. (Phase 2)' },
+    { name: 'The Circle Forms',         desc: 'A preview of Campfire Circles — how eight kindred gather. (Phase 2)' },
+    { name: 'The Campfire Invitation',  desc: 'The doorway — a step into Campfire Circles proper. (Phase 2 · Facet 05)' },
+  ],
+  movement: [
+    { name: 'The Single Shape',     desc: 'One asana hold (mountain). You hold the form; the thumb keeps the time.' },
+    { name: 'Two Shapes, One Breath',desc: 'A two-pose transition synced to breath; the thumb follows the tempo.' },
+    { name: 'The Controlled Pulse', desc: 'Pilates-style controlled pulses — thumb-tap rhythm matching. Precision over range.' },
+    { name: 'The Three-Pose Flow',  desc: 'A short vinyasa — three poses chained, tempo held across the sequence.' },
+    { name: 'Building Strength',    desc: 'A strength set — plank and controlled reps; tap to confirm each rep.' },
+    { name: 'Mobility & Opening',   desc: 'A slow joint-mobility sequence — the body learning its own range.' },
+    { name: 'The Integrated Practice',desc: 'A blended sequence — yoga flow, a strength hold, pilates pulses, no break.' },
+    { name: 'Your Own Practice',    desc: 'Self-directed — you choose tradition, sequence and intensity. The thumb witnesses.' },
+  ],
+  nourish: [
+    { name: 'The First Path',    desc: 'A simple labyrinth traced inward; at its centre, one figure of traditional medicine is named.' },
+    { name: 'One Character',     desc: 'Sacred-text tracing — one character from a wisdom tradition, studied not scanned.' },
+    { name: 'One Plant',         desc: 'Trace a botanical illustration as the Lama tells the plant’s traditional story. (educational only)' },
+    { name: 'The Lineage Path',  desc: 'A longer labyrinth — at each turn a lineage figure surfaces (Hua Tuo, Sushruta, Avicenna).' },
+    { name: 'A Passage',         desc: 'Trace a short passage of traditional text, phrase by phrase, meaning unfolding.' },
+    { name: 'The Herbal Garden', desc: 'Plants studied in relationship — which grow together, how the knowledge travelled. (educational only)' },
+    { name: 'The Mandala',       desc: 'Trace a mandala from one tradition; the Lama explains the cosmology it encodes.' },
+    { name: 'The Open Temple',   desc: 'Self-directed study — choose a tradition, a text, a plant, a path. The temple is yours.' },
+  ],
+};
+
+// The authored cell for an octant at a given GVRP score (maps score → belt → cell).
+function getOctantCell(octantId, pts) {
+  const ladder = OCTANT_LADDER[octantId];
+  if (!ladder) return null;
+  return ladder[BELTS.indexOf(getBelt(pts || 0))] || ladder[0];
+}
+
 // Track introduction — a short, warm Lama line as the session opens (S01-007)
 function showLamaTrackIntro(octantId) {
   const line = LAMA_TRACK_INTROS[octantId];
@@ -1243,6 +1340,7 @@ async function sendMessage() {
     if (guru.chatUrl) {
       // ── Gaia Twins Integration ──
       const isGaia = guru.chatUrl.includes('gaia-twins');
+      if (isGaia) postGvgUsage('chat'); // GVG §08: record-only (text cap not enforced yet)
       const payload = isGaia
         ? { text: text, twin: guru.twinId }
         : { message: text };
@@ -1544,11 +1642,15 @@ function startPhygitalSession(typeKey) {
   if (!meta) return;
 
   activePhygitalSession = meta;
-  phygitalTitle.textContent = meta.name;
-  phygitalSubtitle.textContent = meta.desc;
-  document.getElementById('touchPromptText').textContent = meta.instruction;
-  
   const pts = window.currentOctantScores?.[meta.id] || 0;
+  const cell = getOctantCell(meta.id, pts);
+  phygitalTitle.textContent = meta.name;
+  // Surface the canonical belt cell (name + framing) for this octant × belt.
+  phygitalSubtitle.innerHTML = cell
+    ? `<strong>${cell.name}</strong> · ${getBelt(pts).name} Belt<span class="ladder-cell-desc">${cell.desc}</span>`
+    : meta.desc;
+  document.getElementById('touchPromptText').textContent = meta.instruction;
+
   phygitalSecs = getScaledDuration(pts) * 60;
   phygitalTimeEl.textContent = formatTime(phygitalSecs);
   
@@ -3106,6 +3208,18 @@ async function loadProfile() {
     if (dashBelt) dashBelt.textContent = currentBelt.name;
     const ctaG = document.getElementById('ctaGvrp');
     if (ctaG) ctaG.textContent = data.total_points; // shadow-ledger balance
+    // Gateway §03: the CTA now reflects the real shadow-ledger state from the
+    // backend. Activation can only flip to true via the Good Vybes app (Facet 02).
+    window.gvrpActivated = !!data.activated;
+    const ctaSub = document.querySelector('.activation-cta-sub');
+    const ctaBtn = document.getElementById('btnActivate');
+    if (data.activated) {
+      if (ctaSub) ctaSub.textContent = 'Activated · earning for real';
+      if (ctaBtn) { ctaBtn.textContent = 'Rewards active ✓'; ctaBtn.classList.add('activated'); }
+    } else {
+      if (ctaSub) ctaSub.textContent = 'Earned & waiting · pending activation';
+      if (ctaBtn) { ctaBtn.textContent = 'Activate to claim →'; ctaBtn.classList.remove('activated'); }
+    }
     // (SVG Thumbagotchi updated below in vibeTitle block)
 
     // Vybes Progress (0 to 100% of next belt tier)
@@ -3653,6 +3767,49 @@ let audioChunks = [];
 let voiceTimerInterval = null;
 let voiceStartTime = null;
 let isRecording = false;
+let voiceStream = null;       // BUG-01: cached for the whole voice session — acquire once, reuse
+let voiceCapReached = false;  // GVG §08: voice budget exhausted for today
+
+/* BUG-01 · mic permission persistence. Re-acquiring getUserMedia on every record
+   tap re-triggers the Telegram WebApp prompt. Acquire a single stream per voice
+   session and reuse it; only release when the voice screen closes. We also
+   remember a first grant so we can set expectations without re-prompting. */
+async function ensureMicStream() {
+  if (voiceStream && voiceStream.getTracks().some(t => t.readyState === 'live')) return voiceStream;
+  voiceStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  try { localStorage.setItem('hv_mic_granted', '1'); } catch (e) {}
+  return voiceStream;
+}
+function releaseMicStream() {
+  if (voiceStream) {
+    voiceStream.getTracks().forEach(t => t.stop());
+    voiceStream = null;
+  }
+}
+
+/* GVG §08 · constitutional voice cap (1 hr/calendar-day). Voice is enforced;
+   text is recorded server-side but not yet enforced (threshold is an open
+   decision — see STATUS.md). Fail-open: any error here leaves voice available. */
+async function postGvgUsage(action, seconds) {
+  if (!initData) return null;
+  try {
+    const res = await fetch(`${API_BASE}/api/gvg-usage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ initData, action, seconds }),
+    });
+    return await res.json();
+  } catch (e) { return null; }
+}
+function applyVoiceCapState(usage) {
+  voiceCapReached = !!(usage && usage.voice_cap_reached);
+  if (voiceCapReached) {
+    voiceStatusText.textContent = "You've reached today's hour of voice. It resets at midnight — your practice continues. 🌙";
+    voiceRecordBtn.classList.add('disabled');
+  } else {
+    voiceRecordBtn.classList.remove('disabled');
+  }
+}
 
 function openVoiceChat(guru) {
   activeGuru = guru;
@@ -3673,14 +3830,20 @@ function openVoiceChat(guru) {
     tg.BackButton.show();
     tg.BackButton.onClick(() => closeVoiceChat());
   }
+
+  // GVG §08: surface today's remaining voice budget (resets at midnight).
+  voiceCapReached = false;
+  voiceRecordBtn.classList.remove('disabled');
+  postGvgUsage('check').then(applyVoiceCapState);
 }
 
 function closeVoiceChat() {
   if (isRecording) stopRecording();
+  releaseMicStream();           // BUG-01: release the mic only when the session ends
   voiceScreen.classList.add('hidden');
   document.body.style.overflow = '';
   if (tg?.BackButton) tg.BackButton.hide();
-  
+
   // Stop any playing TTS
   if (window.currentTTS) {
     window.currentTTS.pause();
@@ -3691,8 +3854,9 @@ function closeVoiceChat() {
 voiceClose.addEventListener('click', closeVoiceChat);
 
 async function startRecording() {
+  if (voiceCapReached) { applyVoiceCapState({ voice_cap_reached: true }); return; }
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const stream = await ensureMicStream();   // BUG-01: reuse the session's stream, no re-prompt
     mediaRecorder = new MediaRecorder(stream);
     audioChunks = [];
 
@@ -3708,9 +3872,7 @@ async function startRecording() {
         const base64Audio = reader.result.split(',')[1];
         sendVoiceToGaia(base64Audio);
       };
-      
-      // Stop all tracks to release mic
-      stream.getTracks().forEach(track => track.stop());
+      // Keep the stream alive for the next turn; released in closeVoiceChat().
     };
 
     mediaRecorder.start();
@@ -3739,6 +3901,9 @@ function stopRecording() {
     voiceAvatarRing.classList.remove('pulsing');
     voiceStatusText.textContent = 'Processing...';
     clearInterval(voiceTimerInterval);
+    // GVG §08: record this turn's voice seconds against the daily cap.
+    const elapsedSec = voiceStartTime ? Math.round((Date.now() - voiceStartTime) / 1000) : 0;
+    if (elapsedSec > 0) postGvgUsage('voice', elapsedSec).then(applyVoiceCapState);
   }
 }
 

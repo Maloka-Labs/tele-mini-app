@@ -1774,6 +1774,16 @@ body {
 .lama-track-intro.show { opacity: 1; transform: translate(-50%, 0); }
 .lama-orb { font-size: 18px; flex-shrink: 0; }
 
+/* Canonical belt-cell framing under the session subtitle (64-cell ladder) */
+.ladder-cell-desc {
+  display: block;
+  margin-top: 5px;
+  font-size: 12px;
+  line-height: 1.45;
+  font-weight: 400;
+  opacity: 0.72;
+}
+
 /* ═══ Thumb Lama · belt ceremony ═══ */
 .belt-ceremony {
   position: fixed;
