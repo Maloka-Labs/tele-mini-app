@@ -797,29 +797,7 @@ function updateLamaNudge(data) {
   // No auto-intake ambush — the intake only runs if the user chooses to open the Lama chat.
 }
 
-function handleLamaIntervention(text) {
-  const affirmative = ['yes', 'okay', 'sure', 'let\'s go', 'ready', 'do it', 'yoga', 'breathe', 'meditate'];
-  const userSaysYes = affirmative.some(word => text.toLowerCase().includes(word));
-  
-  if (userSaysYes && window.lastLamaSuggestion) {
-    const oct = window.lastLamaSuggestion;
-    const msg = `Magnificent. Opening the ${oct.charAt(0).toUpperCase() + oct.slice(1)} Sanctuary for you...`;
-    
-    appendMessage('guru', msg, activeGuru);
-    
-    setTimeout(() => {
-      closeChat();
-      const octMap = { 
-        stillness: 'octStillness', movement: 'octMovement', wisdom: 'octWisdom', 
-        emotion: 'octEmotion', sonic: 'octSonic', creation: 'octCreation',
-        bridge: 'octBridge', nourish: 'octNourish'
-      };
-      document.getElementById(octMap[oct])?.click();
-    }, 1200);
-    return true;
-  }
-  return false;
-}
+// (retired) Thumb Lama triage-router removed — he is the practice teacher, not a router.
 
 function openThumbLamaChat() {
   const lama = gurus.find(g => g.id === 'lama');
@@ -1042,10 +1020,59 @@ function openChat(guru) {
 
 /* Close chat */
 function closeChat() {
+  exitChatExerciseMode();
   chatScreen.classList.remove('open');
   document.body.style.overflow = '';
   chatInput.blur();
   if (tg?.BackButton) tg.BackButton.hide();
+}
+
+/* ═══ Exercise Mode Toggle (DeBrus QA · Option C hybrid) ═══
+   When a Guru/Lama reply guides a breathing or movement exercise, swap the chat input
+   for a timer + Done so the user can practise without being pressured to type back.
+   Heuristic (no backend exercise-tagging yet): require a couple of exercise cues. */
+const CHAT_EXERCISE_CUES = [
+  'breathe in', 'breathe out', 'inhale', 'exhale', 'deep breath', 'box breathing',
+  '4-7-8', 'four count', 'close your eyes', 'hold for', "let's breathe", 'breathe with me',
+  'roll your shoulders', 'stretch', 'soften your', 'place your hand', 'on your body',
+];
+function isExerciseReply(text) {
+  const t = (text || '').toLowerCase();
+  let hits = 0;
+  for (const c of CHAT_EXERCISE_CUES) { if (t.includes(c)) hits++; }
+  return hits >= 2; // a couple of cues — avoids false positives on casual mentions
+}
+function maybeEnterExerciseMode(reply) {
+  if (isExerciseReply(reply)) enterChatExerciseMode(75);
+}
+function enterChatExerciseMode(seconds) {
+  const bar = document.querySelector('#chatScreen .chat-input-bar');
+  if (!bar) return;
+  bar.classList.add('exercise-hidden');
+  let panel = document.getElementById('chatExercisePanel');
+  if (!panel) {
+    panel = document.createElement('div');
+    panel.id = 'chatExercisePanel';
+    panel.className = 'chat-exercise-panel';
+    bar.parentElement.appendChild(panel);
+  }
+  let left = seconds;
+  panel.innerHTML = `
+    <div class="cep-line">🧘 Take your time — no need to type. I'm here when you're ready.</div>
+    <div class="cep-row"><span class="cep-timer" id="cepTimer">${formatTime(Math.max(0, left))}</span><button class="cep-done" id="cepDone" type="button">Done ✓</button></div>`;
+  panel.classList.add('show');
+  document.getElementById('cepDone')?.addEventListener('click', exitChatExerciseMode);
+  clearInterval(window._cepInt);
+  window._cepInt = setInterval(() => {
+    left--;
+    const t = document.getElementById('cepTimer'); if (t) t.textContent = formatTime(Math.max(0, left));
+    if (left <= 0) exitChatExerciseMode();
+  }, 1000);
+}
+function exitChatExerciseMode() {
+  clearInterval(window._cepInt);
+  document.getElementById('chatExercisePanel')?.classList.remove('show');
+  document.querySelector('#chatScreen .chat-input-bar')?.classList.remove('exercise-hidden');
 }
 
 chatBack.addEventListener('click', closeChat);
@@ -1260,6 +1287,7 @@ async function sendMessage() {
 
     appendMessage('guru', reply, guru);
     conversations[guru.id].push({ role: 'assistant', content: reply });
+    maybeEnterExerciseMode(reply); // DeBrus QA: swap input for a timer when a Guru guides an exercise
 
   } catch (err) {
     hideTyping();
@@ -2396,65 +2424,12 @@ function wisdomComplete() {
   setTimeout(() => closeModal('phygitalModal'), 2600);
 }
 
-/* ─ Octant 05: Pamper Palace (id: emotion) · pressure biofeedback + acupressure ─ */
-function renderEmotionCommand() {
-  const wrap = document.createElement('div');
-  wrap.style.width = '100dvw';
-  wrap.style.height = '100dvw';
-  wrap.style.background = 'radial-gradient(circle, var(--purple-dim) 0%, transparent 70%)';
-  wrap.innerHTML = `
-    <div id="bioString" style="width:2px; height:60%; background:var(--purple); box-shadow: 0 0 20px var(--purple); transition: transform 0.1s linear, background 0.4s;"></div>
-    <div style="position:absolute; bottom:20px; font-size:10px; color:var(--text2);">PRESS &amp; HOLD · LET TOUCH RESTORE</div>
-  `;
-  wrap.style.display = 'flex';
-  wrap.style.alignItems = 'center';
-  wrap.style.justifyContent = 'center';
-  phygitalSurface.appendChild(wrap);
-}
-
 function updateEmotionCommand(e) {
   const string = document.getElementById('bioString');
   if (!string || !phygitalIsContact) return;
   const touch = e.touches ? e.touches[0] : e;
   const shake = (Math.random() - 0.5) * 10;
   string.style.transform = `translateX(${shake}px) scaleX(${1 + Math.random()})`;
-}
-
-/* ─ Octant 06: Kindred Spirits (id: bridge) ─ */
-function renderConnectionHub() {
-  const wrap = document.createElement('div');
-  wrap.style.display = 'flex';
-  wrap.style.gap = '20px';
-  wrap.innerHTML = `
-    <div style="width:60px; height:60px; background:var(--teal-dim); border:2px dashed var(--teal); border-radius:12px; display:flex; align-items:center; justify-content:center;">🧩</div>
-    <div style="width:60px; height:60px; background:var(--purple-dim); border:2px dashed var(--purple); border-radius:12px; display:flex; align-items:center; justify-content:center;">🤝</div>
-    <div style="width:60px; height:60px; background:var(--pink-dim); border:2px dashed var(--pink); border-radius:12px; display:flex; align-items:center; justify-content:center;">💞</div>
-  `;
-  phygitalSurface.appendChild(wrap);
-}
-
-/* ─ Octant 07: Shape Studio (id: movement) ─ */
-function renderMovementArena() {
-  const wrap = document.createElement('div');
-  wrap.innerHTML = `
-    <div style="font-size:80px; filter: drop-shadow(0 0 20px var(--teal-glow));">🧘</div>
-    <div style="margin-top:20px; font-size:11px; text-align:center; color:var(--text2); font-weight:700;">HOLD THE FORM<br><span style="color:var(--teal)">THUMB KEEPS TIME</span></div>
-  `;
-  wrap.style.display = 'flex';
-  wrap.style.flexDirection = 'column';
-  wrap.style.alignItems = 'center';
-  phygitalSurface.appendChild(wrap);
-}
-
-/* ─ Octant 08: Wisdom Temple (id: nourish) · labyrinth + sacred-text tracing ─ */
-function renderSpiritTemple() {
-  phygitalSurface.innerHTML = `
-    <svg viewBox="0 0 200 200" style="width:100%; height:80%;">
-       <circle cx="100" cy="100" r="80" stroke="var(--border2)" stroke-width="40" fill="none" />
-       <circle cx="100" cy="100" r="80" stroke="var(--teal)" stroke-width="2" fill="none" stroke-dasharray="10 5" />
-       <circle id="labyrinthDot" cx="100" cy="20" r="10" fill="var(--teal)" style="transition: all 0.1s linear;" />
-    </svg>
-  `;
 }
 
 function updateSpiritTemple() {
@@ -2464,54 +2439,6 @@ function updateSpiritTemple() {
   const rad = (angle * Math.PI) / 180;
   dot.setAttribute('cx', 100 + 80 * Math.cos(rad));
   dot.setAttribute('cy', 100 + 80 * Math.sin(rad));
-}
-
-/* ─ Octant 03: Sleep Sanctuary (id: sonic) ─ */
-function renderSonicSanctuary() {
-  const wrap = document.createElement('div');
-  wrap.style.display = 'grid';
-  wrap.style.gridTemplateColumns = '1fr 1fr';
-  wrap.style.gap = '10px';
-  wrap.style.width = '80%';
-  wrap.innerHTML = `
-    <div class="sonic-pad" data-note="C4" style="aspect-ratio:1; border:2px solid var(--teal); border-radius:20px; display:flex; align-items:center; justify-content:center; font-size:24px;">🥁</div>
-    <div class="sonic-pad" data-note="E4" style="aspect-ratio:1; border:2px solid var(--purple); border-radius:20px; display:flex; align-items:center; justify-content:center; font-size:24px;">🔔</div>
-    <div class="sonic-pad" data-note="G4" style="aspect-ratio:1; border:2px solid var(--pink); border-radius:20px; display:flex; align-items:center; justify-content:center; font-size:24px;">✨</div>
-    <div class="sonic-pad" data-note="C5" style="aspect-ratio:1; border:2px solid var(--gold); border-radius:20px; display:flex; align-items:center; justify-content:center; font-size:24px;">🌊</div>
-  `;
-  phygitalSurface.appendChild(wrap);
-  
-  wrap.querySelectorAll('.sonic-pad').forEach(pad => {
-    pad.addEventListener('touchstart', (e) => {
-      e.stopPropagation();
-      pad.style.transform = 'scale(0.9)';
-      pad.style.background = 'rgba(255,255,255,0.1)';
-      if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
-    });
-    pad.addEventListener('touchend', () => {
-      pad.style.transform = 'scale(1)';
-      pad.style.background = 'transparent';
-    });
-  });
-}
-
-/* ─ Octant 04: Fuel Stop (id: wisdom) ─ */
-function renderWisdomChamber() {
-  const wrap = document.createElement('div');
-  wrap.className = 'wisdom-svg-wrap';
-  wrap.style.width = '100dvw';
-  wrap.style.height = '100%';
-  wrap.style.display = 'flex';
-  wrap.style.alignItems = 'center';
-  wrap.style.justifyContent = 'center';
-  wrap.innerHTML = `
-    <svg viewBox="0 0 200 200" style="width:100%; height:80%;">
-      <path d="M50 150 L100 50 L150 150 Z" stroke="rgba(255,255,255,0.1)" stroke-width="12" fill="none" stroke-linecap="round" />
-      <path id="tracePath" d="M50 150 L100 50 L150 150 Z" stroke="var(--teal)" stroke-width="12" fill="none" stroke-linecap="round" stroke-dasharray="400" stroke-dashoffset="400" />
-    </svg>
-    <div style="position:absolute; bottom:20px; font-size:11px; color:var(--text3); font-weight:700;">PAUSE · THREE BREATHS BEFORE YOU FUEL</div>
-  `;
-  phygitalSurface.appendChild(wrap);
 }
 
 function updateWisdomTrace(e) {
@@ -2593,18 +2520,6 @@ function handleDanActTransition() {
   }, 800);
 }
 
-function renderReflectionDojo() {
-  const wrap = document.createElement('div');
-  wrap.className = 'breathing-ring-phygital';
-  wrap.innerHTML = `
-    <svg class="breathing-svg" viewBox="0 0 100 100">
-      <circle class="breathing-circle-bg" cx="50" cy="50" r="40" />
-      <circle id="breathingFill" class="breathing-circle-fill" cx="50" cy="50" r="30" />
-    </svg>
-  `;
-  phygitalSurface.appendChild(wrap);
-}
-
 function conductPhygitalSession() {
   if (activePhygitalSession?.offScreen || window.creationWriteMode) return; // off-screen / journaling: own flow
   if (phygitalTimer) return;
@@ -2639,16 +2554,6 @@ function conductPhygitalSession() {
       completePhygitalSession();
     }
   }, 1000);
-}
-
-function updateReflectionDojo() {
-  const fill = document.getElementById('breathingFill');
-  if (!fill) return;
-  const cycle = (getScaledDuration(0) * 60 - phygitalSecs) % 16;
-  if (cycle < 4) { fill.setAttribute('r', 40); fill.style.fill = 'rgba(0, 229, 204, 0.3)'; }
-  else if (cycle < 8) { fill.style.fill = 'rgba(168, 85, 247, 0.4)'; }
-  else if (cycle < 12) { fill.setAttribute('r', 25); fill.style.fill = 'rgba(0, 229, 204, 0.2)'; }
-  else { fill.style.fill = 'rgba(168, 85, 247, 0.2)'; }
 }
 
 function handlePhygitalDisconnect() {

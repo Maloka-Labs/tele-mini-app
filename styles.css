@@ -1877,6 +1877,34 @@ body {
 .guru-host { border: 1px solid rgba(0, 229, 204, 0.3); }
 .gvg-empty { color: var(--text2); text-align: center; padding: 28px 12px; line-height: 1.6; }
 
+/* ═══ Exercise Mode Toggle (in-chat) ═══ */
+.chat-input-bar.exercise-hidden { display: none; }
+.chat-exercise-panel {
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  padding-bottom: max(14px, env(safe-area-inset-bottom, 14px));
+  background: var(--bg2);
+  border-top: 1px solid rgba(0, 229, 204, 0.25);
+  flex-shrink: 0;
+}
+.chat-exercise-panel.show { display: flex; }
+.cep-line { font-size: 13px; color: var(--text2); text-align: center; line-height: 1.4; }
+.cep-row { display: flex; align-items: center; justify-content: center; gap: 16px; }
+.cep-timer { font-size: 22px; font-weight: 800; color: var(--teal, #00e5cc); min-width: 64px; text-align: center; }
+.cep-done {
+  padding: 12px 28px;
+  border: none;
+  border-radius: 22px;
+  background: linear-gradient(135deg, var(--teal, #00e5cc), var(--purple, #a855f7));
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.cep-done:active { filter: brightness(1.1); }
+
 /* ═══ Pamper Palace · Off-Screen Acupressure card ═══ */
 /* The footer only holds non-interactive text — make sure it never swallows taps
    meant for the acupressure card / Begin button sitting in the surface. */
