@@ -1008,6 +1008,25 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 
+/* LOVEval · simulated-presence label — visible, near the guide's name/avatar */
+.ai-disclaimer {
+  flex: 0 0 auto;
+  padding: 7px 14px;
+  font-size: 11px;
+  line-height: 1.4;
+  text-align: center;
+  color: var(--text2, #b8b3c9);
+  background: rgba(212, 175, 55, 0.08);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.18);
+}
+.voice-ai-disclaimer {
+  background: transparent;
+  border: none;
+  max-width: 280px;
+  margin: 6px auto 0;
+  opacity: 0.7;
+}
+
 /* Scrollbar */
 .chat-messages::-webkit-scrollbar { width: 4px; }
 .chat-messages::-webkit-scrollbar-track { background: transparent; }
@@ -1215,6 +1234,63 @@ body {
   background: rgba(220,53,69,0.12) !important;
   border-color: rgba(220,53,69,0.25) !important;
   color: #f87878 !important;
+}
+
+/* LOVEval · pre-entry contextual gate (fasting note / herbal disclaimer) */
+.loveval-gate {
+  position: absolute;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+  background: rgba(0, 0, 0, 0.86);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.loveval-gate.hidden { display: none; }
+.loveval-gate-card {
+  max-width: 360px;
+  text-align: center;
+  background: rgba(20, 18, 30, 0.95);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 20px;
+  padding: 28px 24px;
+}
+.loveval-gate-icon { font-size: 34px; margin-bottom: 12px; }
+.loveval-gate-text {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text, #ece8f5);
+  margin-bottom: 22px;
+}
+.loveval-gate-btn {
+  width: 100%;
+  padding: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1726;
+  background: linear-gradient(135deg, #e8c860, #d4af37);
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+}
+.loveval-gate-btn:active { transform: scale(0.98); }
+
+/* GVG §08 · warm day-rest notice when the 60-message daily cap is reached */
+.chat-cap-notice {
+  align-self: center;
+  max-width: 88%;
+  margin: 14px auto 6px;
+  padding: 14px 18px;
+  text-align: center;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--text2, #c7c2d8);
+  background: rgba(138, 124, 216, 0.10);
+  border: 1px solid rgba(138, 124, 216, 0.25);
+  border-radius: 16px;
 }
 
 /* ═══════════════════════════════
@@ -1844,6 +1920,72 @@ body {
 }
 .activation-cta-btn:active { filter: brightness(1.08); }
 
+/* Activation handshake · two-step checklist + multiplier */
+.activation-steps {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.activation-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+.activation-step.done {
+  background: rgba(34, 197, 94, 0.10);
+  border-color: rgba(34, 197, 94, 0.30);
+}
+.activation-step-check {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text2);
+  background: rgba(255, 255, 255, 0.06);
+}
+.activation-step.done .activation-step-check {
+  color: #06281b;
+  background: #22c55e;
+}
+.activation-step-text { display: flex; flex-direction: column; gap: 2px; }
+.activation-step-title { font-size: 13px; font-weight: 600; color: var(--text, #fff); }
+.activation-step-sub { font-size: 11px; line-height: 1.45; color: var(--text2); opacity: 0.85; }
+.activation-multiplier {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.activation-mult-badge {
+  font-size: 12px;
+  font-weight: 700;
+  color: #ffd76a;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(212, 175, 55, 0.14);
+  border: 1px solid rgba(212, 175, 55, 0.32);
+}
+.activation-mult-note { font-size: 10.5px; color: var(--text2); opacity: 0.75; }
+.activation-cta-note {
+  margin: 12px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--text2);
+}
+
 /* ═══ GVG Directory ═══ */
 .gvg-head { margin-bottom: 14px; }
 .gvg-privacy {
@@ -2070,7 +2212,7 @@ body {
 
 /* ═══════════════════════════════
    THUMBAGOTCHI DASHBOARD
-   Digital Companion Experience
+   Digital Guide Experience
 ═══════════════════════════════ */
 .dashboard-hero {
   background: linear-gradient(180deg, var(--card2) 0%, var(--bg) 100%);

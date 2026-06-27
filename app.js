@@ -56,7 +56,7 @@ function getBelt(points) {
 
 /* ─── Thumbagotchi SVG Controller ─── */
 // True if the user has completed at least one practice session today — drives the glow state
-// so the companion reacts to today's practice, not just multi-day login streaks.
+// so the guide reacts to today's practice, not just multi-day login streaks.
 function practicedToday() {
   try { return localStorage.getItem('hv_last_activity_date') === new Date().toISOString().slice(0, 10); }
   catch (e) { return false; }
@@ -267,7 +267,7 @@ async function claimActivityReward(activity) {
     });
     const data = await res.json();
     if (data.ok) {
-      // Record that the user practised today (drives the companion glow state)
+      // Record that the user practised today (drives the guide glow state)
       try { localStorage.setItem('hv_last_activity_date', new Date().toISOString().slice(0, 10)); } catch (e) {}
     }
     if (data.ok && !data.already_claimed && data.points_earned > 0) {
@@ -573,7 +573,7 @@ function renderGuruCard(g, i, isHost) {
     ? `<div class="guru-loc">📍 ${m.hood}, ${m.city}</div>`
     : `<div class="guru-followers">🏆 ${g.followers} followers</div>`;
   const capsLine = (!isHost && g.voiceEnabled)
-    ? `<div class="guru-caps">🎙️ 1 hr voice/day · 💬 ~1 hr chat/day · resets at midnight</div>` : '';
+    ? `<div class="guru-caps">🎙️ 60 min voice/day · 💬 60 messages/day · resets at midnight</div>` : '';
 
   card.innerHTML = `
     <div class="guru-head">
@@ -872,7 +872,7 @@ const OCTANT_LADDER = {
     { name: 'The Slow First Bites', desc: 'Thumb-paced timing of the first three bites. (×6/day)' },
     { name: 'The Full Pause',       desc: 'Breath, hydration, gratitude, slow bites — one fluid sub-60s ritual. (×6/day)' },
     { name: 'Naming the Fuel',      desc: 'A brief tap-reflection: what is this fuel for — energy, comfort, repair? (×6/day)' },
-    { name: 'The Fasting Companion',desc: 'A gentle hourly check-in for an eating window. Presence, not pressure. (×6/day)' },
+    { name: 'The Fasting Guide',    desc: 'A gentle hourly check-in for an eating window. Presence, not pressure. (×6/day)' },
     { name: 'Your Own Table',       desc: 'The habit is yours; set your own stop rhythm and ritual depth. (self-set)' },
   ],
   emotion: [ // Pamper Palace — already drives ACU_SEQUENCE; names align to it
@@ -1062,6 +1062,9 @@ function openChat(guru) {
 
   // Illustrative (seed persona): read-only, chat disabled per canon (not a real WIP)
   const chatHeaderStatusEl = document.getElementById('chatHeaderStatus');
+  // LOVEval simulated-presence label: shown only where an AI presence actually replies.
+  const aiDisclaimerEl = document.getElementById('chatAiDisclaimer');
+  if (aiDisclaimerEl) aiDisclaimerEl.style.display = guru.illustrative ? 'none' : '';
   if (guru.illustrative) {
     chatInput.disabled = true;
     chatSend.disabled = true;
@@ -1071,6 +1074,13 @@ function openChat(guru) {
     chatInput.disabled = false;
     chatInput.placeholder = 'Ask your guru anything…';
     if (chatHeaderStatusEl) chatHeaderStatusEl.innerHTML = '<span class="chat-status-dot"></span> AI · Online';
+  }
+
+  // GVG §08: surface today's remaining message budget for GVG twins (resets at
+  // midnight). The cap is a GVG-persona boundary; the Thumb Lama is ungated.
+  chatCapReached = false;
+  if (!guru.illustrative && guru.chatUrl && guru.chatUrl.includes('gaia-twins')) {
+    postGvgUsage('check').then(applyChatCapState);
   }
 
   // Init conversation if first time
@@ -1292,6 +1302,11 @@ async function sendMessage() {
 
   const guru = activeGuru;
 
+  // GVG §08: free-tier daily message cap (60/day). Gate before sending to a
+  // GVG twin — a considered boundary, surfaced warmly, never a hard error.
+  const isGaiaGuru = !!guru.chatUrl && guru.chatUrl.includes('gaia-twins');
+  if (isGaiaGuru && chatCapReached) { showChatCapNotice(); return; }
+
   // Append user message to UI and history
   appendMessage('user', text, guru);
   conversations[guru.id].push({ role: 'user', content: text });
@@ -1340,7 +1355,7 @@ async function sendMessage() {
     if (guru.chatUrl) {
       // ── Gaia Twins Integration ──
       const isGaia = guru.chatUrl.includes('gaia-twins');
-      if (isGaia) postGvgUsage('chat'); // GVG §08: record-only (text cap not enforced yet)
+      if (isGaia) postGvgUsage('chat').then(applyChatCapState); // GVG §08: count + enforce 60/day
       const payload = isGaia
         ? { text: text, twin: guru.twinId }
         : { message: text };
@@ -1637,6 +1652,39 @@ document.getElementById('submitJournal')?.addEventListener('click', () => {
   completeDanSession(content);
 });
 
+/* LOVEval contextual gates (placeholder wording per 28 Jun standards note —
+   final wording follows from the standards side). Shown before the practice
+   begins; the user must acknowledge before continuing. */
+const LOVEVAL_NOTES = {
+  fasting: {
+    icon: '🍃',
+    text: "This practice explores mindful fasting as a centuries-old wellness tradition. It is not a diet programme. If you have any history of disordered eating, or are unsure whether fasting is appropriate for you, please speak with a trusted health professional before beginning.",
+  },
+  herbal: {
+    icon: '🌿',
+    text: "For education and exploration only — please consult a qualified practitioner before making any health decisions.",
+  },
+};
+function lovevalNoteFor(octantId, cell) {
+  // Wisdom Temple (nourish) is the herbal / traditional-medicine area.
+  if (octantId === 'nourish') return LOVEVAL_NOTES.herbal;
+  // The fasting cell lives in Fuel Stop (wisdom octant) at its upper belt.
+  if (cell && /fasting/i.test(cell.name)) return LOVEVAL_NOTES.fasting;
+  return null;
+}
+function applyLovevalGate(octantId, cell) {
+  const gate = document.getElementById('lovevalGate');
+  if (!gate) return;
+  const note = lovevalNoteFor(octantId, cell);
+  if (!note) { gate.classList.add('hidden'); return; }
+  document.getElementById('lovevalGateIcon').textContent = note.icon;
+  document.getElementById('lovevalGateText').textContent = note.text;
+  gate.classList.remove('hidden');
+}
+document.getElementById('lovevalGateBtn')?.addEventListener('click', () => {
+  document.getElementById('lovevalGate')?.classList.add('hidden');
+});
+
 function startPhygitalSession(typeKey) {
   const meta = PHYGITAL_TYPES[typeKey];
   if (!meta) return;
@@ -1665,6 +1713,7 @@ function startPhygitalSession(typeKey) {
   phygitalAudioInfo.classList.add('hidden');
   phygitalStatusEl.textContent = meta.offScreen ? 'Off-Screen Practice' : 'Awaiting Signal';
   showLamaTrackIntro(meta.id); // the Lama frames the practice as it opens
+  applyLovevalGate(meta.id, cell); // LOVEval: fasting note / herbal disclaimer before entry
 }
 
 function renderPhygitalSurface(octantId) {
@@ -3085,22 +3134,67 @@ document.getElementById('btnShodanCard')?.addEventListener('click', (e) => {
   startDanSession();
 });
 
-// Shadow-ledger activation — gentle, no freemium pressure. Activation lives in the
-// Good Vybes app (Facet 02), which isn't shipped yet, so we reassure rather than gate.
-document.getElementById('btnActivate')?.addEventListener('click', () => {
-  const bal = document.getElementById('ctaGvrp')?.textContent || '0';
-  const cta = document.getElementById('activationCta');
-  if (cta) {
-    cta.innerHTML = `
-      <div class="activation-cta-head">
-        <span class="activation-cta-orb">🌱</span>
-        <div>
-          <div class="activation-cta-title">Safely waiting</div>
-          <div class="activation-cta-sub">Nothing to do yet</div>
-        </div>
-      </div>
-      <p class="activation-cta-body">The Good Vybes app is coming soon. Your <strong>${bal}</strong> GVRP are credited and safe — you'll claim them the moment activation opens. Keep practising; they keep growing. 🌱</p>`;
+/* Activation handshake CTA — two-step commitment (28 Jun feedback):
+   (1) GVRP subscription (flag from the Good Vybes app) and (2) ThumbPIN toggle
+   (≥1 active device). Points stay "pending" until both are met, then flip to
+   "real". Device count drives the reward-point multiplier tier. Gentle, no
+   freemium pressure — we reassure rather than gate. */
+function setActivationStep(stepEl, done, doneSub) {
+  if (!stepEl) return;
+  const check = stepEl.querySelector('.activation-step-check');
+  if (check) check.textContent = done ? '✓' : '○';
+  stepEl.classList.toggle('done', !!done);
+  if (doneSub) {
+    const sub = stepEl.querySelector('.activation-step-sub');
+    if (sub) sub.textContent = doneSub;
   }
+}
+
+function renderActivationCta(data) {
+  const gvrpDone   = !!data.gvrp_subscribed;
+  const thumbDone  = !!data.thumbpin_active;
+  const devices    = data.active_devices || 0;
+  const multiplier = data.multiplier || 1.0;
+  const activated  = !!data.activated;
+
+  setActivationStep(document.getElementById('stepGvrp'), gvrpDone);
+  setActivationStep(
+    document.getElementById('stepThumbpin'),
+    thumbDone,
+    thumbDone
+      ? `${devices} device${devices === 1 ? '' : 's'} active on the network`
+      : 'Activate at least one device on the network',
+  );
+
+  const multBadge = document.getElementById('activationMultBadge');
+  if (multBadge) multBadge.textContent = `${multiplier.toFixed(1)}× multiplier`;
+
+  const ctaSub = document.querySelector('.activation-cta-sub');
+  const ctaTitle = document.querySelector('.activation-cta-title');
+  const ctaBtn = document.getElementById('btnActivate');
+  if (activated) {
+    if (ctaTitle) ctaTitle.textContent = 'Your GVRP are real';
+    if (ctaSub) ctaSub.textContent = 'Activated · earning for real';
+    if (ctaBtn) { ctaBtn.textContent = 'Rewards active ✓'; ctaBtn.classList.add('activated'); }
+  } else {
+    if (ctaTitle) ctaTitle.textContent = 'Your GVRP are credited';
+    const left = (gvrpDone ? 0 : 1) + (thumbDone ? 0 : 1);
+    if (ctaSub) ctaSub.textContent = `Pending activation · ${left} step${left === 1 ? '' : 's'} to go`;
+    if (ctaBtn) { ctaBtn.textContent = 'How activation works →'; ctaBtn.classList.remove('activated'); }
+  }
+}
+
+document.getElementById('btnActivate')?.addEventListener('click', () => {
+  const cta = document.getElementById('activationCta');
+  if (cta && cta.classList.contains('explained')) return; // already expanded
+  const activated = !!window.gvrpActivated;
+  const note = document.createElement('p');
+  note.className = 'activation-cta-note';
+  note.innerHTML = activated
+    ? 'Both steps are complete — your GVRP are live and earning for real. Add more devices to ThumbPIN to raise your multiplier. 🌱'
+    : "Activation is a two-step commitment, made in the Good Vybes app: subscribe to GVRP with your Google ID, then toggle into the ThumbPIN network on at least one device. The moment both are done, your GVRP flip from pending to real — every device you add lifts your multiplier. 🌱";
+  cta?.appendChild(note);
+  cta?.classList.add('explained');
 });
 
 document.getElementById('btnConnectWallet')?.addEventListener('click', () => {
@@ -3208,18 +3302,10 @@ async function loadProfile() {
     if (dashBelt) dashBelt.textContent = currentBelt.name;
     const ctaG = document.getElementById('ctaGvrp');
     if (ctaG) ctaG.textContent = data.total_points; // shadow-ledger balance
-    // Gateway §03: the CTA now reflects the real shadow-ledger state from the
-    // backend. Activation can only flip to true via the Good Vybes app (Facet 02).
+    // Gateway §03 + activation handshake: the CTA reflects the real two-step
+    // state — GVRP subscription (Good Vybes app flag) + ThumbPIN device toggle.
     window.gvrpActivated = !!data.activated;
-    const ctaSub = document.querySelector('.activation-cta-sub');
-    const ctaBtn = document.getElementById('btnActivate');
-    if (data.activated) {
-      if (ctaSub) ctaSub.textContent = 'Activated · earning for real';
-      if (ctaBtn) { ctaBtn.textContent = 'Rewards active ✓'; ctaBtn.classList.add('activated'); }
-    } else {
-      if (ctaSub) ctaSub.textContent = 'Earned & waiting · pending activation';
-      if (ctaBtn) { ctaBtn.textContent = 'Activate to claim →'; ctaBtn.classList.remove('activated'); }
-    }
+    renderActivationCta(data);
     // (SVG Thumbagotchi updated below in vibeTitle block)
 
     // Vybes Progress (0 to 100% of next belt tier)
@@ -3809,6 +3895,32 @@ function applyVoiceCapState(usage) {
   } else {
     voiceRecordBtn.classList.remove('disabled');
   }
+}
+
+/* GVG §08 · constitutional text cap (60 messages/calendar-day, free Telegram tier).
+   A Doxa governance boundary — "a guide knows when to step back" — not just a
+   resource limit. Mirrors the voice cap; fail-open leaves chat available. */
+let chatCapReached = false;
+function applyChatCapState(usage) {
+  chatCapReached = !!(usage && usage.chat_cap_reached);
+  if (chatCapReached) {
+    chatInput.disabled = true;
+    chatSend.disabled = true;
+    chatInput.placeholder = 'Your Dojo rests — back tomorrow, refreshed 🌙';
+    showChatCapNotice();
+  } else if (activeGuru && !activeGuru.illustrative) {
+    chatInput.disabled = false;
+    chatInput.placeholder = 'Ask your guru anything…';
+  }
+}
+/* Warm day-rest message shown when the daily message budget is spent. */
+function showChatCapNotice() {
+  if (!chatMessages || chatMessages.querySelector('.chat-cap-notice')) return;
+  const el = document.createElement('div');
+  el.className = 'chat-cap-notice';
+  el.textContent = "🌙 You've had a full day of practice — your Dojo rests when you do. Come back tomorrow refreshed.";
+  chatMessages.appendChild(el);
+  scrollToBottom();
 }
 
 function openVoiceChat(guru) {

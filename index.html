@@ -349,7 +349,7 @@
         </div>
       </div>
 
-      <!-- Shadow-ledger activation CTA (Gateway · Section 03) -->
+      <!-- Shadow-ledger activation CTA (Gateway · Section 03 + activation handshake) -->
       <div class="activation-cta" id="activationCta">
         <div class="activation-cta-head">
           <span class="activation-cta-orb">🌱</span>
@@ -358,7 +358,31 @@
             <div class="activation-cta-sub">Earned &amp; waiting · pending activation</div>
           </div>
         </div>
-        <p class="activation-cta-body">You've earned <strong id="ctaGvrp">0</strong> GVRP, held safely in your shadow ledger. When the Good Vybes app arrives, activate to <em>claim</em> them — and begin earning for real.</p>
+        <p class="activation-cta-body">You've earned <strong id="ctaGvrp">0</strong> GVRP, held safely in your shadow ledger. Two steps flip them from <em>pending</em> to <strong>real</strong>:</p>
+
+        <!-- Two-step activation handshake: GVRP subscription + ThumbPIN toggle -->
+        <div class="activation-steps" id="activationSteps">
+          <div class="activation-step" id="stepGvrp">
+            <span class="activation-step-check">○</span>
+            <div class="activation-step-text">
+              <span class="activation-step-title">Subscribe to GVRP</span>
+              <span class="activation-step-sub">Sign up with your Google ID in the Good Vybes app</span>
+            </div>
+          </div>
+          <div class="activation-step" id="stepThumbpin">
+            <span class="activation-step-check">○</span>
+            <div class="activation-step-text">
+              <span class="activation-step-title">Toggle into ThumbPIN</span>
+              <span class="activation-step-sub" id="stepThumbpinSub">Activate at least one device on the network</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="activation-multiplier" id="activationMultiplier">
+          <span class="activation-mult-badge" id="activationMultBadge">1.0× multiplier</span>
+          <span class="activation-mult-note">More devices on ThumbPIN → higher multiplier</span>
+        </div>
+
         <button class="activation-cta-btn" id="btnActivate">Activate to claim →</button>
       </div>
     </div>
@@ -567,6 +591,15 @@
           <div id="contactWarning" class="contact-warning hidden">Your thumb has wandered. Place it back to continue.</div>
           <p id="phygitalAudioInfo" class="audio-info" style="font-size: 10px; opacity: 0.5;"></p>
         </footer>
+
+        <!-- LOVEval · contextual gate (fasting note / herbal disclaimer) shown before the practice begins -->
+        <div id="lovevalGate" class="loveval-gate hidden">
+          <div class="loveval-gate-card">
+            <div class="loveval-gate-icon" id="lovevalGateIcon">🌿</div>
+            <p class="loveval-gate-text" id="lovevalGateText"></p>
+            <button class="loveval-gate-btn" id="lovevalGateBtn">I understand · Continue</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -941,6 +974,11 @@
         <div class="chat-header-tag" id="chatHeaderTag"></div>
       </div>
 
+      <!-- LOVEval · simulated-presence label (never hidden in a menu) -->
+      <div class="ai-disclaimer" id="chatAiDisclaimer">
+        ⚠️ GaiA-guided replies are AI-based and can make mistakes. Please double-check responses.
+      </div>
+
       <!-- Messages -->
       <div class="chat-messages" id="chatMessages">
         <!-- Populated by JS -->
@@ -996,6 +1034,8 @@
           <div class="voice-avatar" id="voiceAvatar">🧘</div>
         </div>
         <h2 class="voice-guru-name" id="voiceGuruName">AI Twin</h2>
+        <!-- LOVEval · simulated-presence label (near the guide's name) -->
+        <p class="ai-disclaimer voice-ai-disclaimer">GaiA-guided replies are AI-based and can make mistakes. Please double-check responses.</p>
         <div class="voice-status">
            <span class="voice-status-icon" id="voiceStatusIcon">🧘</span>
            <span class="voice-status-text" id="voiceStatusText">Ready to talk</span>
